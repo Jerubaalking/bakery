@@ -391,7 +391,6 @@ public function exportProduct_OutAll(Request $request)
 
     public function sales_info($id){
         $data=DB::table('product_out')
-      
         ->join('sales','product_out.id','=','sales.product_out_id')
         ->join('products','sales.product_id','=','products.id')
         ->select('product_out.*','sales.qty','sales.amt',

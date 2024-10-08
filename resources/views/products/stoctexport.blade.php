@@ -137,16 +137,23 @@
         </style>
 {{--</head>--}}
 {{--<body>--}}
+
+        <div>
+            <small style="font-family:sans-serif"><?php 
+            date_default_timezone_set("Africa/Nairobi");
+            echo '>>> '.date("D d, M Y").' '.date("h:i:sa").' <<<'
+            ?></small>
+        </div>
                 <div class="section__content section__content--p30">
                     <div class="container-fluid">
                     <div id="watermark">
                      <img src="assets/img/misana.png" alt="logo" height="100" width="150" style="float:right;padding-right:62px;margin-top:-25px;">
-                     <img src="assets/img/misana.png" height="100%" width="100%" style="opacity: 0.05;"/>
                         </div>
                         
                     <div class="row" style="margin-top:80px;">
                     <center><h1 style="color:red;"><strong>Misana Home Bakery</strong></h1></center>
                     <center><h3 style="margin-left:30px;margin-top:-10px;"><strong style="color:green">Stock  Report</strong></h3></center>
+                    <center><h3 style="margin-left:30px;margin-top:-10px; font-size:10px;"><strong style=""><?php echo $kevi=date('Y-m-d H:m:s');?></strong></h3></center>
                   
                     <div class="box">
       
@@ -168,7 +175,7 @@
                                        {{$product->product_name}}
                                        </td>
                                        <td class="pl-0">
-                                       {{$product->stock}}
+                                       {{$product->available}}
                                          </td>
                                          </tr>
                                          @endforeach

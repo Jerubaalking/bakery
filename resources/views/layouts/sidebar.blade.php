@@ -111,15 +111,15 @@
                     </ul>
                 </li>
 
-                <li class="active">
+                <!-- <li class="active">
                     <a href="/productsOut" class="js-arrow" >
                         <i class="fa fa-minus"></i>Product Out</a>
-                </li>
+                </li> -->
 
                 <li class="active"><a class="js-arrow"  href="{{ url('/suppliers') }}"><i class="fa fa-truck"></i>
                         <span>Suppliers</span></a></li>
 
-                <li class="active"><a href="{{ url('/task') }}"><i class="fa fa-list"></i> <span>Tasks</span></a></li>
+                <li class="active"><a href="{{ url('/task') }}"><i class="fa fa-list"></i> <span>Sales Accounts</span></a></li>
                 <li class="active"><a href="{{ url('/payment_history') }}"><i class="fa fa-history"></i> <span>Sales
                             Payment hist</span></a></li>
                 <li class="active">
@@ -204,15 +204,15 @@
                     </ul>
                 </li>
 
-                <li class="active">
+                <!-- <li class="active">
                     <a href="/productsOut ">
                         <i class="fa fa-minus"></i>Product Out</a>
-                </li>
+                </li> -->
 
                 <li class="active"><a href="{{ url('/suppliers') }}"><i class="fa fa-truck"></i>
                         <span>Suppliers</span></a></li>
 
-                <li class="active"><a href="{{ url('/task') }}"><i class="fa fa-list"></i> <span>Tasks</span></a></li>
+                <li class="active"><a href="{{ url('/task') }}"><i class="fa fa-list"></i> <span>Sales Accounts</span></a></li>
                 <li class="active"><a href="{{ url('/payment_history') }}"><i class="fa fa-history"></i> <span>Sales
                             Payment hist</span></a></li>
 

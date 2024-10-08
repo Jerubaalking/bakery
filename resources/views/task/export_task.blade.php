@@ -1,19 +1,4 @@
-{{--<!doctype html>--}}
-{{--<html lang="en">--}}
-{{--<head>--}}
-    {{--<meta charset="UTF-8">--}}
-    {{--<meta name="viewport"--}}
-          {{--content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">--}}
-    {{--<meta http-equiv="X-UA-Compatible" content="ie=edge">--}}
-    {{--<link rel="stylesheet" href="asset('css1.css')}}">--}}
-    {{--<!-- Font Awesome -->--}}
-   
-     <!-- Vendor CSS-->
-    {{--<link rel="stylesheet" href="{{ asset('assets/bower_components/font-awesome/css/font-awesome.min.css')}} ">--}}
-    {{--<!-- Ionicons -->--}}
-    {{--<link rel="stylesheet" href="{{ asset('assets/bower_components/Ionicons/css/ionicons.min.css')}} ">--}}
 
-    {{--<title>rizone||application form</title>--}}
     <style type="text/css" media="screen">
             html {
                 font-family: sans-serif;
@@ -135,14 +120,12 @@
                 z-index:  -1000;
             }
         </style>
-{{--</head>--}}
-{{--<body>--}}
                 <div class="section__content section__content--p30">
                     <div class="container-fluid">
-                    <div id="watermark">
+                    <!-- <div id="watermark">
                      <img src="assets/img/misana.png" alt="logo" height="100" width="150" style="float:right;padding-right:62px;margin-top:-25px;">
                      <img src="assets/img/misana.png" height="100%" width="100%" style="opacity: 0.05;"/>
-                        </div>
+                        </div> -->
                         
                     <div class="row" style="margin-top:80px;">
                     <center><h1 style="color:red;"><strong>Misana Home Bakery</strong></h1></center>
@@ -157,6 +140,10 @@
                                     <div class="table-responsive">
                                         <table class="table table-top-campaign">
                                             <tbody>
+                                            <tr>
+                                                <td>Employee</td>
+                                                <td>{{$employee}}</td>
+                                                </tr>
                                                 <tr>
                                                 <td>Total Task Records</td>
                                                 <td>{{$count}}</td>
@@ -175,7 +162,7 @@
                                                 </tr>
                                                 <tr>
                                                     <td style="color:red">Products Demage Cost</td>
-                                                    <td  style="color:red">{{number_format($sum_demage,2)}}</td>
+                                                    <td  style="color:red">{{number_format($sum_return,2)}}</td>
                                                 </tr>
                                                 <tr>
                                                     <td style="color:red">Cost Returned</td>
@@ -204,10 +191,8 @@
                                  <th scope="col" class="border-0 pl-0">Item Name</th>
                                  <th scope="col" class="border-0 pl-0">Qty</th>  
                                  <th scope="col" class="border-0 pl-0">price</th> 
-                                 <th scope="col" class="border-0 pl-0">Unity Price</th> 
-                                 <th scope="col" class="border-0 pl-0">return Qty</th>  
-                                 <th scope="col" class="border-0 pl-0">return product cost</th> 
-                                 <th scope="col" class="border-0 pl-0">return unity cost</th>   
+                                 <th scope="col" class="border-0 pl-0">cost</th> 
+                                 <th scope="col" class="border-0 pl-0">damages</th>   
                                             </tr>
                                         </thead>
                                         <tbody>
@@ -239,14 +224,9 @@
                                          </td>
                                       
                                          <td class="pl-0"style="color:red">
-                                        {{$product_out->return_qty}}
+                                        {{number_format($product_out->demages,2)}}
                                          </td>
-                                         <td class="pl-0" style="color:red">
-                                         {{number_format($product_out->return_price,2)}}
-                                         </td>
-                                         <td class="pl-0" style="color:red">
-                                         {{number_format($product_out->return_amt,2)}}
-                                         </td>
+                                         
                                          </tr>
                                          @endforeach
                                          <tr>
@@ -256,25 +236,17 @@
                                       
                                          <td>
                                          </td>
+                                         <td></td>
                                          <td style="color:green">{{$sum_qty}}</td>
                                          <td></td>
-                                         <td style="color:green">{{number_format($sum_amt,2)}}</td>
-                                         <td style="color:red">{{$sum_return_qty}}</td>
-                                         <td></td>
-                                         <td style="color:red">{{number_format($sum_return_amt,2)}}</td>
-                                         </tr>
+                                         <td style="color:green">{{number_format($sum_sub,2)}}</td>
+                                         <td style="color:red">{{number_format($sum_return, 2)}}</td>
+                                         
                                         </tbody>
                                    
                                     </table>
                                 </div>
         </div>
         </div>
-                    {{--<!-- jQuery 3 -->--}}
-    {{--<script src="{{  asset('assets/bower_components/jquery/dist/jquery.min.js') }} "></script>--}}
-    {{--<!-- Bootstrap 3.3.7 -->--}}
-    {{--<script src="{{  asset('assets/bower_components/bootstrap/dist/js/bootstrap.min.js') }} "></script>--}}
-    {{--<!-- AdminLTE App -->--}}
-    {{--<script src="{{  asset('assets/dist/js/adminlte.min.js') }}"></script>--}}
-{{--</body>--}}
-{{--</html>--}}
+                   
                       

@@ -1,0 +1,104 @@
+name: Deployment to Dev-misana Server
+
+on:
+  push:
+    branches:
+      - dev # Only run on pushes to the dev branch
+
+jobs:
+  build:
+    timeout-minutes: 60
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check E2E Test Status
+        run: exit 0 # Placeholder for checking test status
+
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.1'  # Use the appropriate PHP version for Laravel
+          extensions: mbstring, pdo, bcmath, xml, curl, json, openssl
+          coverage: none
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '20.x'
+
+      - name: Select the proper .env file
+        run: mv .env.dev .env
+
+      - name: Install Node.js dependencies
+        run: npm install
+
+      - name: Install Composer dependencies
+        run: composer install --no-dev --prefer-dist --optimize-autoloader
+
+      - name: Set up Laravel environment
+        run: |
+          php artisan key:generate
+          php artisan config:cache
+          php artisan route:cache
+          php artisan view:cache
+
+      - name: Deploy to Server
+        uses: easingthemes/ssh-deploy@main
+        with:
+          SSH_PRIVATE_KEY: ${{ secrets.DEV_SERVER_SSH_PRIVATE_KEY }}
+          ARGS: "-rlgoDzc --delete"
+          SOURCE: "/"
+          REMOTE_HOST: ${{ vars.REMOTE_HOST }}
+          REMOTE_USER: "gitactions"
+          TARGET: "/var/www/misana/dev/stage"
+          EXCLUDE: "/node_modules/ /vendor/"
+
+      - name: Configure SSH on server for remote commands
+        run: |
+          mkdir -p ~/.ssh/
+          echo "${{ secrets.DEV_SERVER_SSH_PRIVATE_KEY }}" > ~/.ssh/authorized_keys
+          chmod 600 ~/.ssh/authorized_keys
+          cat >>~/.ssh/config <<END
+          Host staging
+            HostName ${{ vars.REMOTE_HOST }}
+            User "gitactions"
+            IdentityFile ~/.ssh/authorized_keys
+            StrictHostKeyChecking no
+          END
+
+      - name: Install Composer on the server
+        run: ssh staging 'cd /var/www/misana/dev/stage && composer install --no-dev --prefer-dist --optimize-autoloader'
+        continue-on-error: true
+
+      # - name: Run Laravel migrations
+      #   run: ssh staging 'cd /var/www/misana/dev/stage && php artisan migrate --force'
+
+      - name: Run npm install and build assets
+        run: ssh staging 'cd /var/www/misana/dev/stage && npm install && npm run prod'
+        continue-on-error: true
+
+      - name: Clear Laravel caches
+        run: ssh staging 'cd /var/www/misana/dev/stage && php artisan config:cache && php artisan route:cache && php artisan view:cache'
+
+      - name: Clear old files and caches
+        run: |
+          ssh staging 'rm -rf /var/www/misana/dev/stage/node_modules'
+          ssh staging 'php artisan cache:clear'
+
+      - name: Set correct permissions on server
+        run: ssh staging 'sudo chown -R www-data:www-data /var/www/misana/dev/stage && sudo chmod -R 775 /var/www/misana/dev/stage/storage /var/www/misana/dev/stage/bootstrap/cache'
+
+      - name: Stop PM2 (if necessary)
+        run: ssh staging 'pm2 stop misana'
+        continue-on-error: true
+
+      - name: Delete old PM2 instance (if necessary)
+        run: ssh staging 'pm2 delete misana'
+        continue-on-error: true
+
+      - name: Start Laravel application with PM2 on port 3013
+        run: ssh staging 'cd /var/www/misana/dev/stage && pm2 start "php artisan serve --host=0.0.0.0 --port=3013" --name "misana" --log "/home/gitactions/.pm2/logs/misana-error.log"'
+        continue-on-error: true

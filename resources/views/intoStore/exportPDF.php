@@ -141,6 +141,12 @@
 
     <body>
     
+        <div>
+            <small style="font-family:sans-serif"><?php 
+            date_default_timezone_set("Africa/Nairobi");
+            echo '>>> '.date("D d, M Y").' '.date("h:i:sa").' <<<'
+            ?></small>
+        </div>
        
     <div id="watermark">
                      <img src="assets/img/misana.png" alt="logo" height="100" width="150" style="float:right;padding-right:62px;margin-top:-25px;">

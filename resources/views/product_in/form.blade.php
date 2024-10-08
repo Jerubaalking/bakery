@@ -10,11 +10,11 @@
                     <h3 class="modal-title"></h3>
                 </div>
                 <div class="modal-body">
-                    <button type="button" name="more_charge" id="more_charge"  class="btn btn-success btn-xs">+ add slot</button><span><small id="batch_notify"></small></span>
+                    <!-- <button type="button" name="more_charge" id="more_charge"  class="btn btn-success btn-xs">+ add slot</button><span><small id="batch_notify"></small></span> -->
                     <input type="hidden" id="id" name="id">
                     <input type="hidden" id="indexer" name="indexer" value="0">
                     <div class="row">
-                            <div class='col-md-5'>
+                            <div class='col-md-6'>
                                 <label>Batch Number <small>available</small></label>
                                 <select id="batch_number" onchange="populateModal()" name="batch_number" class="form-control">
                                 <option disabled id="ophide" selected>--select Batch Number--</option>
@@ -24,20 +24,34 @@
                                 <span class="help-block with-errors"></span>
                                 </select>
                             </div>
-                            <div class='col-md-3'>
+                            <div class='col-md-6'>
+                                <label>Product Item</label>
+                                <input type="hidden" name="product_id" id="product_id">
+                                <input id="product_name" type="text" name="product_name" value="" class="form-control" readonly required>
+                            </div>
+                            <div class='col-md-6'>
                                 <label>Batch Value</label>
                                 <input id="batch_value" type="text" name="batch_value" value="0" class="form-control" readonly required>
                             </div>
                             
-                            <div class='col-md-3'>
+                            <div class='col-md-6'>
                                 <label>Manufacture Date</label>
                                 <input id="manufacture_date" name="manufacture_date" class="form-control" readonly required>
                             </div>
+                            <div class='col-md-6'>
+                                <label>Available</label>
+                                <input id="available" name="available" class="form-control" readonly required>
+                            </div>
+                            
+                            <div class='col-md-6'>
+                                <label>Qty</label>
+                                <input id="qty" name="qty" type="number" class="form-control" required>
+                            </div>
                             <hr></hr>
                     </div>
-                            <div class="row" id="materials" style="margin-top:-10px;">
+                            <!-- <div class="row" id="materials" style="margin-top:-10px;">
 
-                            </div>
+                            </div> -->
 
                 </div>
 

@@ -48,8 +48,8 @@
             <div class="col-lg-4 col-sm-6">
                 <div class="card-box bg-orange">
                     <div class="inner">
-                        <h3 class="title-3 m-b-30">{{$count_stock}}</h3>
-                        <span>All products stock</span>
+                        <h3 class="title-3 m-b-30">{{number_format($count_stock)}} /=</h3>
+                        <span>Available stock value</span>
 
 
                     </div>
@@ -266,7 +266,7 @@
                                 @foreach($materials as $material)
                                 <tr>
                                     <td>{{$material->name}}</td>
-                                    <td class="text-right">{{$material->available}} {{$material->symbol}}</td>
+                                    <td class="text-right">{{$material->available}} </td>
                                 </tr>
                                 @endforeach
 

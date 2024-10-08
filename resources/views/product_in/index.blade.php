@@ -2,14 +2,28 @@
 
 
 @section('top')
-    <!-- DataTables -->
-    <link rel="stylesheet" href="{{ asset('assets/bower_components/datatables.net-bs/css/dataTables.bootstrap.min.css') }}">
-    <link rel="stylesheet" href="https://cdn.datatables.net/buttons/2.1.0/css/buttons.dataTables.min.css">
+<!-- DataTables -->
+<link rel="stylesheet" href="{{ asset('assets/bower_components/datatables.net-bs/css/dataTables.bootstrap.min.css') }}">
 
+<!-- daterange picker -->
+<link rel="stylesheet" href="{{ asset('assets/bower_components/bootstrap-daterangepicker/daterangepicker.css') }}">
+<!-- bootstrap datepicker -->
+<link rel="stylesheet" href="https://cdn.datatables.net/buttons/2.1.0/css/buttons.dataTables.min.css">
+<link rel="stylesheet"
+    href="{{ asset('assets/bower_components/bootstrap-datepicker/dist/css/bootstrap-datepicker.min.css') }}">
+<link rel="stylesheet" href="{{ asset('assets/bower_components/datatables.net/css/dataTables.dateTime.min.css') }} ">
+<link rel="stylesheet" href="{{ asset('assets/bower_components/datatables.net/css/editor.dataTables.min.css') }} ">
+<link rel="stylesheet" href="{{ asset('assets/bower_components/datatables.net/css/font-awesome.min.css') }} ">
+<link rel="stylesheet" href="{{ asset('assets/bower_components/datatables.net/css/select.dataTables.min.css') }} ">
+    <style type="text/css" media="print">
+        .nonPrintable{
+            display:none;
+        }
+    </style>
 @endsection
 
 @section('content')
-    <div class="box">
+    <div class="box nonPrintable" id="noPrintable">
 
                         <h3 class="title-5 m-b-35">ProductIn Details</h3>
                                 <div class="table-data__tool">
@@ -108,14 +122,20 @@
   </div>
 
     @include('product_in.form')
+    @include('product_in.batch')
 
 @endsection
 
 @section('bot')
 
 
+<!-- DataTables -->
 <script src=" {{ asset('assets/bower_components/datatables.net/js/jquery.dataTables.min.js') }} "></script>
-    <script src="{{ asset('assets/bower_components/datatables.net-bs/js/dataTables.bootstrap.min.js') }} "></script>
+<script src="{{ asset('assets/bower_components/datatables.net-bs/js/dataTables.bootstrap.min.js') }} "></script>
+<script src=" {{ asset('assets/bower_components/datatables.net/js/dataTables.rowReorder.min.js') }} "></script>
+<script src="{{ asset('assets/bower_components/datatables.net/js/dataTables.responsive.min.js') }} "></script>
+<script src="{{ asset('assets/bower_components/datatables.net/js/dataTables.select.min.js') }} "></script>
+<script src="{{ asset('assets/bower_components/datatables.net/js/dataTables.dateTime.min.js') }} "></script>
 
 
     <!-- InputMask -->
@@ -185,14 +205,16 @@
     <script type="text/javascript">
         var table = $('#products-in-table').DataTable({
             processing: true,
-            serverSide: true,
+            rowReorder: {
+                        selector: 'td:nth-child(3)'
+                    },
+                    "autoWidth": false,
             dom:'lBfrtip',
-           "ScrollX": "100%",
            "scrollCollapse": true,
             buttons: [
             'excel', 'pdf', 'print'
            ],
-           "lengthMenu": [10,20,30,50,100,500,1000,2000,5000,10000,50000,100000],
+           "lengthMenu": [10,20,30,50,100,500],
             ajax:  "{{ url('apiProducts_in') }}",
             columns: [
              
@@ -233,8 +255,13 @@
             for(let batch of allBatches){
                 if(batch.batch_number == id){
                     console.log(batch.material_value, id, batch.manufacture_date);
+                    product_name = batch.product_name;
+                    product_id = batch.product_id;
                     mat_val += parseInt(batch.material_value);
                     $('#manufacture_date').val(batch.manufacture_date);
+                    $('#product_name').val(batch.product_name);
+                    $('#product_id').val(batch.product_id);
+                    populateCurrentstock();
                 }
             }  
             
@@ -255,12 +282,13 @@
                     }
             })
         }
-        function populateCurrentstock(prev){
-            var id= $(`.selectProduct_id${prev}`).val();
+        function populateCurrentstock(){
+            var id= $(`#product_id`).val();
             $.ajax({
                       url :'check_stock/'+id,
                       success : function(html) {
-                         $(`.inputStock${prev}`).val(html.data[0].available)
+                        console.log("html stock ===>>", html.data)
+                         $(`#available`).val(html.data.stock)
                        },
             });
             // $(`.inputStock${prev}`).val(stockAvailable);
@@ -474,6 +502,53 @@ $('#materials').delegate('.remove', 'click', function(){
             });
         }
 
+        function materialData(batch_number){
+            if(batch_number == ''||null){
+
+            }else{
+                
+            $.ajax({
+                    url:'/intoStoreShow/'+batch_number,
+                    success: function(html){
+                        let datas = JSON.parse(html)
+                        $('#materialData-body').html('');
+                        let table = '';
+                        let sum = 0;
+                        let weight = 0;
+                        let litres = 0;
+                        let date = '';
+                        for(let data of datas){
+                            sum+=parseInt(data.cost);
+                            date = data.updated_at;
+                            
+                            table+=`<tr>
+                            <td>${data.name}</td>
+                            <td>${data.category_name}</td>
+                            <td>${data.qty} ${data.symbol}</td>
+                            <td>${data.cost}</td>
+                            </tr>`
+                            console.log(data)
+                        };
+                        table+=`<tr>
+                            <td>Total</td>
+                            <td>-</td>
+                            <td>-</td>
+                            <td>${sum}</td>
+                            </tr>`;
+                        $('#batch_number_report').html('');
+                        $('#batch_number_report').append(batch_number);
+                        $('#date_report').html('');
+                        $('#date_report').append(date);
+                        $('#materialData-body').append(table);
+                        $('#modal-materialData').modal('show');
+                    }
+                })
+            }
+        }
+        function printModal(){
+            let modalBody = $('#materialData-modal').detach();
+            window.print();
+        }
         function deleteData(id){
             var csrf_token = $('meta[name="csrf-token"]').attr('content');
             swal({

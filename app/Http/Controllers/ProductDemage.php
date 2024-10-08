@@ -46,144 +46,84 @@ class ProductDemage extends Controller
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
-    public function store(Request $request)
+    
+    public function store1(Request $request, $id)
     {
-        if($request->normal=="normal"){
-              //
-        $validator = Validator::make($request->all(), [
-            "price.*" => 'required|integer|min:1',
-      
-            "qty.*" => 'required|integer|min:1',
-        ]);
-        if ($validator->fails()) 
-           { 
-            return response()->json([
-                'error'    => true,
-                'message'    => 'Stock return is Invalid check all fields'
-            ]);
-
-         }
         
-       else{
-        $date=Carbon::now()->format('Y-m-d');
-        $item_name=$request->item_name;
-        $date_in=$request->date_in;
-        $sales_id=$request->sales_id;
-        $qty=$request->qty;
-        $price=$request->price;
-        $amt=$request->amt;
-        $subtotal=$request->sub_total;
-        $id=$request->task_id;
-        $product_id=$request->product_id;
-
-       for($count=0; $count < count($qty);$count++){
-            $form_data[]= array(
-             'product_id' =>$product_id[$count],
-             'qty'  =>$qty[$count],
-             'price'  =>round($price[$count],2),
-             'amt'=>round($price[$count]*$qty[$count],2),
-             'created_at'  =>$date,
-            );   
-         
-             
-            //  DB::table('products')
-            //  ->where('id', $product_id[$count])
-            //  ->update([
-            //  'stock' => DB::raw('stock - '.$qty[$count]),
-            //   ]);
-
+        if(request()->ajax()){
+                $date=Carbon::now()->format('Y-m-d');
+                $task_id=$id;
+                $item_name=$request->item_name;
+                $date_in=$request->date_in;
+                $sales_id=$request->sales_id;
+                $qty=$request->damage_qty;
+                $price=$request->price;
+                $amt=$request->amt;
+                $subtotal=$request->sub_total;
+                $id=$request->task_id;
+                $product_id=$request->product_id;
+                info($request);
+                foreach ($qty as $count => $value) {
+                    if($qty[$count]>0){
+                        $demages = DB::table('product_demage')->where('sales_id', $sales_id[$count])->get();
+                        if(sizeof($demages)<=0){  
+                            $form_data[]= array(
+                                'task_id'=>$task_id,
+                                'sales_id'=>$sales_id[$count],
+                                'product_id' =>$product_id[$count],
+                                'qty'  =>$qty[$count],
+                                'price'  =>round($price[$count],2),
+                                'amt'=>round($price[$count]*$qty[$count],2),
+                                'sales_id'  =>$sales_id[$count],
+                                'created_at'=>Carbon::now(),
+                            ); 
+                            DB::table('product_demage')->insert($form_data); 
+                            DB::table('sales')
+                            ->where('id', $sales_id[$count])
+                            ->update([
+                            'return_qty' => DB::raw('return_qty + '.intVal($qty[$count])),
+                            'return_amt' => DB::raw('return_amt + '.round($price[$count]*$qty[$count],2)),
+                            ]); 
+                            DB::table('task')
+                            ->where('id', $task_id)
+                            ->update([
+                                'demage_cost' => DB::raw('demage_cost + '.(intVal($qty[$count])*intVal($price[$count]))),
+                                'amount_due' => DB::raw('amount_due - '.(intVal($qty[$count])*intVal($price[$count]))),
+                            ]);
+                        }else{
+                            
+                            $dqty = $demages[0]->qty;
+                            info($demages[0]->qty);
+                            DB::table('product_demage')
+                            ->where('sales_id', $sales_id[$count])
+                            ->update([
+                                'qty'=>DB::raw('qty + '.$qty[$count]-$dqty),
+                                'amt'=>DB::raw('amt + '.round($price[$count]*($qty[$count]-$dqty),2))
+                            ]);
+                            DB::table('sales')
+                            ->where('id', $sales_id[$count])
+                            ->update([
+                            'return_qty' => DB::raw('return_qty + '.intVal($qty[$count])-$dqty),
+                            'return_amt' => DB::raw('return_amt + '.round($price[$count]*($qty[$count]-$dqty),2)),
+                            ]); 
+                            DB::table('task')
+                            ->where('id', $task_id)
+                            ->update([
+                                'demage_cost' => DB::raw('demage_cost + '.(intVal($qty[$count]-$dqty)*intVal($price[$count]))),
+                                'amount_due' => DB::raw('amount_due - '.round(intVal($price[$count])*intVal($qty[$count]-$dqty), 2)),
+                            ]);
+                        }
+                    }
+                }
+                
+                info($task_id);
+                return response()->json([
+                            'success'    => true,
+                            'message'    => 'Demaged product recorded successfully'
+                ]);
             }
-
-          DB::table('product_demage')->insert($form_data); 
-
-         
-          return response()->json([
-                        'success'    => true,
-                        'message'    => 'Demage product Record'
-              ]);
-               } 
-               }
-      else{
-               //
-              
-            $validator = Validator::make($request->all(), [
-            "qty.*" => 'required|integer|min:1',
-               ]);
-                if ($validator->fails()) 
-               { 
-                 return response()->json([
-                'error'    => true,
-                'message'    => 'Stock return is Invalid check all fields'
-               ]);
-
-            }
-        
-       else{
-        $id=$request->sales_id;
-        $get_task=DB::table('sales')->where('id',$id)->first();
-        $date_in=$request->date_in;
-        $qty=$request->qty;
-        $subtotal=$request->sub_total;
-    
-            $form_data= array(
-             'task_id'=>$get_task->task_id,
-             'product_id' =>$get_task->product_id,
-             'qty'  =>$qty,
-             'price' =>$get_task->price,
-             'amt'=>round($get_task->price*$qty,2),
-             'created_at'  =>$date_in,
-            );   
-         
-             
-            //  DB::table('products')
-            //  ->where('id', $get_task->product_id)
-            //  ->update([
-            //  'stock' => DB::raw('stock + '.$qty),
-            //   ]);
-
             
-          
-            DB::table('sales')
-            ->where('id', $id)
-            ->where('product_id',$get_task->product_id)
-            ->update([
-            'qty' => DB::raw('qty - '.$qty),
-            'amt' => DB::raw('amt - '. $get_task->price*$qty),
-           // 'return_qty' => DB::raw('return_qty + '.$qty),
-           // 'return_amt' => DB::raw('return_amt + '.$get_task->price*$qty),
-          //  'return_price' => DB::raw('return_price + '.$get_task->price),
-         
-             ]); 
-                 
-
-             DB::table('product_demage')->insert($form_data); 
-       
-              $task=DB::table('task')->where('id',$get_task->task_id)
-                      ->first();
-
-        $amount_remain=$task->amount_due-$get_task->price*$qty;
-        $amount_returned=$task->demage_cost+$get_task->price*$qty;
-        
-        
-
-        $update_amount_form=array(
-            'amount_due'=>$amount_remain,
-            'demage_cost'=>$amount_returned
-        );
-
-      DB::table('task')->where('id',$get_task->task_id)
-                      ->update($update_amount_form);
-
-   
-        return response()->json([
-                        'success'    => true,
-                        'message'    => 'Demage product Record'
-       ]);
     }
-        }
-     
-    
-}
 
     /**
      * Display the specified resource.

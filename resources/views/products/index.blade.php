@@ -128,7 +128,7 @@
             columns: [
                 {data: 'cat_name', name: 'cat_name'},
                 {data: 'product_name', name: 'product_name'},
-                {data: 'stock', name: 'stock'},
+                {data: 'available', name: 'stock'},
                 {data: 'action', name: 'action', orderable: false, searchable: false}
             ]
             

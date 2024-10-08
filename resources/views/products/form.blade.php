@@ -26,7 +26,7 @@
                    <span class="help-block with-errors"></span>
                   </div>
                     <div class='col-md-6'>
-                            <label>Item Name</label>
+                            <label>Item Name</label>    
                             <input type="text" class="form-control" id="product_name" name="product_name"   autofocus required >
                             <span class="help-block with-errors"></span>
                     </div>

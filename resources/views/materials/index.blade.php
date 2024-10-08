@@ -17,10 +17,15 @@
 
          </div> 
             <div class="table-data__tool " >
+                
+                <div class="col-md-2 form group">
+                        <a id="print_btn" target="_blank" onclick="materialReport('materialReport')" style="margin-top:22px;"
+                        class="btn btn-default  au-btn--small">
+                        <i class="zmdi zmdi-download"></i> <i class="fa fa-pdf"></i> Report </a>
+                </div>
                     <div class="table-data__tool-right col-md-12">
-                                 
-                                 <a  id="add_btn" style="float:right"; class="au-btn au-btn-icon au-btn--green au-btn--small">
-                                     <i class="zmdi zmdi-plus"></i>Add</a>
+                        <a  id="add_btn" style="float:right"; class="au-btn au-btn-icon au-btn--green au-btn--small">
+                        <i class="zmdi zmdi-plus"></i>Add</a>
                     </div>
                                   
             </div>
@@ -173,7 +178,34 @@
             });
  
      }
-         
+     function materialReport(router) {
+        $.ajax({
+                    // type: router.type,
+                    // dataType: router.dataType,
+                    // data: obj,
+                    url: router,
+                    xhrFields: {
+                        responseType: 'blob'
+                    },
+                    success: function (html) {
+                        var blob = new Blob([html], { type: 'application/pdf' });
+                        // var link = document.createElement('a');
+                        // link.href = window.URL.createObjectURL(blob);
+                        // link.download = moment().utc()+"-MaterialReport.pdf";
+                        // link.click();
+                        if (window.navigator && window.navigator.msSaveOrOpenBlob) {
+                            window.navigator.msSaveOrOpenBlob(blob); // for IE
+                        }
+                        else {
+                            var fileURL = URL.createObjectURL(blob);
+                            var newWin = window.open(fileURL);
+                            newWin.focus();
+                            newWin.location.reload();
+                        }
+                        // console.log(html)
+                    }
+                })
+        }
         function deleteData(id){
             console.log(id)
             var csrf_token = $('meta[name="csrf-token"]').attr('content');
@@ -228,8 +260,11 @@
                 e.preventDefault();
                 if (e.isDefaultPrevented()){
                     var id = $('#id').val();
-                    if (save_method == 'add') url = "{{ url('materials') }}";
-                    else url = "{{ url('materials') . '/' }}" + id;
+                    console.log("ID:: ",id);
+                    if (save_method == 'add'){
+                         url = "{{ url('materials') }}";
+                    }
+                    else {url = "{{ url('materials') }}"+"/"+ id};
                     $.ajax({
                         url : url,
                         type : "POST",

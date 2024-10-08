@@ -16,7 +16,7 @@
                     <div class="box-body">
                     <div class="row">
                         <div class="col-md-12 form-group">
-                            <div class='col-md-6 ' >
+                            <div class='col-md-6' >
                                 <label>batch number</label>
                                 <input type="text" class="form-control" id="batch_number" name="batch_number"  placeholder="" required readonly >
                                 <small>This number is <strong>NEW</strong> everytime you open this page</small>
@@ -26,10 +26,14 @@
                                 <input type="date" class="form-control" id="date" name="date"  placeholder="" required >
                             </div>
                         </div>
-                        <div class="col-md-12 form-group receipt">
-                            <div class="col-md-6"  >
+                        <div class="col-md-12 form-group">
+                            <div class="col-md-6 receipt"  >
                                 <label>Receipt</label>
                                 <input type="text" class="form-control receiptInput" id="receipt[]" name="receipt[]"  placeholder=""  >
+                            </div>
+                            <div class="col-md-6 product">
+                                <label>Product</label>
+                                <select name="product_id" id="product_id" class="form-control selectProduct_id"><option value="" disabled selected>--select product--</option>@foreach($products as $x)<option value="{{$x->id}}">{{$x->product_name}}</option>@endforeach</select>
                             </div>
                             <div class="col-md-6">
                                 <div class='row'>

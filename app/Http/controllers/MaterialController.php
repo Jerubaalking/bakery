@@ -133,15 +133,16 @@ class MaterialController extends Controller
     public function update(Request $request, $id)
     {
         //
+        // dump("am here::");
             //
             try {
                 //code...
-                $this->validate($request, [
+                // $this->validate($request, [
                 
-                    'name' => 'required',
-                    'type' => 'required',
+                //     'name' => 'required',
+                //     'type' => 'required',
                 
-                ]);
+                // ]);
     
             
                     $form_data1 = array(
@@ -191,64 +192,63 @@ class MaterialController extends Controller
             ]);
         }
     }
-    public function apiMaterial(){
-        $materialz=DB::table('materials')
-        ->join('measurements','measurements.id','=','materials.measurement_id')
-        ->join('material_categories','material_categories.id','=','materials.material_category_id')
-        ->select('materials.*', 'measurements.measurement', 'material_categories.category_name','material_categories.type')
-        ->orderBy('created_at', 'DESC')
-        ->get();
         
-        // info(json_encode($materialz));
-        // for ($i=0; $i <sizeof($materials) ; $i++) { 
-        //     # code...
-        //     var_dump($materials[$i]);
-        // }
-        $materials = array();
-        foreach ($materialz as $value) {
-            // info(json_encode($value->id));
-            $into_store = DB::table('into_store')
-            ->where('material_id', $value->id)
-            ->where('status', '=','in')
-            ->selectRaw('sum(qty) as intoT')
-            ->get();
+        
+    public function apiMaterial(){
+        
+        // $materialz=DB::table('materials')
+        // ->join('measurements','measurements.id','=','materials.measurement_id')
+        // ->join('material_categories','material_categories.id','=','materials.material_category_id')
+        // ->select('materials.id','materials.name','materials.unit_cost', 'measurements.symbol','measurements.measurement', 'material_categories.category_name','material_categories.type')
+        // ->orderBy('materials.name', 'DESC')
+        // ->get();
+    
+        $materialz=DB::table('materials')
+                    ->join('measurements','measurements.id','=','materials.measurement_id')
+                    ->join('material_categories','material_categories.id','=','materials.material_category_id')
+                    ->select('materials.*', 'measurements.symbol','measurements.measurement', 'material_categories.category_name','material_categories.type')
+                    ->get();
 
-            // info(json_encode($into_store));
-            // $value['available'] = $into_store->inT;
-            $out_store = DB::table('into_store')
-            ->where('material_id', $value->id)
-            ->where('status', '!=', 'in')
-            ->selectRaw('sum(qty) as outT')
-            ->get();
-            $inTotal = 0;
-            $outTotal = 0;
-            foreach ($into_store as $ans) {
-                $inTotal += $ans->intoT;
-            }
-            foreach ($out_store as $ans) {
-                $outTotal +=$ans->outT;
-            }
-            // $c =json_encode($into_store[0]);
-            // $d =json_encode($out_store[0]);
-            // info($c);info($d);
-            // if($c->has('outT')){
-            //     $c->intoT=0;
-            // }
-            // if(!isset($d)){
-            //     $d->outT=0;
-            // }
-            
+                    $into_stores=DB::table('into_store')
+                    ->join('materials', 'materials.id', '=', 'into_store.material_id')
+                    ->join('material_categories','material_categories.id','=','materials.material_category_id')
+                    ->join('measurements','measurements.id','=','materials.measurement_id')
+                    ->select('into_store.*', 'materials.name','material_categories.type', 'materials.unit_cost','materials.material_category_id', 'materials.measurement_id', 'measurements.measurement', 'measurements.symbol')
+                    ->get();
 
-            $value->available = $inTotal - $outTotal;
+                    $materials = array();
+                    foreach ($materialz as $value) {
+                        // info(json_encode($value->id));
+                        
+                        $inTotal = 0;
+                        $outTotal = 0;
+                    foreach ($into_stores as $store) {
+                        if($store->status == 'in' && $store->material_id == $value->id){
+                            $inTotal += intVal($store->qty);
+                        }
+                        if($store->status != 'in' && $store->material_id == $value->id){
+                            $outTotal += intVal($store->qty);
+                        }
+                    }
+                       if($outTotal > $inTotal){
+                        $value->available = -($inTotal - $outTotal);
+                       } else{
+                        $value->available = $inTotal - $outTotal;
+                       }
+                       $total = $value->available;
+                       
+            if($value->symbol == "g"){
+                if($total>999){
+                    $value->available = floatVal($total/1000);
+                    $value->symbol = 'kg';
+                }
+            }
+        
+               
+            $value->available = number_format($value->available, 2).' '. $value->symbol;
             array_push($materials, $value);
         }
-            info($materials);
-            
-        //     $inTo =$into_store->inT;
-        //     $outTo =$out_store->outT;
-        //     $value->avaliable = $into - $outTo;
-        //     array_push($materialFull, "value");
-        // }
+          
         if(Auth::user()->role=="Superadministrator"){
         return Datatables::of($materials)
             ->addColumn('action', function($materials){
@@ -349,6 +349,44 @@ class MaterialController extends Controller
     
       
     }
+    public function materialReport(){
+        $materialz=DB::table('materials')
+                    ->join('measurements','measurements.id','=','materials.measurement_id')
+                    ->join('material_categories','material_categories.id','=','materials.material_category_id')
+                    ->select('materials.*', 'measurements.symbol','measurements.measurement', 'material_categories.category_name','material_categories.type')
+                    ->get();
 
+                    $into_stores=DB::table('into_store')
+                    ->join('materials', 'materials.id', '=', 'into_store.material_id')
+                    ->join('material_categories','material_categories.id','=','materials.material_category_id')
+                    ->join('measurements','measurements.id','=','materials.measurement_id')
+                    ->select('into_store.*', 'materials.name','material_categories.type', 'materials.unit_cost','materials.material_category_id', 'materials.measurement_id', 'measurements.measurement', 'measurements.symbol')
+                    ->get();
+
+                    $materials = array();
+                    foreach ($materialz as $value) {
+                        // info(json_encode($value->id));
+                        
+                        $inTotal = 0;
+                        $outTotal = 0;
+                    foreach ($into_stores as $store) {
+                        if($store->status == 'in' && $store->material_id == $value->id){
+                            $inTotal += intVal($store->qty);
+                        }
+                        if($store->status != 'in' && $store->material_id == $value->id){
+                            $outTotal += intVal($store->qty);
+                        }
+                    }
+                       if($outTotal > $inTotal){
+                        $value->available = -($inTotal - $outTotal);
+                       } else{
+                        $value->available = $inTotal - $outTotal;
+                       }
+                        array_push($materials, $value);
+                    }
+        $pdf = PDF::loadView('materials.material_report',compact('materials'));
+           return $pdf->stream();
+        
+    }
 
 }

@@ -76,6 +76,7 @@ class TaskController extends Controller
         $qty = $request->qty;
         $price = $request->price;
         $retail_price = $request->retail_price;
+        $retail = 0;
         $subtotal = $request->sub_total;
         $supplier_id = $request->supplier_id;
         $account_id = $request->supplier_id;
@@ -95,6 +96,7 @@ class TaskController extends Controller
         // Check for existing task
         $recordDate = DB::table('task')
             ->where('empoyee_id', '=', $employee->id)
+            ->where('account_id', '=', $account_id)
             ->where('created_at', '=', $date_in)
             ->orderBy('id', 'DESC')
             ->first();
@@ -138,6 +140,7 @@ class TaskController extends Controller
                 $get_id = $recordDate->id;
             }
 
+            $currentSales = DB::table('sales')->where('sales.task_id', '=', $recordDate);
             // Inserting sales entries
             if ($qty) {
                 $sales_data = [];
@@ -150,6 +153,7 @@ class TaskController extends Controller
                         'price'  => round($price[$i], 2),
                         'retail_price'  => round($retail_price[$i], 2),
                         'amt' => round($price[$i] * $qty[$i], 2),
+                        'retail_amt' => round($retail_price[$i] * $retail[$i], 2),
                         'return_qty'  => $return_qty,
                         'return_price'  => $return_price,
                         'return_amt'  => $return_amt,
@@ -338,7 +342,7 @@ class TaskController extends Controller
             }
         }
     }
-    public function apiTask(Request $request, $start, $end, $empId)
+    public function apiTask($start, $end, $empId)
     {
         if (request()->ajax()) {
 
@@ -350,19 +354,44 @@ class TaskController extends Controller
                     ->whereDate('task.created_at', '>=', $start)
                     ->whereDate('task.created_at', '<=', $end)
                     ->join('employee', 'employee.id', '=', 'task.empoyee_id')
-                    // ->join('sales', 'task.id', '=', 'sales.task_id')
-                    ->where('task.amount_paid', '<', 'task.sub_total')
+                    ->join('sales', 'task.id', '=', 'sales.task_id')
                     ->where('task.amount_due', '>', 0)
-                    ->select('task.*', 'employee.first_name', 'employee.last_name')
+                    ->select(
+                        'task.id',
+                        'task.empoyee_id',
+                        'task.account_id',
+                        'task.returned',
+                        'task.demage_cost',
+                        'task.task_number',
+                        'task.amount_paid',
+                        'task.amount_due',
+                        'task.sub_total',
+                        DB::raw('SUM(sales.bulk*sales.price + sales.retail*sales.retail_price) as expected_amount'),
+                        'employee.first_name',
+                        'employee.last_name'
+                    )
+                    ->groupBy(
+                        'task.id',
+                        'task.empoyee_id',
+                        'task.account_id',
+                        'task.returned',
+                        'task.demage_cost',
+                        'task.task_number',
+                        'task.amount_paid',
+                        'task.amount_due',
+                        'task.sub_total',
+                        'employee.id',
+                        'employee.first_name',
+                        'employee.last_name'
+                    ) // To aggregate results properly
+                    // ->havingRaw('task.amount_paid < SUM(sales.bulk * sales.price + sales.retail * sales.retail_price)')
                     ->orderBy('task.created_at', 'DESC')
                     ->get();
             } else {
                 $task = DB::table('task')
                     ->whereDate('task.created_at', '>=', $start)
                     ->whereDate('task.created_at', '<=', $end)
-                    // ->join('sales', 'task.id', '=', 'sales.task_id')   
-                    ->join('employee', 'employee.id', '=', 'task.empoyee_id')
-                    // ->join('sales', 'task.id', '=', 'sales.task_id') 
+                    ->join('employee', 'employee.id', '=', 'task.employee_id')
                     ->where('employee.id', '=', $empId)
                     ->where('task.amount_paid', '<', 'task.sub_total')
                     ->where('task.amount_due', '>', 0)
@@ -372,85 +401,73 @@ class TaskController extends Controller
             }
 
             // You have to create a link option to view account
-            // info($task);
             if (Auth::user()->role == "Superadministrator") {
                 return Datatables::of($task)
                     ->addColumn('action', function ($task) {
-                        info($task->id);
                         return '
-                <div class="btn-group" style="width:100%">
-                   <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                       Action <span class="caret"></span>
-                   </button>
-                   <ul class="dropdown-menu">
-                        <li><a href="#" class="btn btn-warning btn-xs pays" style="color:white"  id="' . $task->empoyee_id . '" test="' . $task->id . '"><i class="fa fa-money" style="color:white"></i>Receive Payment</a></li>
-                        
-                       <li><a href="#" id="' . $task->id . '" class="btn btn-warning btn-xs demageForm" ><i class="glyphicon glyphicon-plus" style="color:white"></i> add damaged</a></li>
-                       <li><a onclick="deleteData(' . $task->id . ')" id="' . $task->id . '" class="btn btn-danger btn-xs" style="color:white"><i class="glyphicon glyphicon-trash" style="color:white"></i> Delete</a></li>
-                       <li><a href="task_info/' . $task->id . '" class="btn btn-success btn-xs more_details" style="color:white" ><i class="glyphicon glyphicon-eye-open" style="color:white"></i>More Details</a></li>
-                   </ul>
-               </div> ';
+                        <div class="btn-group" style="width:100%">
+                           <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                               Action <span class="caret"></span>
+                           </button>
+                           <ul class="dropdown-menu">
+                               <li><a href="#" class="btn btn-warning btn-xs pays" style="color:white" id="' . $task->empoyee_id . '" test="' . $task->id . '"><i class="fa fa-money" style="color:white"></i> Receive Payment</a></li>
+                               <li><a href="#" id="' . $task->id . '" class="btn btn-warning btn-xs demageForm" ><i class="glyphicon glyphicon-plus" style="color:white"></i> Add Damaged</a></li>
+                               <li><a onclick="deleteData(' . $task->id . ')" id="' . $task->id . '" class="btn btn-danger btn-xs" style="color:white"><i class="glyphicon glyphicon-trash" style="color:white"></i> Delete</a></li>
+                               <li><a href="task_info/' . $task->id . '" class="btn btn-success btn-xs more_details" style="color:white"><i class="glyphicon glyphicon-eye-open" style="color:white"></i> More Details</a></li>
+                           </ul>
+                       </div>';
                     })
                     ->editColumn('demage_cost', function ($task) {
-
                         return '<div class="text-warning">' . number_format($task->demage_cost, 2) . '</div>';
                     })
                     ->editColumn('amount_due', function ($task) {
-
-                        return '<div class="text-danger">' . number_format((intVal($task->sub_total) - intVal($task->demage_cost)) - intVal($task->amount_paid), 2) . '</div>';
+                        return '<div class="text-danger">' . number_format((intval($task->sub_total) - intval($task->demage_cost)) - intval($task->amount_paid), 2) . '</div>';
                     })
                     ->editColumn('amount_paid', function ($task) {
-
                         return '<div class="text-success">' . number_format($task->amount_paid, 2) . '</div>';
                     })
                     ->editColumn('returned', function ($task) {
-
                         return '<div class="text-primary">' . number_format($task->returned, 2) . '</div>';
                     })
                     ->editColumn('sub_total', function ($task) {
-
                         return '<div class="text-primary">' . number_format($task->sub_total, 2) . '</div>';
                     })
                     ->escapeColumns([])
-                    ->rawColumns(['action'])->make(true);
+                    ->rawColumns(['action'])
+                    ->make(true);
             } else {
                 return Datatables::of($task)
                     ->addColumn('action', function ($task) {
                         return '
-                <div class="btn-group" style="width:100%">
-                   <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                       Action <span class="caret"></span>
-                   </button>
-                   <ul class="dropdown-menu">
-                   <li><a href="#" class="btn btn-warning btn-xs pays" style="color:white" test="' . $task->id . '" id="' . $task->empoyee_id . '" ><i class="fa fa-money" style="color:white"></i>Receive Payment</a></li>
-                   <li><a href="#" id="' . $task->id . '" class="btn btn-warning btn-xs demageForm" ><i class="glyphicon glyphicon-plus" style="color:white"></i> add damaged</a></li>
-
-                       <li><a href="task_info/' . $task->id . '" class="btn btn-success btn-xs more_details" style="color:white" ><i class="glyphicon glyphicon-eye-open" style="color:white"></i>More Details</a></li>
-                   </ul>
-               </div> ';
+                        <div class="btn-group" style="width:100%">
+                           <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                               Action <span class="caret"></span>
+                           </button>
+                           <ul class="dropdown-menu">
+                               <li><a href="#" class="btn btn-warning btn-xs pays" style="color:white" test="' . $task->id . '" id="' . $task->empoyee_id . '" ><i class="fa fa-money" style="color:white"></i> Receive Payment</a></li>
+                               <li><a href="#" id="' . $task->id . '" class="btn btn-warning btn-xs demageForm" ><i class="glyphicon glyphicon-plus" style="color:white"></i> Add Damaged</a></li>
+                               <li><a href="task_info/' . $task->id . '" class="btn btn-success btn-xs more_details" style="color:white" ><i class="glyphicon glyphicon-eye-open" style="color:white"></i> More Details</a></li>
+                           </ul>
+                       </div>';
                     })
                     ->editColumn('demage_cost', function ($task) {
-
                         return '<div class="text-warning">' . number_format($task->demage_cost, 2) . '</div>';
                     })
                     ->editColumn('amount_due', function ($task) {
-
-                        return '<div class="text-danger">' . number_format((intVal($task->sub_total) - intVal($task->demage_cost)) - intVal($task->amount_paid), 2) . '</div>';
+                        return '<div class="text-danger">' . number_format((intval($task->sub_total) - intval($task->demage_cost)) - intval($task->amount_paid), 2) . '</div>';
                     })
                     ->editColumn('amount_paid', function ($task) {
-
                         return '<div class="text-success">' . number_format($task->amount_paid, 2) . '</div>';
                     })
                     ->editColumn('returned', function ($task) {
-
                         return '<div class="text-primary">' . number_format($task->returned, 2) . '</div>';
                     })
                     ->editColumn('sub_total', function ($task) {
-
                         return '<div class="text-primary">' . number_format($task->sub_total, 2) . '</div>';
                     })
                     ->escapeColumns([])
-                    ->rawColumns(['action'])->make(true);
+                    ->rawColumns(['action'])
+                    ->make(true);
             }
         }
     }
@@ -869,6 +886,7 @@ class TaskController extends Controller
                 $data = DB::table('task')
                     ->join('employee', 'employee.id', '=', 'task.empoyee_id')
                     ->join('account', 'account.id', '=', 'task.account_id')
+                    ->join('sales', 'sales.task_id', '=', 'task.id')
                     ->where('task.empoyee_id', '=', $id)
                     ->where('task.amount_due', '>', '0')
                     ->selectRaw('
@@ -877,7 +895,7 @@ class TaskController extends Controller
                     account.account_name,
                     employee.employee_number,
                     CONCAT(employee.first_name, " ", employee.last_name) as employee_name,
-                    SUM(task.sub_total) as sub_total,
+                    SUM(sales.amt+sales.retail_amt) as sub_total,
                     SUM(task.amount_paid) as amount_paid,
                     SUM(task.returned) as returned,
                     SUM(task.demage_cost) as demage_cost
@@ -899,13 +917,13 @@ class TaskController extends Controller
                         MAX(receive_sales.updated_at) as latest_payment_date
                     ')
                     ->first(); // To fetch a single result
-                    
+
                 $data->paid_amount = $paid->total_paid_amount;
                 $data->last_paid = $paid->latest_payment_date;
-                info('task id ==>'. json_encode($data));
+                info('task id ==>' . json_encode($data));
                 // Calculate the amount due
                 $subTotal = intval($data->sub_total);
-                $amountPaid = intval($data->amount_paid);
+                $amountPaid = intval($data->paid_amount);
                 $demageCost = intval($data->demage_cost);
                 $returned = intval($data->returned);
 
@@ -1044,7 +1062,6 @@ class TaskController extends Controller
             ->whereDate('task.created_at', '>=', $created)
             ->orderBy('task.created_at', 'DESC')
             ->get();
-        info($pay);
         return view('task.task_info', compact('data', 'previous_task', 'pay', 'empo', 'return_task', 'latest_task', 'demage_product', 'id'));
     }
 

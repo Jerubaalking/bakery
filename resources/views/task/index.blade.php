@@ -704,47 +704,73 @@
 
 
         const changeAllTotals = (count) => {
-            var tr = $(this).parent().parent();
-            var product_id = $(".product_id" + count).val();
-            var sub = 0;
+            // Get the current row (tr) for this product
+            const tr = $(this).closest('tr');
 
+            // Retrieve the product ID based on the count
+            const product_id = $(".product_id" + count).val();
+
+            // Initialize subtotal to 0
+            let sub = 0;
+
+            // Make an AJAX request to check the stock for the selected product
             $.ajax({
-                url: "check_stock/" + product_id,
-                success: async function(html) {
-                    console.log("hapa bablai ==>", html.data.stock)
-                    $('#sub_total1').val(sub);
-                    let qt = $(".qty" + count).val();
-                    var stocks = html.data.stock;
-                    if (qt <= stocks && qt >= 0) {
-                        let prodd = $('.product_id' + count).val();
-                        let currentPrice = parseInt($(".amt" + count).text());
-                        $(".stock" + count).val(stocks);
-                        let pr = $(".price" + count).val();
-                        let proddd = $('select[id="product_id"]');
-                        $(".amt" + count).text(qt * pr);
-                        let idadi = $('#expensive').children().length;
-                        for (var tt = 0; tt < idadi; ++tt) {
+                url: "check_stock/" + product_id, // Send the request to the check_stock route
+                success: async function(response) {
+                    // Get the available stock from the response
+                    const stock = response.data.stock;
+                    console.log("Stock available:", stock);
 
-                            console.log("tt::", $(".amt" + tt).text());
-                            sub = sub + parseInt($(".amt" + tt).text());
-                            // console.log("price:: ",$(".amt"+count).text());
-                            // console.log("product:: ",sub);
+                    // Initialize subtotal input field to 0
+                    $('#sub_total1').val(sub);
+
+                    // Get the current quantity input by the user
+                    const qty = $(".qty" + count).val();
+
+                    // Check if the quantity is valid (within stock range and non-negative)
+                    if (qty <= stock && qty >= 0) {
+                        // Retrieve the price of the product
+                        const price = parseInt($(".price" + count).val());
+
+                        // Calculate the total amount for this product (qty * price)
+                        const currentAmount = qty * price;
+
+                        // Update the stock input field for this product
+                        $(".stock" + count).val(stock);
+
+                        // Update the displayed amount for this product
+                        $(".amt" + count).text(currentAmount);
+
+                        // Get the total number of items listed in the table (e.g., #expensive)
+                        const totalItems = $('#expensive').children().length;
+
+                        // Loop through each item and sum up the total amount
+                        for (let i = 0; i < totalItems; i++) {
+                            const itemAmount = parseInt($(".amt" + i).text());
+                            sub += itemAmount;
                         }
-                        console.log("product sub:: ", sub, idadi, $('#expensive').children());
-                        if (sub == 'NaN') {
+
+                        // Log the subtotal and item count for debugging purposes
+                        console.log("Subtotal:", sub, "Items count:", totalItems);
+
+                        // If subtotal is invalid (NaN), reset it to 0
+                        if (isNaN(sub)) {
                             sub = 0;
                         }
+
+                        // Update the subtotal field with the final computed value
                         $('#sub_total1').val(sub);
 
-
                     } else {
-                        // alert("quantity cannot exceed available!");
-                        $(".qty" + count).val(qt > stocks ? stocks : 0);
+                        // If the quantity is greater than available stock, adjust it to the maximum allowed stock
+                        // Otherwise, set the quantity to 0 if invalid
+                        const newQty = qty > stock ? stock : 0;
+                        $(".qty" + count).val(newQty);
                     }
                 }
-
-            })
+            });
         }
+
 
         $("#expensive").delegate('#product_id', 'change', function() {
             var tr = $(this).parent().parent();
@@ -1403,7 +1429,8 @@
                     $('.receive_account').text('Shop: ' + html.data.account_name);
                     $('.receive_employee_number').text('Employee: ' + html.data.employee_number);
                     $('.receive_date').text('Latest payment: ' + html.data.last_paid)
-                    $('#paid_total').val(html.data.paid_amount);
+                    $('#paid_total').val(html.data.amount_paid);
+                    $('#expected_total').val(html.data.sub_total);
                     $('#received_total').val(html.data.amount_paid - html.data.paid_amount);
                     $('.modal-title').text('Receiving Payment from ' + html.data.employee_name);
                     $('#modal_payment').modal('show');
@@ -1440,7 +1467,7 @@
 
                         html_form += '<div class="col-md-2">';
                         html_form += '<label>Expected</label><br>';
-                        html_form += '<input type="number" min=0 name="amt[]" id="amt" readonly  value="' + (parseFloat(html.data.sales[i].amt) + parseFloat(html.data.sales[i].retail_amt)) + '" class="form-control" placeholder="price"/>';
+                        html_form += '<input type="number" min=0 name="amt[]" id="amt" readonly  value="' + (parseFloat(html.data.sales[i].amt)) + '" class="form-control" placeholder="price"/>';
                         html_form += '</div>';
 
                         html_form += '</div></div><br /></span>';
@@ -1507,9 +1534,9 @@
             });
 
             let received = $('#received_total').val();
-            if( received<0){
+            if (received < 0) {
                 alert('Received amount cannot be negative');
-                received = 0; 
+                received = 0;
                 $('#received_total').val(received);
             }
             let totalP = $('#paid_total').val();
@@ -1518,12 +1545,12 @@
             // Calculate the balance and round to 2 decimal places
             let balance;
             if (data) {
-                $('#paid_total').val(data.paid_amount);
-                balance = (total - data.paid_amount - received).toFixed(2);
-                balance< 0? balance = 0:balance;
+                $('#paid_total').val(data.amount_paid);
+                balance = (total - data.amount_paid - received).toFixed(2);
+                balance < 0 ? balance = 0 : balance;
             } else {
-                balance = (total - totalP - received).toFixed(2); 
-                balance< 0? balance = 0:balance;
+                balance = (total - totalP - received).toFixed(2);
+                balance < 0 ? balance = 0 : balance;
             }
 
             // Format with thousand separators but without currency symbol

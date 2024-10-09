@@ -25,9 +25,14 @@ class SalesModel extends Model implements Auditable
     protected $fillable = [
         'task_id',
         'product_id',
+        'account_id',
         'qty',
+        'bulk',
+        'retial',
         'price',
+        'retail_price',
         'amt',
+        'retail_amt',
     ];
 
 }

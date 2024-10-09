@@ -28,6 +28,8 @@ use App\Http\Controllers\UserController;
 use App\Http\Controllers\CashFlow;
 use App\Http\Controllers\Expensive_Income;
 use App\Http\Controllers\AuditController;
+use Illuminate\Support\Facades\Auth;
+
 /*
 |--------------------------------------------------------------------------
 | Web Routes
@@ -38,10 +40,6 @@ use App\Http\Controllers\AuditController;
 | contains the "web" middleware group. Now create something great!
 |
 */
-
-Route::get('/', function () {
-    return view('welcome');
-});
 
 //user router will be here
 
@@ -187,17 +185,6 @@ Route::get('check_amount/{id}', [TaskController::class,'amount_due']);
 Route::get('/apiPay', [ReceivePayment::class,'apiTask']);
 
 
-Auth::routes();
-
-Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])->name('home');
-Route::get('/', function () {
-	return view('welcome');
-});
-Route::get('/login', function () {
-	return view('auth.login');
-});
-
-
 route::post('/exportexpenses',[ExpensiveController::class,'exportexpenses']);
 route::post('/exportdeposite',[DepositeController::class,'exportdeposite']);
 
@@ -229,8 +216,12 @@ route::resource('/income_expenditure',Expensive_Income::class);
 route::post('/profit_loss', [Expensive_Income::class,'income_exp']);
 
 route::resource('/get_audit',AuditController::class);
+Route::get('/home', [HomeController::class, 'index'])->name('home');
 
-
+Route::get('/', function () {
+	return view('welcome');
+});
+Route::get('/login', function () {
+	return view('auth.login');
+});
 Auth::routes();
-
-Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])->name('home');

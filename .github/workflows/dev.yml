@@ -21,7 +21,7 @@ jobs:
         uses: shivammathur/setup-php@v2
         with:
           php-version: '8.1'  # Use the appropriate PHP version for Laravel
-          extensions: mbstring, pdo, bcmath, xml, curl, json, openssl
+          extensions: mbstring, pdo, bcmath, xml, curl, json, openssl, pdo_mysql
           coverage: none
 
       - name: Set up Node.js
@@ -72,10 +72,12 @@ jobs:
             StrictHostKeyChecking no
           END
 
+      - name: Check PHP PDO and MySQL extensions on the server
+        run: ssh staging 'php -m | grep pdo; php -m | grep mysql'
+
       - name: Update Composer on the server
         run: ssh staging 'cd /var/www/misana/dev/stage && composer update'
         continue-on-error: true
-
 
       - name: Clear old files and caches
         run: |
@@ -85,8 +87,6 @@ jobs:
       - name: Install Composer on the server
         run: ssh staging 'cd /var/www/misana/dev/stage && composer install'
         continue-on-error: true
-      # - name: Run Laravel migrations
-      #   run: ssh staging 'cd /var/www/misana/dev/stage && php artisan migrate --force'
 
       - name: Run npm install and build assets
         run: ssh staging 'cd /var/www/misana/dev/stage && npm install'
@@ -94,10 +94,6 @@ jobs:
 
       - name: Clear Laravel caches
         run: ssh staging 'cd /var/www/misana/dev/stage && php artisan config:cache && php artisan route:cache && php artisan view:cache'
-
-
-      # - name: Set correct permissions on server
-      #   run: ssh staging 'sudo chown -R www-data:www-data /var/www/misana/dev/stage && sudo chmod -R 775 /var/www/misana/dev/stage/storage /var/www/misana/dev/stage/bootstrap/cache'
 
       - name: Stop PM2 (if necessary)
         run: ssh staging 'pm2 stop misana'

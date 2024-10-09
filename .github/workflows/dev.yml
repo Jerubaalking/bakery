@@ -53,7 +53,7 @@ jobs:
         with:
           SSH_PRIVATE_KEY: ${{ secrets.DEV_SERVER_SSH_PRIVATE_KEY }}
           ARGS: "-rlgoDzc --delete"
-          SOURCE: "/"
+          SOURCE: "./"
           REMOTE_HOST: ${{ vars.REMOTE_HOST }}
           REMOTE_USER: "gitactions"
           TARGET: "/var/www/misana/dev/stage"

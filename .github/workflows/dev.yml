@@ -72,15 +72,14 @@ jobs:
             StrictHostKeyChecking no
           END
 
-      - name: Install Composer on server
+      - name: Install PHP on the server (Ubuntu/Debian)
+        run: ssh staging 'sudo apt update && sudo apt install -y php-cli'
+        
+      - name: Install Composer on the server
         run: |
-          ssh staging 'which composer || curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer'
-        continue-on-error: true
-
-      - name: Install Node.js 20 on server
-        run: |
-          ssh staging 'node -v || curl -sL https://deb.nodesource.com/setup_20.x | sudo -E bash - && sudo apt-get install -y nodejs'
-        continue-on-error: true
+            ssh staging 'which composer || curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer'
+            ssh staging 'composer --version'
+        
 
       # - name: Run Laravel migrations
       #   run: ssh staging 'cd /var/www/misana/dev/stage && php artisan migrate --force'

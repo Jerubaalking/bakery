@@ -80,6 +80,7 @@ jobs:
       - name: Clear old files and caches
         run: |
           ssh staging 'rm -rf /var/www/misana/dev/stage/node_modules'
+        continue-on-error: true
 
       - name: Install Composer on the server
         run: ssh staging 'cd /var/www/misana/dev/stage && composer install'
@@ -106,6 +107,6 @@ jobs:
         run: ssh staging 'pm2 delete misana'
         continue-on-error: true
 
-      - name: Start Laravel application with PM2 on port 3013
-        run: ssh staging 'cd /var/www/misana/dev/stage && pm2 start "php artisan serve --host=0.0.0.0 --port=3013" --name "misana" --log "/home/gitactions/.pm2/logs/misana-error.log"'
+      - name: Start Laravel application with PM2 on port 3018
+        run: ssh staging 'cd /var/www/misana/dev/stage && pm2 start "php artisan serve --host=127.0.0.1 --port=3018" --name "misana" --log "/home/gitactions/.pm2/logs/misana-error.log"'
         continue-on-error: true

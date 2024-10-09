@@ -5,3 +5,5 @@ storage/*.key
 vendor
 .env
 composer.lock
+misaznmx_bakery.sql
+

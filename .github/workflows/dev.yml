@@ -72,19 +72,21 @@ jobs:
             StrictHostKeyChecking no
           END
 
-      - name: Install Composer on the server
-        run: ssh staging 'cd /var/www/misana/dev/stage && composer update'
+      - name: Install Composer on server
+        run: |
+          ssh staging 'which composer || curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer'
         continue-on-error: true
 
-      - name: Install Composer on the server
-        run: ssh staging 'cd /var/www/misana/dev/stage && composer install --no-dev --prefer-dist --optimize-autoloader'
+      - name: Install Node.js 20 on server
+        run: |
+          ssh staging 'node -v || curl -sL https://deb.nodesource.com/setup_20.x | sudo -E bash - && sudo apt-get install -y nodejs'
         continue-on-error: true
 
       # - name: Run Laravel migrations
       #   run: ssh staging 'cd /var/www/misana/dev/stage && php artisan migrate --force'
 
-      - name: Run npm install and build assets
-        run: ssh staging 'cd /var/www/misana/dev/stage && npm install && npm run prod'
+      - name: Run npm install
+        run: ssh staging 'cd /var/www/misana/dev/stage && npm install'
         continue-on-error: true
 
       - name: Clear Laravel caches
@@ -92,7 +94,6 @@ jobs:
 
       - name: Clear old files and caches
         run: |
-          ssh staging 'rm -rf /var/www/misana/dev/stage/node_modules'
           ssh staging 'php artisan cache:clear'
 
       - name: Set correct permissions on server

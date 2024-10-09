@@ -72,19 +72,17 @@ jobs:
             StrictHostKeyChecking no
           END
 
-      - name: Install PHP on the server (Ubuntu/Debian)
-        run: ssh staging 'apt update && sudo apt install -y php-cli'
-        
-      - name: Install Composer on the server
-        run: |
-            ssh staging 'which composer || curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer'
-            ssh staging 'composer --version'
-        
+      - name: Update Composer on the server
+        run: ssh staging 'cd /var/www/misana/dev/stage && composer update'
+        continue-on-error: true
 
+      - name: Install Composer on the server
+        run: ssh staging 'cd /var/www/misana/dev/stage && composer install'
+        continue-on-error: true
       # - name: Run Laravel migrations
       #   run: ssh staging 'cd /var/www/misana/dev/stage && php artisan migrate --force'
 
-      - name: Run npm install
+      - name: Run npm install and build assets
         run: ssh staging 'cd /var/www/misana/dev/stage && npm install'
         continue-on-error: true
 
@@ -93,6 +91,7 @@ jobs:
 
       - name: Clear old files and caches
         run: |
+          ssh staging 'rm -rf /var/www/misana/dev/stage/node_modules'
           ssh staging 'php artisan cache:clear'
 
       - name: Set correct permissions on server

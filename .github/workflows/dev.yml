@@ -35,8 +35,11 @@ jobs:
       - name: Install Node.js dependencies
         run: npm install
 
+      - name: Update Composer dependencies
+        run: composer update
+      
       - name: Install Composer dependencies
-        run: composer install --no-dev --prefer-dist --optimize-autoloader
+        run: composer update --no-dev --prefer-dist --optimize-autoloader
 
       - name: Set up Laravel environment
         run: |

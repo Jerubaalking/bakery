@@ -57,7 +57,7 @@ jobs:
           REMOTE_HOST: ${{ vars.REMOTE_HOST }}
           REMOTE_USER: "gitactions"
           TARGET: "/var/www/misana/dev/stage"
-          EXCLUDE: "/node_modules/ /vendor/"
+          EXCLUDE: "--exclude=node_modules --exclude=vendor"
 
       - name: Configure SSH on server for remote commands
         run: |

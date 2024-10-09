@@ -34,8 +34,7 @@
                                 <p class="lead">User Login </p>
                             </div>
                             <form class="form-auth-small" method="POST" action="{{ route('login') }}">
-                                <!-- @csrf -->
-                                <input type="hidden" name="_token" value="{{ csrf_token() }}">
+                                @csrf
                                 <div class="form-group">
                                     <label for="signin-email" class="control-label sr-only">Email</label>
                                     <input type="email" name="email" class="form-control{{ $errors->has('email') ? ' is-invalid' : '' }}" id="signin-email" value="{{ old('email') }}" autofocus required placeholder="Email">

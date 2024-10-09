@@ -76,6 +76,11 @@ jobs:
         run: ssh staging 'cd /var/www/misana/dev/stage && composer update'
         continue-on-error: true
 
+
+      - name: Clear old files and caches
+        run: |
+          ssh staging 'rm -rf /var/www/misana/dev/stage/node_modules'
+
       - name: Install Composer on the server
         run: ssh staging 'cd /var/www/misana/dev/stage && composer install'
         continue-on-error: true
@@ -89,13 +94,9 @@ jobs:
       - name: Clear Laravel caches
         run: ssh staging 'cd /var/www/misana/dev/stage && php artisan config:cache && php artisan route:cache && php artisan view:cache'
 
-      - name: Clear old files and caches
-        run: |
-          ssh staging 'rm -rf /var/www/misana/dev/stage/node_modules'
-          ssh staging 'php artisan cache:clear'
 
-      - name: Set correct permissions on server
-        run: ssh staging 'sudo chown -R www-data:www-data /var/www/misana/dev/stage && sudo chmod -R 775 /var/www/misana/dev/stage/storage /var/www/misana/dev/stage/bootstrap/cache'
+      # - name: Set correct permissions on server
+      #   run: ssh staging 'sudo chown -R www-data:www-data /var/www/misana/dev/stage && sudo chmod -R 775 /var/www/misana/dev/stage/storage /var/www/misana/dev/stage/bootstrap/cache'
 
       - name: Stop PM2 (if necessary)
         run: ssh staging 'pm2 stop misana'

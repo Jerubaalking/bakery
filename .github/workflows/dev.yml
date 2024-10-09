@@ -21,7 +21,24 @@ jobs:
         uses: shivammathur/setup-php@v2
         with:
           php-version: '8.1'  # Use the appropriate PHP version for Laravel
-          extensions: mbstring, pdo, bcmath, xml, curl, json, openssl, pdo_mysql
+          extensions: |
+              - mbstring
+              - pdo
+              - pdo_mysql
+              - bcmath
+              - xml
+              - curl
+              - json
+              - openssl
+              - gd
+              - zip
+              - tokenizer
+              - ctype
+              - dom
+              - simplexml
+              - xmlreader
+              - xmlwriter
+              - zlib
           coverage: none
 
       - name: Set up Node.js
@@ -72,8 +89,8 @@ jobs:
             StrictHostKeyChecking no
           END
 
-      - name: Check PHP PDO and MySQL extensions on the server
-        run: ssh staging 'php -m | grep pdo; php -m | grep mysql'
+      - name: Check PHP Extensions on Server
+        run: ssh staging 'php -m | grep -E "gd|mbstring|pdo_mysql|bcmath|xml|curl|json|openssl|zip|tokenizer|ctype|dom|simplexml|xmlreader|xmlwriter|zlib"'
 
       - name: Update Composer on the server
         run: ssh staging 'cd /var/www/misana/dev/stage && composer update'

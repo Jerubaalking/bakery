@@ -73,7 +73,7 @@ jobs:
           END
 
       - name: Install PHP on the server (Ubuntu/Debian)
-        run: ssh staging 'sudo apt update && sudo apt install -y php-cli'
+        run: ssh staging 'apt update && sudo apt install -y php-cli'
         
       - name: Install Composer on the server
         run: |

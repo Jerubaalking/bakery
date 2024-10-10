@@ -12,6 +12,10 @@ use Illuminate\Support\Facades\Hash;
 use Carbon\Carbon;
 class UserController extends Controller {
 
+	public function __construct()
+    {
+        $this->middleware('auth');
+    }
 	/**
 	 * Display a listing of the resource.
 	 *
@@ -39,18 +43,19 @@ class UserController extends Controller {
 	 */
 	public function store(Request $request) {
 		$this->validate($request, [
-			'user_name' => 'required',
+			'name' => 'required',
 			'email' => 'required',
-		
+			'password' => 'required',
 			'role' => 'required',
+			'password' => 'required',
 		
 		]);
 			$form_data = array(
-				'name' => $request->user_name,
+				'name' => $request->name,
 				'email' => $request->email,
 				'phone' => $request->phone,
 				'role' => $request->role,
-				'password' => Hash::make('misana')	
+				'password' => Hash::make( $request->password)	
 			);
          DB::table('users')->insert($form_data);
 
@@ -92,26 +97,26 @@ class UserController extends Controller {
 	 * @return \Illuminate\Http\Response
 	 */
 	public function update(Request $request, $id) {
-		$this->validate($request, [
-			
-			'email' => 'required|string|email|max:255|unique:users',
-		]);
+		// $this->validate($request, [
+		// 	'email' => 'required|string|email|max:255|unique:users',
+		// ]);
 
-	  
+		info('user request data ===>', $request->all());
 		$updated_at= Carbon::now();
     
 		$form_data = array(
-			'name' => $request->user_name,
+			'name' => $request->name,
 			'email' => $request->email,
 			'phone' => $request->phone,
 			'role' => $request->role,
-			'password' => Hash::make('misana')	
+			'password' => Hash::make( $request->password),
+			'updated_at'=>$updated_at
 		);
 
 	  DB::table('users')->where('id','=',$id)->update($form_data);
 	  return response()->json([
 		'success' => true,
-		'message' => 'User Email Updated',
+		'message' => 'User Updated',
 	  ]);
 	}
 

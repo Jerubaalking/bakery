@@ -1,5 +1,7 @@
 <?php
+
 namespace App\Http\Controllers;
+
 use App\Exports\ExportProdukMasuk;
 use App\Http\Models\ProductModel;
 use App\Http\Models\SupplierModel;
@@ -10,13 +12,14 @@ use Yajra\DataTables\DataTables;
 use Illuminate\Support\Facades\DB;
 use Auth;
 use App\Models\ProductInModel;
+
 class ProductInController extends Controller
 
 {
-    public function __construct()
-    {
-      
-    }
+    // public function __construct()
+    // {
+    //     $this->middleware('auth');
+    // }
     /**
      * Display a listing of the resource.
      *
@@ -25,39 +28,39 @@ class ProductInController extends Controller
     public function index()
     {
         //
-        $into_stores=DB::table('into_store')
-        ->get();
+        $into_stores = DB::table('into_store')
+            ->get();
 
-        $batches=DB::table('into_store')
-        ->where('status','=', 'process')
-        ->join('materials','materials.id','=','into_store.material_id')
-        ->join('products','products.id','=','into_store.product_id')
-        ->orderBy('into_store.batch_number', 'DESC')
-        ->select('into_store.batch_number','into_store.product_id','into_store.qty','materials.unit_cost','into_store.updated_at as manufacture_date', 'products.product_name')
-        ->selectRaw('(into_store.qty * materials.unit_cost) as material_value')
-        ->get();
-        
-        $BatchOut=DB::table('into_store')
-        ->where('status','=', 'process')
-        ->groupBy('batch_number')
-        ->select('into_store.batch_number')
-        ->get();
-        
+        $batches = DB::table('into_store')
+            ->where('status', '=', 'process')
+            ->join('materials', 'materials.id', '=', 'into_store.material_id')
+            ->join('products', 'products.id', '=', 'into_store.product_id')
+            ->orderBy('into_store.batch_number', 'DESC')
+            ->select('into_store.batch_number', 'into_store.product_id', 'into_store.qty', 'materials.unit_cost', 'into_store.updated_at as manufacture_date', 'products.product_name')
+            ->selectRaw('(into_store.qty * materials.unit_cost) as material_value')
+            ->get();
+
+        $BatchOut = DB::table('into_store')
+            ->where('status', '=', 'process')
+            ->groupBy('batch_number')
+            ->select('into_store.batch_number')
+            ->get();
+
         $materials = DB::table('materials')
-        ->get();
-        $cat= DB::table('categories')
-        ->get();
-        $products_in =DB::table('product_in')
-        ->join('products','products.id','=','product_in.product_id')
-        ->join('categories','categories.id','=','products.category_id')
-        ->select('product_in.*','products.product_name','products.category_id', 'categories.cat_name')
-        ->get();
-        $products_out =DB::table('product_out')
-        ->get();
-        $invoice_data =DB::table('product_in')
-        ->get();
-        $products =DB::table('products')->get();
-        return view('product_in.index', compact('into_stores','materials', 'batches','BatchOut','products','invoice_data','cat','products_in', 'products_out'));
+            ->get();
+        $cat = DB::table('categories')
+            ->get();
+        $products_in = DB::table('product_in')
+            ->join('products', 'products.id', '=', 'product_in.product_id')
+            ->join('categories', 'categories.id', '=', 'products.category_id')
+            ->select('product_in.*', 'products.product_name', 'products.category_id', 'categories.cat_name')
+            ->get();
+        $products_out = DB::table('product_out')
+            ->get();
+        $invoice_data = DB::table('product_in')
+            ->get();
+        $products = DB::table('products')->get();
+        return view('product_in.index', compact('into_stores', 'materials', 'batches', 'BatchOut', 'products', 'invoice_data', 'cat', 'products_in', 'products_out'));
     }
 
     /**
@@ -80,55 +83,55 @@ class ProductInController extends Controller
     {
 
         // try{
-            // $this->validate($request, [
-            //     'product_id'     => 'required',
-            //     'batch_number'     => 'required',
-            //     'qty'            => 'required',
-            //     'current_stock'            => 'required',
-            //     'manufacture_date'        => 'required'
-            // ]);
-            $batch_number = $request->batch_number;
-            $date_in = $request->manufacture_date;
-            $product_id = $request->product_id;
-            $qty = $request->qty;
-            
-            // foreach ($qty as $i=>$val){
-                $form_datas = array(
-                    'batch_number' => $batch_number,
-                    'product_id' => $product_id,
-                    'qty' => $qty,
-                    'date_in' => $date_in,
-                    'created_at' =>Carbon::now(),
-                    'updated_at' =>Carbon::now(),
-            
-                );
-            // }
-        
-            $proccess = array(
-                'status' => 'finished',
-                'updated_at' =>Carbon::now(),
-            );
-            ProductInModel::insert( $form_datas);
+        // $this->validate($request, [
+        //     'product_id'     => 'required',
+        //     'batch_number'     => 'required',
+        //     'qty'            => 'required',
+        //     'current_stock'            => 'required',
+        //     'manufacture_date'        => 'required'
+        // ]);
+        $batch_number = $request->batch_number;
+        $date_in = $request->manufacture_date;
+        $product_id = $request->product_id;
+        $qty = $request->qty;
 
-            //DB::table('product_in')->insert($form_datas);
+        // foreach ($qty as $i=>$val){
+        $form_datas = array(
+            'batch_number' => $batch_number,
+            'product_id' => $product_id,
+            'qty' => $qty,
+            'date_in' => $date_in,
+            'created_at' => Carbon::now(),
+            'updated_at' => Carbon::now(),
 
-            // $product =DB::table('products')->where('id','=',$request->product_id)->get();
-            $processUpdate = DB::table('into_store')
-            ->where('batch_number','=',$batch_number)
+        );
+        // }
+
+        $proccess = array(
+            'status' => 'finished',
+            'updated_at' => Carbon::now(),
+        );
+        ProductInModel::insert($form_datas);
+
+        //DB::table('product_in')->insert($form_datas);
+
+        // $product =DB::table('products')->where('id','=',$request->product_id)->get();
+        $processUpdate = DB::table('into_store')
+            ->where('batch_number', '=', $batch_number)
             ->update($proccess);
 
-            // $x=$request->tlitre;
-            // $form_data = array(
-            //     'stock'=>$product[0]->stock + $request->qty, 
-            //     // 'tlitre'=>$product[0]->tlitre +$x,
-            // );
-            // DB::table('into_store')->where('id','=',$request->product_id)->update($form_datas);
-            // $savedProductIn = ProductInModel::insert($form_datas);
-            // \dump ($form_datas);
-            return response()->json([
-                'success'    => true,
-                'message'    => 'Products batch added to stock'
-            ]);
+        // $x=$request->tlitre;
+        // $form_data = array(
+        //     'stock'=>$product[0]->stock + $request->qty, 
+        //     // 'tlitre'=>$product[0]->tlitre +$x,
+        // );
+        // DB::table('into_store')->where('id','=',$request->product_id)->update($form_datas);
+        // $savedProductIn = ProductInModel::insert($form_datas);
+        // \dump ($form_datas);
+        return response()->json([
+            'success'    => true,
+            'message'    => 'Products batch added to stock'
+        ]);
         // }catch(\Throwable $th){
         //     return response()->json([
         //         'success' => false,
@@ -157,11 +160,11 @@ class ProductInController extends Controller
      */
     public function edit($id)
     {
-        if(request()->ajax()){
-      
-            $data =DB::table('product_in')->find($id);
-            return response()->json(['data' => $data]);   
-           }
+        if (request()->ajax()) {
+
+            $data = DB::table('product_in')->find($id);
+            return response()->json(['data' => $data]);
+        }
     }
 
     /**
@@ -173,33 +176,30 @@ class ProductInController extends Controller
      */
     public function update(Request $request, $id)
     {
-            $batch_number = $request->batch_number;
-            $date_in = $request->manufacture_date;
-            $product_id = $request->product_id;
-            $qty = $request->qty;
-            
-            // foreach ($qty as $i=>$val){
-                $form_datas = array(
-                    'batch_number' => $batch_number,
-                    'product_id' => $product_id,
-                    'qty' => $qty,
-                    'date_in' => $date_in,
-                    'created_at' =>Carbon::now(),
-                    'updated_at' =>Carbon::now(),
-            
-                );
-            // }
+        $batch_number = $request->batch_number;
+        $date_in = $request->manufacture_date;
+        $product_id = $request->product_id;
+        $qty = $request->qty;
 
-             DB::table('products')
-             ->where('id','=',$request->product_id)->update($form_datas);
-             
-             return response()->json([
-                 'success'    => true,
-                 'message'    => 'Product In Updated'
-             ]);
-        
+        // foreach ($qty as $i=>$val){
+        $form_datas = array(
+            'batch_number' => $batch_number,
+            'product_id' => $product_id,
+            'qty' => $qty,
+            'date_in' => $date_in,
+            'created_at' => Carbon::now(),
+            'updated_at' => Carbon::now(),
 
-    
+        );
+        // }
+
+        DB::table('products')
+            ->where('id', '=', $request->product_id)->update($form_datas);
+
+        return response()->json([
+            'success'    => true,
+            'message'    => 'Product In Updated'
+        ]);
     }
 
     /**
@@ -210,27 +210,27 @@ class ProductInController extends Controller
      */
     public function destroy($id)
     {
-        
-        $mydata= DB::table('product_in')->find($id);
-        $qty=$mydata->qty;
-      
-        $product_id=$mydata->product_id;
 
-        $getdata=DB::table('products')->where('id','=',$product_id)->get();
-        $qtys=$getdata[0]->stock;
-    
-     
-         $remain_qty= $qtys- $qty;
-      
-        
-        $upform=array(
-            'stock'=>$remain_qty,
-        
-            
+        $mydata = DB::table('product_in')->find($id);
+        $qty = $mydata->qty;
+
+        $product_id = $mydata->product_id;
+
+        $getdata = DB::table('products')->where('id', '=', $product_id)->get();
+        $qtys = $getdata[0]->stock;
+
+
+        $remain_qty = $qtys - $qty;
+
+
+        $upform = array(
+            'stock' => $remain_qty,
+
+
         );
-        
-       DB::table('products')->where('id', '=',$product_id)->update($upform);
-      
+
+        DB::table('products')->where('id', '=', $product_id)->update($upform);
+
 
         $productdelete =  ProductInModel::find($id);
         $productdelete->delete();
@@ -240,45 +240,41 @@ class ProductInController extends Controller
             'message'    => 'Products In Deleted'
         ]);
     }
-    public function apiProducts_in(){
-        $products=DB::table('products')->join('product_in','product_in.product_id','=','products.id')
-        ->select('product_in.*','products.product_name')
-        ->orderBy('product_in.date_in','DESC')
-        ->get();
-        if(Auth::user()->role=="Superadministrator"){
-        return Datatables::of($products)
-            ->addColumn('products_name', function ($products){
-                return $products->product_name;
-            })
-           
-            ->addColumn('action', function($products){
-                return
-                    '<a onclick="materialData(`'.$products->batch_number.'`)" class="btn btn-success btn-xs"><i class="glyphicon glyphicon-edit"></i> materials</a>
-                    <a onclick="deleteData('.$products->id.')" class="btn btn-danger btn-xs"><i class="glyphicon glyphicon-trash"></i> Delete</a> ';
-            })
-            ->rawColumns(['products_name','product_in.date_in','action'])->make(true);
+    public function apiProducts_in()
+    {
+        $products = DB::table('products')->join('product_in', 'product_in.product_id', '=', 'products.id')
+            ->select('product_in.*', 'products.product_name')
+            ->orderBy('product_in.date_in', 'DESC')
+            ->get();
+        if (Auth::user()->role == "Superadministrator") {
+            return Datatables::of($products)
+                ->addColumn('products_name', function ($products) {
+                    return $products->product_name;
+                })
 
+                ->addColumn('action', function ($products) {
+                    return
+                        '<a onclick="materialData(`' . $products->batch_number . '`)" class="btn btn-success btn-xs"><i class="glyphicon glyphicon-edit"></i> materials</a>
+                    <a onclick="deleteData(' . $products->id . ')" class="btn btn-danger btn-xs"><i class="glyphicon glyphicon-trash"></i> Delete</a> ';
+                })
+                ->rawColumns(['products_name', 'product_in.date_in', 'action'])->make(true);
+        } else {
+            return Datatables::of($products)
+                ->addColumn('products_name', function ($products) {
+                    return $products->product_name;
+                })
+
+                ->addColumn('action', function ($products) {
+                    return
+
+                        '<a onclick="materialData(' . $products->batch_number . ')" class="btn btn-success btn-xs"><i class="glyphicon glyphicon-edit"></i> materials</a>
+            <a onclick="deleteData(' . $products->id . ')" class="btn btn-danger btn-xs"><i class="glyphicon glyphicon-trash"></i> Delete</a> ';
+                })
+                ->rawColumns(['products_name', 'supplier_name', 'action'])->make(true);
+        }
     }
-    else{
-        return Datatables::of($products)
-        ->addColumn('products_name', function ($products){
-            return $products->product_name;
-        })
-       
-        ->addColumn('action', function($products){
-            return
-            
-            '<a onclick="materialData('. $products->batch_number .')" class="btn btn-success btn-xs"><i class="glyphicon glyphicon-edit"></i> materials</a>
-            <a onclick="deleteData('. $products->id.')" class="btn btn-danger btn-xs"><i class="glyphicon glyphicon-trash"></i> Delete</a> ';
 
-
-
-        })
-        ->rawColumns(['products_name','supplier_name','action'])->make(true);  
-    }
-}
-
-     /**
+    /**
      * Store a newly created resource in storage.
      *
      * @param  \Illuminate\Http\Request  $request
@@ -287,50 +283,48 @@ class ProductInController extends Controller
     public function exportProduct_inAll(Request $request)
 
     {
-
-      
-        if($request->product_id1=="all"){
-        $from=$request->from;
-        $to=$request->to;
-        $product_in=DB::table('products')
-        ->join('product_in','product_in.product_id','=','products.id')
-        ->whereBetween('product_in.date_in',array($request->from,$request->to))
-        ->select('product_in.*','products.product_name',)
-        ->get();
-        $sum=DB::table('products')
-        ->join('product_in','product_in.product_id','=','products.id')
-        ->whereBetween('product_in.date_in',array($request->from,$request->to))
-        ->sum('product_in.qty');
-        $pdf = PDF::loadView('product_in.productInAllPDF',compact('product_in','from','to','sum'));
-      //  return response()->file($pathToFile);
-         return $pdf->stream('product_in.pdf');
+        if ($request->product_id1 == "all") {
+            $from = $request->from;
+            $to = $request->to;
+            $product_in = DB::table('products')
+                ->join('product_in', 'product_in.product_id', '=', 'products.id')
+                ->whereBetween('product_in.date_in', array($request->from, $request->to))
+                ->select('product_in.*', 'products.product_name',)
+                ->get();
+            $sum = DB::table('products')
+                ->join('product_in', 'product_in.product_id', '=', 'products.id')
+                ->whereBetween('product_in.date_in', array($request->from, $request->to))
+                ->sum('product_in.qty');
+                $loggedInUser = Auth::User();
+            $pdf = PDF::loadView('product_in.productInAllPDF', compact('loggedInUser','product_in', 'from', 'to', 'sum'));
+            //  return response()->file($pathToFile);
+            return $pdf->stream('product_in.pdf');
+        } else {
+            $from = $request->from;
+            $to = $request->to;
+            $product_in = DB::table('products')
+                ->join('product_in', 'product_in.product_id', '=', 'products.id')
+                ->whereBetween('product_in.date_in', array($request->from, $request->to))
+                ->select('product_in.*', 'products.product_name',)
+                ->where('product_in.product_id', $request->product_id1)
+                ->get();
+            $sum = DB::table('products')
+                ->join('product_in', 'product_in.product_id', '=', 'products.id')
+                ->whereBetween('product_in.date_in', array($request->from, $request->to))
+                ->where('product_in.product_id', $request->product_id1)
+                ->sum('product_in.qty');
+            $pdf = PDF::loadView('product_in.productInAllPDF', compact('product_in', 'from', 'to', 'sum'));
+            //  return response()->file($pathToFile);
+            return $pdf->stream('product_in.pdf');
         }
-        else{
-            $from=$request->from;
-            $to=$request->to;
-            $product_in=DB::table('products')
-            ->join('product_in','product_in.product_id','=','products.id')
-            ->whereBetween('product_in.date_in',array($request->from,$request->to))
-            ->select('product_in.*','products.product_name',)
-            ->where('product_in.product_id',$request->product_id1)
-            ->get();
-            $sum=DB::table('products')
-            ->join('product_in','product_in.product_id','=','products.id')
-            ->whereBetween('product_in.date_in',array($request->from,$request->to))
-            ->where('product_in.product_id',$request->product_id1)
-            ->sum('product_in.qty');
-            $pdf = PDF::loadView('product_in.productInAllPDF',compact('product_in','from','to','sum'));
-          //  return response()->file($pathToFile);
-             return $pdf->stream('product_in.pdf');  
-        }
-      //  return $pdf->file('');
+        //  return $pdf->file('');
     }
 
     public function exportProductMasuk($id)
     {
         $product_in = product_in::findOrFail($id);
         $pdf = PDF::loadView('product_in.productMasukPDF', compact('product_in'));
-        return $pdf->stream($product_in->id.'_product_in.pdf');
+        return $pdf->stream($product_in->id . '_product_in.pdf');
     }
 
     public function exportExcel()
@@ -338,20 +332,20 @@ class ProductInController extends Controller
         return (new ExportProdukMasuk)->stream('product_in.xlsx');
     }
 
-    public function  get_item($id){
-        $data=DB::table('products')->where('category_id','=',$id)
-       ->get();
-       return response()->json([
-           'data'    =>$data,
-       ]);
- 
-   }
-   public function  get_stock($id){
-    $data=DB::table('products')->where('id','=',$id)
-   ->get();
-   return response()->json([
-       'data'    =>$data,
-   ]);
-
-}
+    public function  get_item($id)
+    {
+        $data = DB::table('products')->where('category_id', '=', $id)
+            ->get();
+        return response()->json([
+            'data'    => $data,
+        ]);
+    }
+    public function  get_stock($id)
+    {
+        $data = DB::table('products')->where('id', '=', $id)
+            ->get();
+        return response()->json([
+            'data'    => $data,
+        ]);
+    }
 }

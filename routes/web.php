@@ -215,7 +215,7 @@ route::post('/export_flow', [CashFlow::class,'export_flow']);
 route::resource('/income_expenditure',Expensive_Income::class);
 route::post('/profit_loss', [Expensive_Income::class,'income_exp']);
 
-route::resource('/get_audit',AuditController::class);
+route::resource('/get_audit', AuditController::class);
 Route::get('/home', [HomeController::class, 'index'])->name('home');
 
 Route::get('/', function () {

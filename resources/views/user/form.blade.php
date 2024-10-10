@@ -1,8 +1,8 @@
 <div class="modal fade" id="modal-user-form" tabindex="1" role="dialog" aria-hidden="true" data-backdrop="static">
     <div class="modal-dialog">
         <div class="modal-content">
-            <form  id="form-user" data-toggle="validator" enctype="multipart/form-data" >
-            {{ csrf_field() }} {{ method_field('POST') }}
+            <form id="form-user" data-toggle="validator" enctype="multipart/form-data">
+                {{ csrf_field() }} {{ method_field('POST') }}
                 <div class="modal-header">
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                         <span aria-hidden="true">&times;</span></button>
@@ -10,38 +10,43 @@
                 </div>
 
 
-                <div class="modal-body"> 
+                <div class="modal-body">
                     <input type="hidden" id="id" name="id">
 
 
                     <div class="box-body">
-                    <div class="form-group">
+                        <div class="form-group">
                             <label>User Name</label>
-                            <input type="text" class="form-control" id="user_name" name="user_name"   required>
+                            <input type="text" class="form-control" id="name" name="name" required>
                             <span class="help-block with-errors"></span>
-                    </div>
-                    <div class="form-group">
-                            <label >Email</label>
-                            <input type="email" class="form-control" id="email" name="email"   required>
+                        </div>
+                        <div class="form-group">
+                            <label>Email</label>
+                            <input type="email" class="form-control" id="email" name="email" required>
                             <span class="help-block with-errors"></span>
-                    </div>
-                    <div class="form-group">
-                            <label >Phone Number</label>
-                            <input type="text" class="form-control" id="phone" name="phone"   required>
+                        </div>
+                        <div class="form-group">
+                            <label>Phone Number</label>
+                            <input type="text" class="form-control" id="phone" name="phone" required>
                             <span class="help-block with-errors"></span>
-                    </div>
-                    <div class="form-group">
-                            <label >Role's</label>
-                       <select class="form-control" id="role" name="role">
-                       <option disabled>--select role--</option>
-                       <option value="Superadministrator" >Superadministrator</option>
-                       <option value="Manager">Manager</option>
-                       <option value="User">User</option>
-                       <option value="Accountant">Accountant</option>
-                       <option value="Store Keeper">Store Keeper</option>
-                       </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Role's</label>
+                            <select class="form-control" id="role" name="role">
+                                <option disabled>--select role--</option>
+                                <option value="Superadministrator">Superadministrator</option>
+                                <option value="Manager">Manager</option>
+                                <option value="User">User</option>
+                                <option value="Accountant">Accountant</option>
+                                <option value="Store Keeper">Store Keeper</option>
+                            </select>
                             <span class="help-block with-errors"></span>
-                    </div>
+                        </div>
+                        <div class="form-group">
+                            <label>Password</label>
+                            <input type="password" class="form-control" id="password" name="password" required>
+                            <span class="help-block with-errors"></span>
+                        </div>
 
 
                     </div>

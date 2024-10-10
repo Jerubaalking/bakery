@@ -18,6 +18,10 @@ use App\Models\SalesModel;
 
 class TaskController extends Controller
 {
+    public function __construct()
+    {
+        $this->middleware('auth');
+    }
     /**
      * Display a listing of the resource.
      *
@@ -469,7 +473,6 @@ class TaskController extends Controller
                         </ul>
                     </div>';
                 })
-                
                     ->editColumn('created_at', function ($task) {
                         return '<div class="text-warning">' . $task->created_at . '</div>';
                     })

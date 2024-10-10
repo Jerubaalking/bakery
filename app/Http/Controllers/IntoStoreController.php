@@ -5,18 +5,17 @@ use Yajra\DataTables\DataTables;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
-use App\Notifications\ExpensiveNotification;
-use Illuminate\Support\Facades\Notification;
-use App\Models\User;
-use App\Models\MeasurementModel;
 use App\Models\MaterialModel;
 use App\Models\IntoStoreModel;
-use App\Models\OutStoreModel;
 use Auth;
 use PDF;
 
 class IntoStoreController extends Controller
 {
+    public function __construct()
+    {
+        $this->middleware('auth');
+    }
     /**
      * Display a listing of the resource.
      *
@@ -372,8 +371,8 @@ class IntoStoreController extends Controller
                 ->get();
                 break;
         }
-        // info($into_store);
-        $pdf = PDF::loadview('intoStore.batchReport', compact('categories','into_store', 'batches','start','end', 'status'))->setPaper('a4', 'landscape');
+        $loggedInUser = Auth::User();
+        $pdf = PDF::loadview('intoStore.batchReport', compact('loggedInUser','categories','into_store', 'batches','start','end', 'status'))->setPaper('a4', 'landscape');
         return $pdf->stream();
     }
     public function showByDates(Request $request){
@@ -580,7 +579,8 @@ class IntoStoreController extends Controller
                     ->get();
                 }
             }
-             $pdf = PDF::loadView('intoStore.exportPDF',compact('from','to','status','data' ));
+            $loggedInUser = Auth::User();
+             $pdf = PDF::loadView('intoStore.exportPDF',compact('loggedInUser','from','to','status','data' ));
             
              return $pdf->stream();
     

@@ -508,26 +508,6 @@
         }
         var table1 = populateTable('apiTask');
 
-        // var table1 = $('#task-table1').DataTable({
-        //     processing: true,
-        //     serverSide: true,
-        //     ajax: "{{ url('apiTask1') }}",
-        //     columns: [
-        //         { data: 'first_name', name: 'first_name' },
-        //         // {data: 'employee_number', name: 'employee_number'},
-        //         // {data: 'task_number', name: 'task_number'},
-        //         { data: 'sub_total', name: 'sub_total' },
-        //         { data: 'amount_paid', name: 'amount_paid' },
-        //         { data: 'amount_due', name: 'amount_due' },
-        //         { data: 'returned', name: 'returned' },
-        //         { data: 'demage_cost', name: 'demage_cost' },
-        //         { data: 'created_at', name: 'created_at' },
-        //         // {data: 'adds', name: 'adds'}, 
-
-        //         { data: 'action', name: 'action', orderable: false, searchable: false }
-
-        //     ]
-        // });
         $(document).on('click', '#add_btn', async function() {
             let top = ``;
             save_method = "add";

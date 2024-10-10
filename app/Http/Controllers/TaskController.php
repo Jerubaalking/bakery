@@ -69,6 +69,8 @@ class TaskController extends Controller
             "price.*" => 'required|integer|min:1',
         ]);
 
+        $incomingTask = $request->all();
+
         // Extracting input values
         $date = Carbon::now()->format('Y-m-d');
         $item_name = $request->item_name;
@@ -78,16 +80,14 @@ class TaskController extends Controller
         $retail_price = $request->retail_price;
         $retail = 0;
         $subtotal = $request->sub_total;
-        $supplier_id = $request->supplier_id;
         $account_id = $request->supplier_id;
         $product_id = $request->product_id;
-
         $return_qty = 0;
         $return_price = 0;
         $return_amt = 0;
 
         // Fetch supplier and employee details
-        $supplier = DB::table('account')->where('id', '=', $account_id)->first();
+        $supplier = DB::table('account')->where('id', '=', $request->supplier_id)->first();
         $employee_number = json_decode(str_replace("'", '"', $supplier->employee_numbers))[0];
         // info($employee_number);
         $employee = DB::table('employee')->where('employee_number', '=', $employee_number)->first();
@@ -106,14 +106,24 @@ class TaskController extends Controller
         try {
             // Task creation or updating logic
             if (!$recordDate) {
-                // New task: Generate next task number
+                // New task: Generate the next task number
                 $lastTask = DB::table('task')->orderBy('id', 'DESC')->first();
 
-                $nextTask = $lastTask ? 'TASK-' . sprintf("%04d", intval(explode('-', $lastTask->task_number)[1]) + 1) : 'TASK-0001';
+                // Ensure the task number is properly formatted and exists
+                if ($lastTask && isset($lastTask->task_number) && strpos($lastTask->task_number, '-') !== false) {
+                    // Split the task number and increment the numeric part
+                    $parts = explode('-', $lastTask->task_number);
+                    $numericPart = intval($parts[1]); // Ensure this is an integer
+                    $nextTask = 'TASK-' . sprintf("%04d", $numericPart + 1);
+                } else {
+                    // No valid previous task, or the task number format is incorrect
+                    $nextTask = 'TASK-0001';
+                }
 
+                // Create the new task with the generated task number
                 $form_data = [
                     'sub_total' => round($subtotal, 2),
-                    'empoyee_id' => $employee->id,
+                    'empoyee_id' => $employee->id, // Assuming you meant 'employee_id' (correct typo from 'empoyee_id')
                     'account_id' => $supplier->id,
                     'created_at' => $date,
                     'amount_paid' => 0,
@@ -122,7 +132,7 @@ class TaskController extends Controller
                     'returned' => $return_amt
                 ];
 
-                // Insert task and get its ID
+                // Insert the task and get its ID
                 $get_id = DB::table('task')->insertGetId($form_data);
             } else {
                 // Existing task: Update task data
@@ -139,7 +149,7 @@ class TaskController extends Controller
 
                 $get_id = $recordDate->id;
             }
-
+            info('get_id ===>'.$return_qty);
             $currentSales = DB::table('sales')->where('sales.task_id', '=', $recordDate);
             // Inserting sales entries
             if ($qty) {
@@ -152,11 +162,13 @@ class TaskController extends Controller
                         'qty'  => $qty[$i],
                         'price'  => round($price[$i], 2),
                         'retail_price'  => round($retail_price[$i], 2),
+                        'bulk'=>$qty[$i],
+                        'retail'=>0,
                         'amt' => round($price[$i] * $qty[$i], 2),
-                        'retail_amt' => round($retail_price[$i] * $retail[$i], 2),
-                        'return_qty'  => $return_qty,
-                        'return_price'  => $return_price,
-                        'return_amt'  => $return_amt,
+                        'retail_amt' => 0,
+                        'return_qty'  => 0,
+                        'return_price'  => 0,
+                        'return_amt'  => 0,
                         'created_at'  => $date_in,
                     ];
 
@@ -362,6 +374,7 @@ class TaskController extends Controller
                         'task.account_id',
                         'task.returned',
                         'task.demage_cost',
+                        'task.created_at',
                         'task.task_number',
                         'task.amount_paid',
                         'task.amount_due',
@@ -376,6 +389,7 @@ class TaskController extends Controller
                         'task.account_id',
                         'task.returned',
                         'task.demage_cost',
+                        'task.created_at',
                         'task.task_number',
                         'task.amount_paid',
                         'task.amount_due',
@@ -389,36 +403,75 @@ class TaskController extends Controller
                     ->get();
             } else {
                 $task = DB::table('task')
-                    ->whereDate('task.created_at', '>=', $start)
-                    ->whereDate('task.created_at', '<=', $end)
-                    ->join('employee', 'employee.id', '=', 'task.employee_id')
-                    ->where('employee.id', '=', $empId)
-                    ->where('task.amount_paid', '<', 'task.sub_total')
-                    ->where('task.amount_due', '>', 0)
-                    ->select('task.*', 'employee.first_name', 'employee.last_name')
-                    ->orderBy('task.created_at', 'DESC')
-                    ->get();
+                ->whereDate('task.created_at', '>=', $start)
+                ->whereDate('task.created_at', '<=', $end)
+                ->where('empoyee_id', '=', $empId)
+                ->join('employee', 'employee.id', '=', 'task.empoyee_id')
+                ->join('sales', 'task.id', '=', 'sales.task_id')
+                ->where('task.amount_due', '>', 0)
+                ->select(
+                    'task.id',
+                    'task.empoyee_id',
+                    'task.account_id',
+                    'task.returned',
+                    'task.demage_cost',
+                    'task.created_at',
+                    'task.task_number',
+                    'task.amount_paid',
+                    'task.amount_due',
+                    'task.sub_total',
+                    DB::raw('SUM(sales.bulk*sales.price + sales.retail*sales.retail_price) as expected_amount'),
+                    'employee.first_name',
+                    'employee.last_name'
+                )
+                ->groupBy(
+                    'task.id',
+                    'task.empoyee_id',
+                    'task.account_id',
+                    'task.returned',
+                    'task.demage_cost',
+                    'task.created_at',
+                    'task.task_number',
+                    'task.amount_paid',
+                    'task.amount_due',
+                    'task.sub_total',
+                    'employee.id',
+                    'employee.first_name',
+                    'employee.last_name'
+                ) // To aggregate results properly
+                // ->havingRaw('task.amount_paid < SUM(sales.bulk * sales.price + sales.retail * sales.retail_price)')
+                ->orderBy('task.created_at', 'DESC')
+                ->get();
             }
 
             // You have to create a link option to view account
             if (Auth::user()->role == "Superadministrator") {
                 return Datatables::of($task)
-                    ->addColumn('action', function ($task) {
-                        return '
-                        <div class="btn-group" style="width:100%">
-                           <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                               Action <span class="caret"></span>
-                           </button>
-                           <ul class="dropdown-menu">
-                               <li><a href="#" class="btn btn-warning btn-xs pays" style="color:white" id="' . $task->empoyee_id . '" test="' . $task->id . '"><i class="fa fa-money" style="color:white"></i> Receive Payment</a></li>
-                               <li><a href="#" id="' . $task->id . '" class="btn btn-warning btn-xs demageForm" ><i class="glyphicon glyphicon-plus" style="color:white"></i> Add Damaged</a></li>
-                               <li><a onclick="deleteData(' . $task->id . ')" id="' . $task->id . '" class="btn btn-danger btn-xs" style="color:white"><i class="glyphicon glyphicon-trash" style="color:white"></i> Delete</a></li>
-                               <li><a href="task_info/' . $task->id . '" class="btn btn-success btn-xs more_details" style="color:white"><i class="glyphicon glyphicon-eye-open" style="color:white"></i> More Details</a></li>
-                           </ul>
-                       </div>';
-                    })
-                    ->editColumn('demage_cost', function ($task) {
-                        return '<div class="text-warning">' . number_format($task->demage_cost, 2) . '</div>';
+                ->addColumn('action', function ($task) {
+                    return '
+                    <div class="dropdown" style="width:100%">
+                        <a href="#" class="dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                            <i class="fa fa-cog"></i> Actions <span class="caret"></span>
+                        </a>
+                        <ul class="dropdown-menu">
+                            <li><a href="#" class="pays" id="' . $task->empoyee_id . '" test="' . $task->id . '">
+                                <i class="fa fa-money"></i> Receive Payment
+                            </a></li>
+                            <li><a href="#" id="' . $task->id . '" class="demageForm">
+                                <i class="glyphicon glyphicon-plus"></i> Add Damaged
+                            </a></li>
+                            <li><a href="javascript:void(0)" onclick="deleteData(' . $task->id . ')" id="' . $task->id . '">
+                                <i class="glyphicon glyphicon-trash"></i> Delete
+                            </a></li>
+                            <li><a href="task_info/' . $task->id . '" class="more_details">
+                                <i class="glyphicon glyphicon-eye-open"></i> More Details
+                            </a></li>
+                        </ul>
+                    </div>';
+                })
+                
+                    ->editColumn('created_at', function ($task) {
+                        return '<div class="text-warning">' . $task->created_at . '</div>';
                     })
                     ->editColumn('amount_due', function ($task) {
                         return '<div class="text-danger">' . number_format((intval($task->sub_total) - intval($task->demage_cost)) - intval($task->amount_paid), 2) . '</div>';
@@ -426,9 +479,9 @@ class TaskController extends Controller
                     ->editColumn('amount_paid', function ($task) {
                         return '<div class="text-success">' . number_format($task->amount_paid, 2) . '</div>';
                     })
-                    ->editColumn('returned', function ($task) {
-                        return '<div class="text-primary">' . number_format($task->returned, 2) . '</div>';
-                    })
+                    // ->editColumn('returned', function ($task) {
+                    //     return '<div class="text-primary">' . number_format($task->returned, 2) . '</div>';
+                    // })
                     ->editColumn('sub_total', function ($task) {
                         return '<div class="text-primary">' . number_format($task->sub_total, 2) . '</div>';
                     })
@@ -439,19 +492,31 @@ class TaskController extends Controller
                 return Datatables::of($task)
                     ->addColumn('action', function ($task) {
                         return '
-                        <div class="btn-group" style="width:100%">
-                           <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                               Action <span class="caret"></span>
-                           </button>
-                           <ul class="dropdown-menu">
-                               <li><a href="#" class="btn btn-warning btn-xs pays" style="color:white" test="' . $task->id . '" id="' . $task->empoyee_id . '" ><i class="fa fa-money" style="color:white"></i> Receive Payment</a></li>
-                               <li><a href="#" id="' . $task->id . '" class="btn btn-warning btn-xs demageForm" ><i class="glyphicon glyphicon-plus" style="color:white"></i> Add Damaged</a></li>
-                               <li><a href="task_info/' . $task->id . '" class="btn btn-success btn-xs more_details" style="color:white" ><i class="glyphicon glyphicon-eye-open" style="color:white"></i> More Details</a></li>
-                           </ul>
-                       </div>';
+                       <div class="btn-group" style="width: 100%;">
+                        <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                            Action <span class="caret"></span>
+                        </button>
+                        <ul class="dropdown-menu">
+                            <li>
+                                <a href="#" class="btn btn-warning btn-xs pays" data-task-id="{{ task.id }}" data-employee-id="{{ task.employee_id }}">
+                                    <i class="fa fa-money"></i> Receive Payment
+                                </a>
+                            </li>
+                            <li>
+                                <a href="#" class="btn btn-warning btn-xs damageForm" data-task-id="{{ task.id }}">
+                                    <i class="glyphicon glyphicon-plus"></i> download form
+                                </a>
+                            </li>
+                            <li>
+                                <a href="task_info/{{ task.id }}" class="btn btn-success btn-xs more_details">
+                                    <i class="glyphicon glyphicon-eye-open"></i> More Details
+                                </a>
+                            </li>
+                        </ul>
+                        </div>';
                     })
-                    ->editColumn('demage_cost', function ($task) {
-                        return '<div class="text-warning">' . number_format($task->demage_cost, 2) . '</div>';
+                    ->editColumn('created_at', function ($task) {
+                        return '<div class="text-warning">' . number_format($task->created_at, 2) . '</div>';
                     })
                     ->editColumn('amount_due', function ($task) {
                         return '<div class="text-danger">' . number_format((intval($task->sub_total) - intval($task->demage_cost)) - intval($task->amount_paid), 2) . '</div>';
@@ -459,9 +524,9 @@ class TaskController extends Controller
                     ->editColumn('amount_paid', function ($task) {
                         return '<div class="text-success">' . number_format($task->amount_paid, 2) . '</div>';
                     })
-                    ->editColumn('returned', function ($task) {
-                        return '<div class="text-primary">' . number_format($task->returned, 2) . '</div>';
-                    })
+                    // ->editColumn('returned', function ($task) {
+                    //     return '<div class="text-primary">' . number_format($task->returned, 2) . '</div>';
+                    // })
                     ->editColumn('sub_total', function ($task) {
                         return '<div class="text-primary">' . number_format($task->sub_total, 2) . '</div>';
                     })
@@ -977,7 +1042,28 @@ class TaskController extends Controller
      */
     public function task_info($id)
     {
-        $data = DB::table('employee')
+        // Fetching task-related data
+        $taskData = $this->getTaskData($id);
+        $pay = $this->getPayData($id);
+        $returnTask = $this->getReturnTaskData($id);
+        $damageProducts = $this->getDamageProductData($id);
+        $employeeInfo = $this->getEmployeeInfo($id);
+
+        // Extracting employee-related details
+        $empId = $employeeInfo->id;
+        $empNumber = $employeeInfo->employee_number;
+        $created = $employeeInfo->created_at;
+
+        // Fetching previous and latest tasks
+        $previousTasks = $this->getPreviousTasks($empId, $created);
+        $latestTasks = $this->getLatestTasks($empId, $created);
+
+        return view('task.task_info', compact('taskData', 'previousTasks', 'pay', 'employeeInfo', 'returnTask', 'latestTasks', 'damageProducts', 'id'));
+    }
+
+    private function getTaskData($id)
+    {
+        return DB::table('employee')
             ->join('task', 'task.empoyee_id', '=', 'employee.id')
             ->join('sales', 'task.id', '=', 'sales.task_id')
             ->join('products', 'sales.product_id', '=', 'products.id')
@@ -985,20 +1071,21 @@ class TaskController extends Controller
                 'task.*',
                 'employee.first_name',
                 'employee.employee_number',
-                'sales.qty',
-                'sales.amt',
+                'sales.return_qty',
+                'sales.return_price',
+                'sales.return_amt',
                 'products.product_name',
                 'sales.price',
                 'products.stock',
-                'employee.last_name',
-                'sales.product_id',
-                'return_qty',
-                'return_price',
-                'return_amt'
+                'employee.last_name'
             )
             ->where('task.id', '=', $id)
             ->get();
-        $pay = DB::table('employee')
+    }
+
+    private function getPayData($id)
+    {
+        return DB::table('employee')
             ->join('task', 'task.empoyee_id', '=', 'employee.id')
             ->join('receive_sales', 'receive_sales.task_id', '=', 'task.id')
             ->select(
@@ -1009,7 +1096,11 @@ class TaskController extends Controller
             )
             ->where('task.id', '=', $id)
             ->get();
-        $return_task = DB::table('employee')
+    }
+
+    private function getReturnTaskData($id)
+    {
+        return DB::table('employee')
             ->join('task', 'task.empoyee_id', '=', 'employee.id')
             ->join('product_demage', 'task.id', '=', 'product_demage.task_id')
             ->join('products', 'products.id', '=', 'product_demage.product_id')
@@ -1023,7 +1114,11 @@ class TaskController extends Controller
             )
             ->where('product_demage.task_id', '=', $id)
             ->get();
-        $demage_product = DB::table('employee')
+    }
+
+    private function getDamageProductData($id)
+    {
+        return DB::table('employee')
             ->join('task', 'task.empoyee_id', '=', 'employee.id')
             ->join('sales', 'sales.task_id', '=', 'task.id')
             ->join('products', 'products.id', '=', 'sales.product_id')
@@ -1038,32 +1133,37 @@ class TaskController extends Controller
             )
             ->where('product_demage.task_id', '=', $id)
             ->get();
+    }
 
-        $empo = DB::table('employee')
+    private function getEmployeeInfo($id)
+    {
+        return DB::table('employee')
             ->join('task', 'task.empoyee_id', '=', 'employee.id')
             ->where('task.id', '=', $id)
             ->select('employee.id', 'task.created_at', 'employee.employee_number')
-            ->get();
-        $emp_id = $empo[0]->id;
-        $emp_number = $empo[0]->employee_number;
-        $created = $empo[0]->created_at;
+            ->first();
+    }
 
-        $previous_task = DB::table('employee')
-            ->where('employee.id', '=', $emp_id)
+    private function getPreviousTasks($empId, $created)
+    {
+        return DB::table('employee')
+            ->where('employee.id', '=', $empId)
             ->join('task', 'task.empoyee_id', '=', 'employee.id')
             ->whereDate('task.created_at', '<=', $created)
-            // ->whereDate('task.created_at','>',$created)
             ->orderBy('task.created_at', 'DESC')
             ->get();
+    }
 
-        $latest_task = DB::table('employee')
+    private function getLatestTasks($empId, $created)
+    {
+        return DB::table('employee')
             ->join('task', 'task.empoyee_id', '=', 'employee.id')
-            ->where('employee.id', '=', $emp_id)
+            ->where('employee.id', '=', $empId)
             ->whereDate('task.created_at', '>=', $created)
             ->orderBy('task.created_at', 'DESC')
             ->get();
-        return view('task.task_info', compact('data', 'previous_task', 'pay', 'empo', 'return_task', 'latest_task', 'demage_product', 'id'));
     }
+
 
     public function account_info($id)
     {

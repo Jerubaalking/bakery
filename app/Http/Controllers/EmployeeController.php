@@ -4,7 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Exports\ExportSuppliers;
 use App\Imports\SuppliersImport;
-use App\Supplier;
+use App\Employee;
 use Excel;
 use Illuminate\Http\Request;
 use PDF;
@@ -48,6 +48,8 @@ class EmployeeController extends Controller {
 			'last_name' => 'required',
 			'address' => 'required',
 			'phone' => 'required',
+			'account_id' => 'required',
+			'position_id' => 'required',
 		]);
 		$record= DB::table('employee')->orderBy('id', 'DESC')->first();
         if(!$record)
@@ -103,8 +105,9 @@ class EmployeeController extends Controller {
 	 */
 	public function edit($id) {
 		if(request()->ajax()){
-         
-            $data=DB::table('employee')->find($id);
+			info('imployee id -->'.$id);
+            $data=DB::table('employee')->where('id','=',$id)->first();
+			// info('imployee id -->'.$data);
            
             return response()->json(['data' => $data]);   
         }
@@ -119,7 +122,7 @@ class EmployeeController extends Controller {
 	 * @return \Illuminate\Http\Response
 	 */
 	public function update(Request $request, $id) {
-		
+		info('on update id --->'.$id);
           $formdata=([
 			'position_id' => $request->position_id,
 			'first_name' => $request->first_name,
@@ -153,18 +156,18 @@ class EmployeeController extends Controller {
 	}
 
 	public function apiEmployee() {
-		$employee =DB::table('department')
-		          ->join('position','department.id','=','position.department_id')
-				  ->join('employee','position.id','=','employee.position_id')
+		$employee =DB::table('employee')
+		          ->join('position','position.id','=','employee.position_id')
 				  ->join('account','account.id','=','employee.account_id')
-				  ->select('employee.*', 'account.account_name','account.id','position.position_name','department.department_name')
+				  ->select('employee.*','employee.id as employee_id', 'account.account_name','account.id','position.position_name')
 		          ->get();
+			info('employee -->>'.$employee);	  
 
 		return Datatables::of($employee)
-			->addColumn('action', function ($employee) {
+			->addColumn('action', function ($data) {
 				return '<a href="#" class="btn btn-info btn-xs"><i class="glyphicon glyphicon-eye-open"></i> Show</a> ' .
-				'<a onclick="editForm(' . $employee->id . ')" class="btn btn-primary btn-xs"><i class="glyphicon glyphicon-edit"></i> Edit</a> ' .
-				'<a onclick="deleteData(' . $employee->id . ')" class="btn btn-danger btn-xs"><i class="glyphicon glyphicon-trash"></i> Delete</a>';
+				'<a onclick="editForm(' . $data->employee_id . ')" class="btn btn-primary btn-xs"><i class="glyphicon glyphicon-edit"></i> Edit</a> ' .
+				'<a onclick="deleteData(' . $data->employee_id . ')" class="btn btn-danger btn-xs"><i class="glyphicon glyphicon-trash"></i> Delete</a>';
 			})
 			->rawColumns(['action'])->make(true);
 	}
@@ -186,7 +189,7 @@ class EmployeeController extends Controller {
 	}
 
 	public function exportSuppliersAll() {
-		$employee = Supplier::all();
+		$employee = Employee::all();
 		$pdf = PDF::loadView('suppliers.SuppliersAllPDF', compact('suppliers'));
 		return $pdf->download('suppliers.pdf');
 	}

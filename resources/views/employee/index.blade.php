@@ -165,7 +165,7 @@
         $('input[name=_method]').val('POST');
         $('#modal-employee').modal('show');
         $('#form-employee')[0].reset();
-        $('.modal-title').text('Add emploee');
+        $('.modal-title').text('Add employee');
     }
 
     function editForm(id) {
@@ -178,6 +178,7 @@
             type: "GET",
             dataType: "JSON",
             success: function(html) {
+                console.log('response data  ===>', html);
                 $('#modal-employee').modal('show');
                 $('.modal-title').text('Edit employee');
                 $('#position_id').val(html.data.position_id);
@@ -189,7 +190,8 @@
                 $('#phone').val(html.data.phone);
                 $('#account_id').val(html.data.account_id??"");
             },
-            error: function() {
+            error: function(e) {
+                console.log('error', e);
                 alert("Nothing Data");
             }
         });

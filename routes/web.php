@@ -28,6 +28,7 @@ use App\Http\Controllers\UserController;
 use App\Http\Controllers\CashFlow;
 use App\Http\Controllers\Expensive_Income;
 use App\Http\Controllers\AuditController;
+use App\Http\Controllers\DesignationController;
 use Illuminate\Support\Facades\Auth;
 
 /*
@@ -146,11 +147,11 @@ Route::resource('cash_advance',CashAdvance::class);
 Route::get('/apiCash', [CashAdvance::class,'apiCash']);
 
 //supplier root
-Route::resource('suppliers',SupplierController::class);
-Route::get('/apiSupplier', [SupplierController::class,'apiSupplier']);
-Route::get('/empo_info/{id}', [SupplierController::class,'empo_info']);
-Route::post('/supplier_report', [SupplierController::class,'supplier_report']);
-Route::get('/check/{id}', [SupplierController::class,'check']);
+Route::resource('designation',DesignationController::class);
+Route::get('/apiDesignation', [DesignationController::class,'apiDesignation']);
+Route::get('/empo_info/{id}', [DesignationController::class,'empo_info']);
+Route::post('/supplier_report', [DesignationController::class,'supplier_report']);
+Route::get('/check/{id}', [DesignationController::class,'check']);
 
 
 

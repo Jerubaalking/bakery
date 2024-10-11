@@ -1,7 +1,7 @@
 <div class="modal fade" id="modal-report" tabindex="1" role="dialog" aria-hidden="true" data-backdrop="static">
     <div class="modal-dialog modal-lg">
         <div class="modal-content">
-            <form  id="form-report" method="POST" action="supplier_report" class="form-horizontal" data-toggle="validator" enctype="multipart/form-data" >
+            <form  id="form-report" method="POST" action="designation_report" class="form-horizontal" data-toggle="validator" enctype="multipart/form-data" >
             {{ csrf_field() }} {{ method_field('POST') }}
                 <div class="modal-header">
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close">

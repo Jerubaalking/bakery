@@ -1,19 +1,4 @@
-{{--<!doctype html>--}}
-{{--<html lang="en">--}}
-{{--<head>--}}
-    {{--<meta charset="UTF-8">--}}
-    {{--<meta name="viewport"--}}
-          {{--content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">--}}
-    {{--<meta http-equiv="X-UA-Compatible" content="ie=edge">--}}
-    {{--<link rel="stylesheet" href="asset('css1.css')}}">--}}
-    {{--<!-- Font Awesome -->--}}
-   
-     <!-- Vendor CSS-->
-    {{--<link rel="stylesheet" href="{{ asset('assets/bower_components/font-awesome/css/font-awesome.min.css')}} ">--}}
-    {{--<!-- Ionicons -->--}}
-    {{--<link rel="stylesheet" href="{{ asset('assets/bower_components/Ionicons/css/ionicons.min.css')}} ">--}}
 
-    {{--<title>rizone||application form</title>--}}
     <style type="text/css" media="screen">
             html {
                 font-family: sans-serif;
@@ -135,8 +120,6 @@
                 z-index:  -1000;
             }
         </style>
-{{--</head>--}}
-{{--<body>--}}
                 <div class="section__content section__content--p30">
                     <div class="container-fluid">
                     <div id="watermark">
@@ -252,12 +235,4 @@
                                 </div>
         </div>
         </div>
-                    {{--<!-- jQuery 3 -->--}}
-    {{--<script src="{{  asset('assets/bower_components/jquery/dist/jquery.min.js') }} "></script>--}}
-    {{--<!-- Bootstrap 3.3.7 -->--}}
-    {{--<script src="{{  asset('assets/bower_components/bootstrap/dist/js/bootstrap.min.js') }} "></script>--}}
-    {{--<!-- AdminLTE App -->--}}
-    {{--<script src="{{  asset('assets/dist/js/adminlte.min.js') }}"></script>--}}
-{{--</body>--}}
-{{--</html>--}}
                       

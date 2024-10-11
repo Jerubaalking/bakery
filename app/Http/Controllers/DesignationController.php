@@ -8,7 +8,7 @@ use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
 use PDF;
 
-class SupplierController extends Controller
+class DesignationController extends Controller
 {
     /**
      * Display a listing of the resource.
@@ -18,7 +18,7 @@ class SupplierController extends Controller
     public function index()
     {
         //
-        return view('supplier.index');
+        return view('designation.index');
     }
 
     /**
@@ -87,7 +87,7 @@ class SupplierController extends Controller
         //
     }
     
-	public function apiSupplier() {
+	public function apiDesignation() {
 		$employee = DB::table('position')
                    ->join('employee','employee.position_id','=','position.id')
  
@@ -133,11 +133,11 @@ class SupplierController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function supplier_report(Request $request){
+    public function designation_report(Request $request){
            
         $from=$request->from;
         $to=$request->to;
-        $supplier=DB::table('employee')
+        $designation=DB::table('employee')
         ->join('task','task.empoyee_id','=','employee.id')
         ->whereBetween('task.created_at',array($request->from,$request->to))
         ->select('task.created_at','task.task_number','employee.employee_number'
@@ -175,9 +175,9 @@ class SupplierController extends Controller
 
 
 
-        $pdf = PDF::loadView('supplier.report',compact('count','supplier','from','to',
+        $pdf = PDF::loadView('designation.report',compact('count','designation','from','to',
            'sum_return','sum_due','sum_recive','sum_sub'));
-        return $pdf->stream('supplier.pdf');
+        return $pdf->stream('designation.pdf');
 
     }
        /**

@@ -15,7 +15,7 @@
     <div class="box">
 
         <div class="box-header">
-        <h3 class="title-5 m-b-35">Suppliers Details</h3>
+        <h3 class="title-5 m-b-35">Sales & HR Management Details</h3>
         </div>
 
         

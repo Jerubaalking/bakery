@@ -22,8 +22,9 @@ class EmployeeController extends Controller {
 	 * @return \Illuminate\Http\Response
 	 */
 	public function index() {
-		$position =DB::table('position')->get();
-		return view('employee.index',compact('position'));
+		$positions =DB::table('position')->get();
+		$accounts =DB::table('account')->get();
+		return view('employee.index',compact('positions', 'accounts'));
 	}
 
 	/**
@@ -65,6 +66,7 @@ class EmployeeController extends Controller {
      
        }
           $formdata=([
+			'account_id' => $request->account_id,
 			'position_id' => $request->position_id,
 			'first_name' => $request->first_name,
             'last_name' => $request->last_name,
@@ -124,6 +126,7 @@ class EmployeeController extends Controller {
             'last_name' => $request->last_name,
             'address' => $request->address,
             'phone' => $request->phone,
+			'account_id' => $request->account_id,
 		  ]);
        DB::table('employee')->where('id','=',$id)->update($formdata);
 		return response()->json([
@@ -153,7 +156,8 @@ class EmployeeController extends Controller {
 		$employee =DB::table('department')
 		          ->join('position','department.id','=','position.department_id')
 				  ->join('employee','position.id','=','employee.position_id')
-				  ->select('employee.*','position.position_name','department.department_name')
+				  ->join('account','account.id','=','employee.account_id')
+				  ->select('employee.*', 'account.account_name','account.id','position.position_name','department.department_name')
 		          ->get();
 
 		return Datatables::of($employee)

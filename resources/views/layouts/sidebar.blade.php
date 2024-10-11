@@ -117,8 +117,7 @@
                 </li> -->
 
                 <li class="active"><a class="js-arrow"  href="{{ url('/suppliers') }}"><i class="fa fa-truck"></i>
-                        <span>Suppliers</span></a></li>
-
+                        <span>Place of work</span></a></li>
                 <li class="active"><a href="{{ url('/task') }}"><i class="fa fa-list"></i> <span>Sales Accounts</span></a></li>
                 <li class="active"><a href="{{ url('/payment_history') }}"><i class="fa fa-history"></i> <span>Sales
                             Payment hist</span></a></li>
@@ -204,13 +203,40 @@
                     </ul>
                 </li>
 
-                <!-- <li class="active">
-                    <a href="/productsOut ">
-                        <i class="fa fa-minus"></i>Product Out</a>
-                </li> -->
+                
+                <li class="active has-sub">
+                    <a class="js-arrow" href="#">
+                        <i class="fa fa-bank"></i>Production</a>
+                    <ul class="list-unstyled navbar__sub-list js-sub-list">
+                        <li class="active">
+                            <a href="/measurements">
+                                <i class="fas fa-table"></i>Measurements</a>
+                        </li>
+                        <li class="active">
+
+                            <a href="/materials">
+                                <i class="fas fa-history"></i>Material</a>
+                        </li>
+                        <li class="active">
+
+                            <a href="/materialCategories">
+                                <i class="fas fa-history"></i>Material Categories</a>
+                        </li>
+                        <li class="active">
+
+                            <a href="/intoStore">
+                                <i class="fas fa-history"></i>Store</a>
+                        </li>
+                        <li class="active">
+
+                            <a href="/productionSessions">
+                                <i class="fas fa-history"></i>Production Sessions</a>
+                        </li>
+                    </ul>
+                </li>
 
                 <li class="active"><a href="{{ url('/suppliers') }}"><i class="fa fa-truck"></i>
-                        <span>Suppliers</span></a></li>
+                        <span>Place of work</span></a></li>
 
                 <li class="active"><a href="{{ url('/task') }}"><i class="fa fa-list"></i> <span>Sales Accounts</span></a></li>
                 <li class="active"><a href="{{ url('/payment_history') }}"><i class="fa fa-history"></i> <span>Sales

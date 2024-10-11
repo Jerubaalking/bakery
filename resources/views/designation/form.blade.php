@@ -6,7 +6,7 @@
                 <div class="modal-header">
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                         <span aria-hidden="true">&times;</span></button>
-                    <h3 class="modal-title">Add Account</h3>
+                    <h3 class="modal-title">Add Designation</h3>
                 </div>
                 <div class="modal-body">
                     <div class="box-body">
@@ -14,7 +14,7 @@
                         <div class="row">
                             <div class="col-md-12">
                                 <div class="form-group">
-                                    <label>Account Name</label>
+                                    <label>Name</label>
                                     <input type="text" class="form-control" id="account_name" name="account_name" autofocus required>
                                     <span class="help-block with-errors"></span>
                                 </div>
@@ -41,21 +41,12 @@
                         <div class="form-group">
                             <label>Department</label>
                             <select class="form-control" id="department_id" name="department_id">
-                                <option disabled>--select department--</position>
+                                <option  value="" selected disabled>--select department--</position>
                                     @foreach($departments as $p)
                                 <option value="{{$p->id}}">{{$p->department_name}}</position>
                                     @endforeach
                             </select>
                         </div> 
-                        <div class="form-group">
-                            <label>Employee</label>
-                            <select class="form-control" id="employee_id" name="employee_id">
-                                <option disabled>--select employee--</position>
-                                    @foreach($employees as $p)
-                                <option value="{{$p->id}}">{{$p->first_name}} {{$p->last_name}}</position>
-                                    @endforeach
-                            </select>
-                        </div>
 
                         <div class="modal-footer">
                             <button type="button" class="btn btn-default pull-left" data-dismiss="modal">Cancel</button>

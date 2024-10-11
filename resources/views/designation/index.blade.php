@@ -43,11 +43,11 @@
                 <thead>
                 <tr>
                     
-                    <th>Position Name</th>
+                    <th>Designation</th>
                   
-                    <th>First Name</th>
-                    <th>Last Name</th>
-                    <th>Supplier Number</th>
+                    <th>Account group</th>
+                    <th>Status</th>
+                    <th>Balance</th>
                     <th>Action</th>
                   
                 </tr>
@@ -118,16 +118,16 @@
                                 name: 'account_name'
                             },
                             {
-                                data: 'first_name',
-                                name: 'first_name'
+                                data: 'account_group',
+                                name: 'account_group'
                             },
                             {
-                                data: 'last_name',
-                                name: 'last_name'
+                                data: 'status',
+                                name: 'status'
                             },
                             {
-                                data: 'employee_number',
-                                name: 'employee_number'
+                                data: 'account_balance',
+                                name: 'account_balance'
                             },
                             {
                                 data: 'action',
@@ -247,6 +247,39 @@
                         $('#modal-account').modal('show');
                         $('#form-account')[0].reset();
                         $('.modal-title').text('Add Account');
+                    }
+
+                    function editForm(id) {
+
+
+                        $('#form-account')[0].reset();
+                        save_method = 'edit';
+                        $('input[name=_method]').val('PATCH');
+
+                        var tr = $(this).parent().parent();
+
+                        count_charge = '';
+                        $.ajax({
+                            url: "{{ url('/designation') }}" + '/' + id + "/edit",
+                            type: "GET",
+                            dataType: "JSON",
+                            success: function(html) {
+                                $('#modal-account').modal('show');
+                                $('.modal-title').text(' Edit Designation');
+                                $('#id').val(html.data[0].id);
+                                $('#account_id').val(html.data[0].account_id);
+
+                                $('#account_group').val(html.data[0].account_group);
+                                $('#status').val(html.data[0].status);
+                                $('#department_id').val(html.data[0].department_id);
+
+                            },
+                            error: function(e) {
+                                console.log(e);
+                                // alert("Nothing Data");
+                            }
+                        });
+
                     }
                     $(function() {
                         $('#modal-account form').validator().on('submit', function(e) {

@@ -24,8 +24,7 @@ class DesignationController extends Controller
         //
         $accounts = DB::table('account')->get();
         $departments = DB::table('department')->get();
-        $employees = DB::table('employee')->get();
-        return view('designation.index', compact('accounts', 'departments', 'employees'));
+        return view('designation.index', compact('accounts', 'departments'));
     }
 
     /**
@@ -47,7 +46,7 @@ class DesignationController extends Controller
     public function store(Request $request)
     {
         //
-        
+
     }
 
     /**
@@ -69,7 +68,13 @@ class DesignationController extends Controller
      */
     public function edit($id)
     {
-        //
+        if(request()->ajax()){
+            $currentAccount = DB::table('account')
+            ->where('id', $id)
+            ->first();
+
+            return response()->json(['data'=>$currentAccount]);
+        }
     }
 
     /**
@@ -97,16 +102,36 @@ class DesignationController extends Controller
 
     public function apiDesignation()
     {
-        $employee = DB::table('account')
+        $account = DB::table('account')
             ->join('employee', 'employee.account_id', '=', 'account.id')
-            ->join('position', 'employee.position_id', '=', 'position.id')
-            ->select('account.id','account.account_name','employee.*', 'employee.id as employee_id')
+            ->select('account.*', 'employee.id as employee_id')
             ->get();
 
-        return Datatables::of($employee)
-            ->addColumn('action', function ($employee) {
-                return
-                    '<!--<a onclick="exportReport(' . $employee->employee_id . ')" class="btn btn-primary btn-xs"><i class="fa fa-file"></i>Report</a> -->';
+        return Datatables::of($account)
+            ->addColumn('action', function ($account) {
+                return '
+           <div class="btn-group" style="width: 100%;">
+            <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                Action <span class="caret"></span>
+            </button>
+            <ul class="dropdown-menu">
+                <li>
+                    <a href="#" class="btn btn-default btn-xs edit" onclick="editForm()" data-account-id="{{ account.id }}" data-employee-id="{{ account.employee_id }}">
+                        <i class="fa fa-edit text-info"></i> Edit 
+                    </a>
+                </li>
+                <li>
+                    <a href="#" class="btn btn-default btn-xs damageForm" data-account-id="{{ account.id }}">
+                        <i class="glyphicon glyphicon-trash text-danger"></i> delete
+                    </a>
+                </li>
+                <li>
+                    <a href="account_info/{{ account.id }}" class="btn btn-default btn-xs more_details">
+                        <i class="fa fa-file-pdf text-success font-medium"></i> Report
+                    </a>
+                </li>
+            </ul>
+            </div>';
             })
             ->rawColumns(['action'])->make(true);
     }
@@ -120,7 +145,7 @@ class DesignationController extends Controller
     public function empo_info($id)
     {
         //
-        info('empo_info is run account id --->>'.$id);
+        info('empo_info is run account id --->>' . $id);
         if (request()->ajax()) {
             $data = DB::table('employee')
                 ->where('employee.account_id', '=', $id)

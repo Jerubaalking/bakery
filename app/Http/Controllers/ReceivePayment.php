@@ -60,7 +60,7 @@ class ReceivePayment extends Controller
             'task_id' => $request->task_id_receive,
             'employee_id' => $request->employee_id,
             'account_id' => $taskss->account_id,
-            'amount' => $request->amount,
+            'amount' => $taskss->amount_paid,
             'payment_methode' => $request->payment_methode,
             'created_at' => $request->payment_date,
             'updated_at' => Carbon::now()->format('Y-m-d H:m:s')

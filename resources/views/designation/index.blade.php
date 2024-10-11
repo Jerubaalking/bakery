@@ -15,19 +15,27 @@
 <div class="box">
 
     <div class="box-header">
-        <h3 class="title-5 m-b-35">Sales & HR Management Details</h3>
+        <h3 class="title-5 m-b-35">Designation & Account Management</h3>
     </div>
     <!-- /.box-header -->
     <div class="box-body">
-        <div class="row">
-            <div class="form-group col-md-6">
+        <div class="">
+            <!-- <div class="form-group col-md-6">
                 <label><i class="fa fa-filter"></i> Filter designation</label>
-                <select class="form-control" id="account" name="account">
+                <select class="form-control" id="account_id" name="account_id">
                     <option disabled>--select designation--</option>
                     <option value="All">All</option>
-                    <span class="help-block with-errors"></span>
+                    @foreach($accounts as $p)
+                    <option value="{{$p->id}}">{{$p->account_name}}</position>
+                        @endforeach
+                        <span class="help-block with-errors"></span>
                 </select>
 
+            </div> -->
+            <div class="table-data__tool-right">
+
+                <a onclick="addForm()" class="au-btn au-btn-icon au-btn--green au-btn--small">
+                    <i class="zmdi zmdi-plus"></i>Add</a>
             </div>
         </div>
         <div class="table-responsive table-striped  table-responsive">
@@ -56,6 +64,7 @@
 @endsection
 
 @section('bot')
+@include('designation.form')
 @include('designation.report_form');
 <script src=" {{ asset('assets/bower_components/datatables.net/js/jquery.dataTables.min.js') }} "></script>
     <script src=" {{ asset('assets/bower_components/datatables.net-bs/js/dataTables.bootstrap.min.js') }} "></script>
@@ -102,11 +111,11 @@
                         buttons: [
                             'excel', 'pdf', 'print'
                         ],
-                        "lengthMenu": [10.20, 30, 50, 100, 500, 1000, 2000, 5000, 10000, 50000, 100000],
+                        "lengthMenu": [10, 20, 50, 100, 500],
                         ajax: "{{ url('/apiDesignation') }}",
                         columns: [{
-                                data: 'position_name',
-                                name: 'position_name'
+                                data: 'account_name',
+                                name: 'account_name'
                             },
                             {
                                 data: 'first_name',
@@ -129,13 +138,6 @@
                         ]
                     });
 
-                    function addForm() {
-                        save_method = "add";
-                        $('input[name=_method]').val('POST');
-                        $('#modal-form').modal('show');
-                        $('#modal-form form')[0].reset();
-                        $('.modal-title').text('Add Cash Advance');
-                    }
 
                     function exportReport(id) {
                         $('#form-report')[0].reset();
@@ -226,6 +228,59 @@
                                         })
                                     },
                                     error: function(data) {
+                                        swal({
+                                            title: 'Oops...',
+                                            text: data.message,
+                                            type: 'error',
+                                            timer: '1500'
+                                        })
+                                    }
+                                });
+                                return false;
+                            }
+                        });
+                    });
+
+                    function addForm() {
+                        var save_method = "add";
+                        $('input[name=_method]').val('POST');
+                        $('#modal-account').modal('show');
+                        $('#form-account')[0].reset();
+                        $('.modal-title').text('Add Account');
+                    }
+                    $(function() {
+                        $('#modal-account form').validator().on('submit', function(e) {
+                            if (!e.isDefaultPrevented()) {
+                                var id = $('#id').val();
+                                if (save_method == 'add') url = "{{ url('designation') }}";
+                                else url = "{{ url('designation') . '/' }}" + id;
+
+                                $.ajax({
+                                    url: url,
+                                    type: "POST",
+                                    //hanya untuk input data tanpa dokumen
+                                    //                      data : $('#modal-form form').serialize(),
+                                    data: new FormData($("#modal-form form")[0]),
+                                    contentType: false,
+                                    processData: false,
+                                    beforeSend: function() {
+                                        $(".subBtn").attr("disabled", true);
+                                    },
+                                    success: function(data) {
+                                        $('#modal-form').modal('hide');
+                                        table.ajax.reload();
+                                        $(".subBtn").attr("disabled", false);
+                                        $('.subBtn').html("Please wait...");
+                                        swal({
+                                            title: 'Success!',
+                                            text: data.message,
+                                            type: 'success',
+                                            timer: '1500'
+                                        })
+                                    },
+                                    error: function(data) {
+                                        $(".subBtn").attr("disabled", false);
+                                        $('.subBtn').html("submit");
                                         swal({
                                             title: 'Oops...',
                                             text: data.message,

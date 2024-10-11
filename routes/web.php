@@ -75,8 +75,8 @@ Route::resource('/user',UserController::class);
 Route::get('/apiUser', [UserController::class,'apiUsers']);
 
 // will be here
-route::resource('/Account',AccountController::class);
-route::get('/AccountApi', [AccountController::class,'AccountApi']);
+route::resource('/account',AccountController::class);
+route::get('/accountApi', [AccountController::class,'AccountApi']);
 route::post('/activateData/{id}',[AccountController::class,'activateData']);
 // expensive will be here
 route::resource('/Expensive',ExpensiveController::class);

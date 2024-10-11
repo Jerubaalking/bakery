@@ -116,7 +116,7 @@
                         <i class="fa fa-minus"></i>Product Out</a>
                 </li> -->
 
-                <li class="active"><a class="js-arrow"  href="{{ url('/suppliers') }}"><i class="fa fa-truck"></i>
+                <li class="active"><a class="js-arrow"  href="{{ url('/designation') }}"><i class="fa fa-truck"></i>
                         <span>Place of work</span></a></li>
                 <li class="active"><a href="{{ url('/task') }}"><i class="fa fa-list"></i> <span>Sales Accounts</span></a></li>
                 <li class="active"><a href="{{ url('/payment_history') }}"><i class="fa fa-history"></i> <span>Sales
@@ -235,7 +235,7 @@
                     </ul>
                 </li>
 
-                <li class="active"><a href="{{ url('/suppliers') }}"><i class="fa fa-truck"></i>
+                <li class="active"><a href="{{ url('/designation') }}"><i class="fa fa-truck"></i>
                         <span>Place of work</span></a></li>
 
                 <li class="active"><a href="{{ url('/task') }}"><i class="fa fa-list"></i> <span>Sales Accounts</span></a></li>

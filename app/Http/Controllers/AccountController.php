@@ -44,8 +44,10 @@ class AccountController extends Controller
         //
         $this->validate($request, [
             'account_name' => 'required',
-            // 'account_group' => 'required',
-            // 'staff_type' => 'required',
+            'account_group' => 'required',
+            'employee_id' => 'required',
+            'department_id' => 'required',
+            'status' => 'required',
         ]);
 
             $created_at= Carbon::now();
@@ -53,9 +55,10 @@ class AccountController extends Controller
             $form_data = array(
                 'account_name'=>$request->account_name,
                  'account_group'=>$request->account_group,
-                'account_balance' =>$account_balance,
-                'created_at'=>$request->open_date,
-                'status'=>'active',
+                'account_balance' =>0,
+                'department_id' =>$request->department_id,
+                'created_at'=>Carbon::now(),
+                'status'=>$request->status,
           
             );
         DB::table('account')->insert($form_data);

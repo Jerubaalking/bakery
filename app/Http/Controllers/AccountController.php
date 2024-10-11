@@ -42,6 +42,7 @@ class AccountController extends Controller
     public function store(Request $request)
     {
         //
+        info('am here at storing task --->');
         $this->validate($request, [
             'account_name' => 'required',
             'account_group' => 'required',

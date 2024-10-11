@@ -40,7 +40,7 @@ class TaskController extends Controller
         $account = DB::table('account')
             ->where('account_group', '=', 'shops')
             ->get();
-        $employees = DB::table('employee')->select('employee.*')->get();
+        $employees = DB::table('employee')->get();
         $close_task = DB::table('employee')
             ->join('task', 'task.empoyee_id', '=', 'employee.id')
             ->select('task.*', 'employee.first_name', 'employee.employee_number')
@@ -91,15 +91,16 @@ class TaskController extends Controller
         $return_amt = 0;
 
         // Fetch supplier and employee details
-        $supplier = DB::table('account')->where('id', '=', $request->supplier_id)->first();
-        $employee_number = json_decode(str_replace("'", '"', $supplier->employee_numbers))[0];
-        // info($employee_number);
-        $employee = DB::table('employee')->where('employee_number', '=', $employee_number)->first();
+        $supplier = DB::table('account')
+        ->where('id', '=', $request->supplier_id)
+        ->join('employee', 'employee.account_id', 'account.id')
+        ->select('account.*', 'employee.employee_number as employee_number', 'employee.id as employee_id')
+        ->first();
 
         // info(json_encode($employee));
         // Check for existing task
         $recordDate = DB::table('task')
-            ->where('empoyee_id', '=', $employee->id)
+            ->where('empoyee_id', '=', $supplier->employee_id)
             ->where('account_id', '=', $account_id)
             ->where('created_at', '=', $date_in)
             ->orderBy('id', 'DESC')
@@ -153,7 +154,7 @@ class TaskController extends Controller
 
                 $get_id = $recordDate->id;
             }
-            info('get_id ===>'.$return_qty);
+            info('get_id ===>' . $return_qty);
             $currentSales = DB::table('sales')->where('sales.task_id', '=', $recordDate);
             // Inserting sales entries
             if ($qty) {
@@ -166,8 +167,8 @@ class TaskController extends Controller
                         'qty'  => $qty[$i],
                         'price'  => round($price[$i], 2),
                         'retail_price'  => round($retail_price[$i], 2),
-                        'bulk'=>$qty[$i],
-                        'retail'=>0,
+                        'bulk' => $qty[$i],
+                        'retail' => 0,
                         'amt' => round($price[$i] * $qty[$i], 2),
                         'retail_amt' => 0,
                         'return_qty'  => 0,
@@ -407,52 +408,52 @@ class TaskController extends Controller
                     ->get();
             } else {
                 $task = DB::table('task')
-                ->whereDate('task.created_at', '>=', $start)
-                ->whereDate('task.created_at', '<=', $end)
-                ->where('empoyee_id', '=', $empId)
-                ->join('employee', 'employee.id', '=', 'task.empoyee_id')
-                ->join('sales', 'task.id', '=', 'sales.task_id')
-                ->where('task.amount_due', '>', 0)
-                ->select(
-                    'task.id',
-                    'task.empoyee_id',
-                    'task.account_id',
-                    'task.returned',
-                    'task.demage_cost',
-                    'task.created_at',
-                    'task.task_number',
-                    'task.amount_paid',
-                    'task.amount_due',
-                    'task.sub_total',
-                    DB::raw('SUM(sales.bulk*sales.price + sales.retail*sales.retail_price) as expected_amount'),
-                    'employee.first_name',
-                    'employee.last_name'
-                )
-                ->groupBy(
-                    'task.id',
-                    'task.empoyee_id',
-                    'task.account_id',
-                    'task.returned',
-                    'task.demage_cost',
-                    'task.created_at',
-                    'task.task_number',
-                    'task.amount_paid',
-                    'task.amount_due',
-                    'task.sub_total',
-                    'employee.id',
-                    'employee.first_name',
-                    'employee.last_name'
-                ) // To aggregate results properly
-                // ->havingRaw('task.amount_paid < SUM(sales.bulk * sales.price + sales.retail * sales.retail_price)')
-                ->orderBy('task.created_at', 'DESC')
-                ->get();
+                    ->whereDate('task.created_at', '>=', $start)
+                    ->whereDate('task.created_at', '<=', $end)
+                    ->where('empoyee_id', '=', $empId)
+                    ->join('employee', 'employee.id', '=', 'task.empoyee_id')
+                    ->join('sales', 'task.id', '=', 'sales.task_id')
+                    ->where('task.amount_due', '>', 0)
+                    ->select(
+                        'task.id',
+                        'task.empoyee_id',
+                        'task.account_id',
+                        'task.returned',
+                        'task.demage_cost',
+                        'task.created_at',
+                        'task.task_number',
+                        'task.amount_paid',
+                        'task.amount_due',
+                        'task.sub_total',
+                        DB::raw('SUM(sales.bulk*sales.price + sales.retail*sales.retail_price) as expected_amount'),
+                        'employee.first_name',
+                        'employee.last_name'
+                    )
+                    ->groupBy(
+                        'task.id',
+                        'task.empoyee_id',
+                        'task.account_id',
+                        'task.returned',
+                        'task.demage_cost',
+                        'task.created_at',
+                        'task.task_number',
+                        'task.amount_paid',
+                        'task.amount_due',
+                        'task.sub_total',
+                        'employee.id',
+                        'employee.first_name',
+                        'employee.last_name'
+                    ) // To aggregate results properly
+                    // ->havingRaw('task.amount_paid < SUM(sales.bulk * sales.price + sales.retail * sales.retail_price)')
+                    ->orderBy('task.created_at', 'DESC')
+                    ->get();
             }
 
             // You have to create a link option to view account
             if (Auth::user()->role == "Superadministrator") {
                 return Datatables::of($task)
-                ->addColumn('action', function ($task) {
-                    return '
+                    ->addColumn('action', function ($task) {
+                        return '
                     <div class="dropdown" style="width:100%">
                         <a href="#" class="dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                             <i class="fa fa-cog"></i> Actions <span class="caret"></span>
@@ -472,7 +473,7 @@ class TaskController extends Controller
                             </a></li>
                         </ul>
                     </div>';
-                })
+                    })
                     ->editColumn('created_at', function ($task) {
                         return '<div class="text-warning">' . $task->created_at . '</div>';
                     })

@@ -10,6 +10,10 @@ use PDF;
 
 class DesignationController extends Controller
 {
+    public function __construct()
+    {
+        $this->middleware('auth');
+    }
     /**
      * Display a listing of the resource.
      *
@@ -43,6 +47,7 @@ class DesignationController extends Controller
     public function store(Request $request)
     {
         //
+        
     }
 
     /**
@@ -115,9 +120,10 @@ class DesignationController extends Controller
     public function empo_info($id)
     {
         //
+        info('empo_info is run account id --->>'.$id);
         if (request()->ajax()) {
             $data = DB::table('employee')
-                ->where('id', '=', $id)
+                ->where('employee.account_id', '=', $id)
                 ->get();
             if ($data) {
                 return response()->json(['data' => $data]);

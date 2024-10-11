@@ -91,7 +91,7 @@
                                 <div class='col-md-6'>
                                     <label>Account</label>
                                     <select id="supplier_id" name="supplier_id" class="form-control supplier_id_demage">
-                                        <option disabled id="ophide">--select Account--</option>
+                                        <option select value="" disabled id="ophide">--select Account--</option>
                                         @foreach($account as $x)
                                         <option value="{{$x->id}}">{{$x->account_name}}</option>
                                         @endforeach

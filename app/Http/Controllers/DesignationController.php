@@ -46,6 +46,8 @@ class DesignationController extends Controller
     public function store(Request $request)
     {
         //
+        $newAccount = $request->all();
+        info('new account designation store -->'.$newAccount);
 
     }
 
@@ -87,6 +89,7 @@ class DesignationController extends Controller
     public function update(Request $request, $id)
     {
         //
+        $updatedAccount = $request->all();
     }
 
     /**

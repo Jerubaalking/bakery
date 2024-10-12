@@ -264,14 +264,15 @@
                             type: "GET",
                             dataType: "JSON",
                             success: function(html) {
+                                console.log("response --->>", html.data)
                                 $('#modal-account').modal('show');
                                 $('.modal-title').text(' Edit Designation');
-                                $('#id').val(html.data[0].id);
-                                $('#account_id').val(html.data[0].account_id);
+                                $('#id').val(html.data.id);
+                                $('#account_id').val(html.data.account_id);
 
-                                $('#account_group').val(html.data[0].account_group);
-                                $('#status').val(html.data[0].status);
-                                $('#department_id').val(html.data[0].department_id);
+                                $('#account_group').val(html.data.account_group);
+                                $('#status').val(html.data.status);
+                                $('#department_id').val(html.data.department_id);
 
                             },
                             error: function(e) {

@@ -92,10 +92,10 @@ class TaskController extends Controller
 
         // Fetch supplier and employee details
         $supplier = DB::table('account')
-        ->where('id', '=', $request->supplier_id)
-        ->join('employee', 'employee.account_id', 'account.id')
-        ->select('account.*', 'employee.employee_number as employee_number', 'employee.id as employee_id')
-        ->first();
+    ->where('account.id', '=', $request->supplier_id) // Specify the table for the 'id' column
+    ->join('employee', 'employee.account_id', 'account.id')
+    ->select('account.*', 'employee.employee_number as employee_number', 'employee.id as employee_id')
+    ->first();
 
         // info(json_encode($employee));
         // Check for existing task
@@ -128,7 +128,7 @@ class TaskController extends Controller
                 // Create the new task with the generated task number
                 $form_data = [
                     'sub_total' => round($subtotal, 2),
-                    'empoyee_id' => $employee->id, // Assuming you meant 'employee_id' (correct typo from 'empoyee_id')
+                    'empoyee_id' => $supplier->employee_id, // Assuming you meant 'employee_id' (correct typo from 'empoyee_id')
                     'account_id' => $supplier->id,
                     'created_at' => $date,
                     'amount_paid' => 0,

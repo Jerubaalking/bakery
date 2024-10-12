@@ -121,7 +121,7 @@ class ReceivePayment extends Controller
     {
         if ($request->ajax()) {
             info('incoming form ===>>', $request->all());
-    
+            
             // Retrieve the task based on the task ID
             $task = DB::table('task')->where('id', $request->task_id_receive)->first();
             if (!$task) {
@@ -139,9 +139,9 @@ class ReceivePayment extends Controller
                 'task_id' => $request->task_id_receive,
                 'account_id' => $request->account_id,
                 'employee_id' => $request->employee_id,
-                'amount' => $task->amount_paid,
+                'amount' => $request->received_total,
                 'payment_methode' => $request->payment_methode,
-                'created_at' => $request->payment_date,
+                'created_at' => Carbon::now(),
                 'updated_at' => Carbon::now(),
             ];
     

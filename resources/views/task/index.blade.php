@@ -1508,7 +1508,7 @@
 
         // Function to calculate the sum of all amt[] fields
         function calculateExpectedTotal(data) {
-            let total = 0;
+            let totalAmount = 0;
             $('input[name="amt[]"]').each(function() {
                 total += parseFloat($(this).val()) || 0; // Accumulate the value
             });

@@ -19,17 +19,22 @@
                                 <small class="receive_employee_number" style="float:inline-start">Date:</small><br>
                                 <small class="receive_date" style="float:inline-start">Latest payment:</small>
                             </div>
-                            <div class='col-md-6 offset-md-3 flex' style="display: inline-block;">
+                            <div class='col-md-6 offset-md-3' style="display: inline-block;">
                                 <div class="" style="float:inline-end">
-                                    <small class="">* Select Payment Method </small>
+                                    <small class="text-danger">* Select Payment Method </small>
                                     <select name="payment_methode" id="payment_methode" class="form-control">
                                         <option value="" selected disabled>Select payment method</option>
                                         <option value="cash">Cash</option>
                                         <option value="mobile">Mobile</option>
                                         <option value="bank">Bank</option>
                                     </select>
-                                </div><br>
-                                <small class="receive_date" style="float:inline-end">Latest payment:</small>
+                                </div>
+                            </div>
+                            <div>
+                                <div class="mr-3" style="float:inline-end; margin-right:24px;">
+                                    <small class="text-danger">* Pay date </small>
+                                    <input type="date" name="pay_date" id="pay_date" value="" class="form-control" />
+                                </div>
                             </div>
                         </div>
                         <hr class="col-md-12">
@@ -48,7 +53,7 @@
                                 <strong for="paid_total" class="flex">Paid Total</strong>
                                 <div class="">
                                     <input min="0" style="font-family: monospace;" value="0" style="color:brown;" onchange="" name="paid_total" class="form-control"
-                                    id="paid_total" readonly />
+                                        id="paid_total" readonly />
                                 </div>
                             </div>
                             <div class="col-md-4">

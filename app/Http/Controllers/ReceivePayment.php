@@ -157,79 +157,16 @@ class ReceivePayment extends Controller
             $amount_due = $total_amt - $total_received;
     
             // Calculate the remainder of the received payment
-            $amount_paid = $request->received_total;
-            $remainder = $amount_paid - $amount_due;
     
             // Update the task's sub_total and amount_due
             $task_data = [
+                'amount_paid' => $total_received,
                 'sub_total' => $total_amt,
                 'amount_due' => max($amount_due, 0),  // Ensuring amount_due does not go negative
                 'updated_at' => Carbon::now(),
             ];
     
             DB::table('task')->where('id', $task->id)->update($task_data);
-    
-            if ($remainder >= 0) {
-                // Fully pay the current task
-                DB::table('task')
-                    ->where('id', $task->id)
-                    ->update([
-                        'amount_paid' => DB::raw('amount_paid + ' . $amount_paid),
-                        'amount_due' => 0,
-                        'sub_total' => $total_amt, // Update with total amt[]
-                    ]);
-    
-                // Pay off previous tasks if there's remaining amount
-                $previous_tasks = DB::table('task')
-                    ->where('empoyee_id', $request->employee_id)
-                    ->where('created_at', '<', $task->created_at)
-                    ->orderBy('created_at', 'asc')
-                    ->get();
-    
-                foreach ($previous_tasks as $previous_task) {
-                    if ($remainder <= 0) {
-                        break;
-                    }
-    
-                    if ($previous_task->amount_due > 0) {
-                        $payment_for_task = min($remainder, $previous_task->amount_due);
-                        DB::table('task')
-                            ->where('id', $previous_task->id)
-                            ->update([
-                                'amount_paid' => DB::raw('amount_paid + ' . $payment_for_task),
-                                'amount_due' => DB::raw('amount_due - ' . $payment_for_task),
-                            ]);
-                        $remainder -= $payment_for_task;
-                    }
-                }
-            } else {
-                // Partially pay the current task
-                DB::table('task')
-                    ->where('id', $task->id)
-                    ->update([
-                        'amount_paid' => DB::raw('amount_paid + ' . $amount_paid),
-                        'amount_due' => DB::raw('amount_due - ' . $amount_paid),
-                        'sub_total' => $total_amt, // Update with total amt[]
-                    ]);
-            }
-    
-            // Update sales table with retail, bulk, amt_retail, and amt for each sale
-            foreach ($request->sale_id as $index => $sale_id) {
-                // Fetch the retail price from the sales table for the specific sale_id
-                $sale = DB::table('sales')->where('id', $sale_id)->first();
-    
-                // Calculate amt_retail based on the retail price from the sales table
-                $amt_retail = $request->retail[$index] * $sale->retail_price;
-    
-                // Update the sales record with the new values
-                DB::table('sales')->where('id', $sale_id)->update([
-                    'retail' => $request->retail[$index],
-                    'bulk' => $request->bulk[$index],
-                    'retail_amt' => $amt_retail,  // Use retail_price from sales table
-                    'amt' => $request->amt[$index],
-                ]);
-            }
-    
             return response()->json([
                 'success' => true,
                 'message' => 'Payment and sales successfully recorded',

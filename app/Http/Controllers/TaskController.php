@@ -459,7 +459,7 @@ class TaskController extends Controller
                             <i class="fa fa-cog"></i> Actions <span class="caret"></span>
                         </a>
                         <ul class="dropdown-menu">
-                            <li><a href="#" class="pays" id="' . $task->empoyee_id . '" test="' . $task->id . '">
+                            <li><a href="#" class="pays" id="' . $task->id . '" test="' . $task->id . '">
                                 <i class="fa fa-money"></i> Receive Payment
                             </a></li>
                             <li><a href="#" id="' . $task->id . '" class="demageForm">
@@ -502,7 +502,7 @@ class TaskController extends Controller
                         </button>
                         <ul class="dropdown-menu">
                             <li>
-                                <a href="#" class="btn btn-warning btn-xs pays" data-task-id="{{ task.id }}" data-employee-id="{{ task.employee_id }}">
+                                <a href="#" class="btn btn-warning btn-xs pays" data-task-id="{{ task.id }}" data-employee-id="{{ task.id }}">
                                     <i class="fa fa-money"></i> Receive Payment
                                 </a>
                             </li>
@@ -951,29 +951,29 @@ class TaskController extends Controller
     {
         if (request()->ajax()) {
             try {
+                info("task id --->".$id);
                 // Fetch the task data
                 $data = DB::table('task')
+                    ->where('task.id', '=', $id)
                     ->join('employee', 'employee.id', '=', 'task.empoyee_id')
                     ->join('account', 'account.id', '=', 'task.account_id')
                     ->join('sales', 'sales.task_id', '=', 'task.id')
-                    ->where('task.empoyee_id', '=', $id)
                     ->where('task.amount_due', '>', '0')
                     ->selectRaw('
-                    task.id, 
-                    task.account_id,
-                    account.account_name,
-                    employee.employee_number,
-                    CONCAT(employee.first_name, " ", employee.last_name) as employee_name,
-                    SUM(sales.amt+sales.retail_amt) as sub_total,
-                    SUM(task.amount_paid) as amount_paid,
-                    SUM(task.returned) as returned,
-                    SUM(task.demage_cost) as demage_cost
-                ')
-                    ->groupBy('task.id', 'task.empoyee_id', 'task.account_id', 'task.sub_total', 'account.account_name', 'employee.employee_number', 'employee.first_name', 'employee.last_name')
+                        task.id, 
+                        task.account_id,
+                        task.amount_due,
+                        task.sub_total,
+                        account.account_name,
+                        employee.employee_number,
+                        CONCAT(employee.first_name, " ", employee.last_name) as employee_name,
+                        SUM(task.amount_paid) as amount_paid,
+                        SUM(task.returned) as returned,
+                        SUM(task.demage_cost) as demage_cost
+                    ')
+                    ->groupBy('task.id','task.amount_due','task.empoyee_id', 'task.account_id', 'task.sub_total', 'account.account_name', 'employee.employee_number', 'employee.first_name', 'employee.last_name')
                     ->first();
-                // $data = DB::table('task')
-                // ->where('task.empoyee_id', '=', $id)
-                // ->get();
+ 
                 // Check if task data exists
                 if (!$data) {
                     return response()->json(['error' => 'No data found'], 404);
@@ -987,12 +987,11 @@ class TaskController extends Controller
                     ')
                     ->first(); // To fetch a single result
 
-                $data->paid_amount = $paid->total_paid_amount;
                 $data->last_paid = $paid->latest_payment_date;
                 info('task id ==>' . json_encode($data));
                 // Calculate the amount due
                 $subTotal = intval($data->sub_total);
-                $amountPaid = intval($data->paid_amount);
+                $amountPaid = intval($data->amount_paid);
                 $demageCost = intval($data->demage_cost);
                 $returned = intval($data->returned);
 

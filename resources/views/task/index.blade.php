@@ -1402,16 +1402,17 @@
                 cache: false,
                 success: function(html) {
                     console.log({
-                        form: $('#form-payment')[0]
+                        response:html.data
                     });
-                    // console.log("html data ===>>", html.data);
+                    console.log("html data ===>>", html.data.sub_total);
                     save_method = "add";
                     $('.receive_account').text('Shop: ' + html.data.account_name);
                     $('.receive_employee_number').text('Employee: ' + html.data.employee_number);
                     $('.receive_date').text('Latest payment: ' + html.data.last_paid)
+                    $('#pay_date').val(new Date().toDateString());
                     $('#paid_total').val(html.data.amount_paid);
                     $('#expected_total').val(html.data.sub_total);
-                    $('#received_total').val(html.data.amount_paid - html.data.paid_amount);
+                    $('#received_total').val(0);
                     $('.modal-title').text('Receiving Payment from ' + html.data.employee_name);
                     $('#modal_payment').modal('show');
 
@@ -1508,7 +1509,7 @@
 
         // Function to calculate the sum of all amt[] fields
         function calculateExpectedTotal(data) {
-            let totalAmount = 0;
+            let total = 0;
             $('input[name="amt[]"]').each(function() {
                 total += parseFloat($(this).val()) || 0; // Accumulate the value
             });

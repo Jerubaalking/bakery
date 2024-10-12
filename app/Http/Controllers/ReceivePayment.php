@@ -45,76 +45,76 @@ class ReceivePayment extends Controller
     {
 
         // if(request()->ajax()){
-        $this->validate($request, [
-            'amount' => 'required|string',
-            'payment_methode' => 'required',
-        ]);
+        // $this->validate($request, [
+        //     'amount' => 'required|string',
+        //     'payment_methode' => 'required',
+        // ]);
+        info('requested payment received ===>>'.$request->all());
+        // $date = Carbon::now()->format('Y-m-d H:m:s');
+        // $task_id = $request->task_id_receive;
+        // info($task_id);
+        // $taskss = DB::table('task')->where('id', $task_id)->first();
+        // $amount_paid = $request->amount;
+        // // $account = DB::table('account')->where('id', '=', $taskss->account_id);
+        // $payment_form = array(
+        //     'task_id' => $request->task_id_receive,
+        //     'employee_id' => $request->employee_id,
+        //     'account_id' => $taskss->account_id,
+        //     'amount' => $taskss->amount_paid,
+        //     'payment_methode' => $request->payment_methode,
+        //     'created_at' => $request->payment_date,
+        //     'updated_at' => Carbon::now()->format('Y-m-d H:m:s')
 
-        $date = Carbon::now()->format('Y-m-d H:m:s');
-        $task_id = $request->task_id_receive;
-        info($task_id);
-        $taskss = DB::table('task')->where('id', $task_id)->first();
-        $amount_paid = $request->amount;
-        // $account = DB::table('account')->where('id', '=', $taskss->account_id);
-        $payment_form = array(
-            'task_id' => $request->task_id_receive,
-            'employee_id' => $request->employee_id,
-            'account_id' => $taskss->account_id,
-            'amount' => $taskss->amount_paid,
-            'payment_methode' => $request->payment_methode,
-            'created_at' => $request->payment_date,
-            'updated_at' => Carbon::now()->format('Y-m-d H:m:s')
+        // );
+        // //    return $request->account_id;
 
-        );
-        //    return $request->account_id;
-
-        DB::table('receive_sales')->insert($payment_form);
-        $remainder = 0;
-        if (sizeof($taskss) > 0) {
-            $remainder = intVal($taskss[0]->amount_due) - intVal($amount_paid);
-            if ($remainder > 0) {
-                DB::table('task')
-                    ->where('id', $task_id)
-                    ->update([
-                        'amount_paid' => DB::raw('amount_paid + ' . $taskss[0]->amount_due),
-                        'amount_due' => DB::raw('amount_due -' . $taskss[0]->amount_due)
-                    ]);
-                $prevs = DB::table('task')
-                    ->where('employee_id', $payment_form->employee_id)
-                    ->whereDate('created_at', '<', $taskss[0]->created_at)
-                    ->get();
-                foreach ($prevs as $key => $value) {
-                    # code...
-                    if (intVal($value->amount_due) >= $remainder) {
-                        DB::table('task')
-                            ->where('id', $task_id)
-                            ->update([
-                                'amount_paid' => DB::raw('amount_paid + ' . $remainder),
-                                'amount_due' => DB::raw('amount_due -' . $remainder)
-                            ]);
-                        $reminder = 0;
-                        break;
-                    } else {
-                        DB::table('task')
-                            ->where('id', $task_id)
-                            ->update([
-                                'amount_paid' => DB::raw('amount_paid + ' . intVal($value->amount_due)),
-                                'amount_due' => DB::raw('amount_due -' . intVal($value->amount_due))
-                            ]);
-                        $reminder -= intVal($value->amount_due);
-                    }
-                }
-            }
-            return response()->json([
-                'success'    => true,
-                'message'    => 'Information successfuly added'
-            ]);
-        } else {
-            return response()->json([
-                'success'    => false,
-                'message'    => 'Task does not exist!'
-            ]);
-        }
+        // DB::table('receive_sales')->insert($payment_form);
+        // $remainder = 0;
+        // if (sizeof($taskss) > 0) {
+        //     $remainder = intVal($taskss[0]->amount_due) - intVal($amount_paid);
+        //     if ($remainder > 0) {
+        //         DB::table('task')
+        //             ->where('id', $task_id)
+        //             ->update([
+        //                 'amount_paid' => DB::raw('amount_paid + ' . $taskss[0]->amount_due),
+        //                 'amount_due' => DB::raw('amount_due -' . $taskss[0]->amount_due)
+        //             ]);
+        //         $prevs = DB::table('task')
+        //             ->where('employee_id', $payment_form->employee_id)
+        //             ->whereDate('created_at', '<', $taskss[0]->created_at)
+        //             ->get();
+        //         foreach ($prevs as $key => $value) {
+        //             # code...
+        //             if (intVal($value->amount_due) >= $remainder) {
+        //                 DB::table('task')
+        //                     ->where('id', $task_id)
+        //                     ->update([
+        //                         'amount_paid' => DB::raw('amount_paid + ' . $remainder),
+        //                         'amount_due' => DB::raw('amount_due -' . $remainder)
+        //                     ]);
+        //                 $reminder = 0;
+        //                 break;
+        //             } else {
+        //                 DB::table('task')
+        //                     ->where('id', $task_id)
+        //                     ->update([
+        //                         'amount_paid' => DB::raw('amount_paid + ' . intVal($value->amount_due)),
+        //                         'amount_due' => DB::raw('amount_due -' . intVal($value->amount_due))
+        //                     ]);
+        //                 $reminder -= intVal($value->amount_due);
+        //             }
+        //         }
+        //     }
+        //     return response()->json([
+        //         'success'    => true,
+        //         'message'    => 'Information successfuly added'
+        //     ]);
+        // } else {
+        //     return response()->json([
+        //         'success'    => false,
+        //         'message'    => 'Task does not exist!'
+        //     ]);
+        // }
         // }
     }
     public function save_public(Request $request)
@@ -181,7 +181,7 @@ class ReceivePayment extends Controller
     
                 // Pay off previous tasks if there's remaining amount
                 $previous_tasks = DB::table('task')
-                    ->where('employee_id', $request->employee_id)
+                    ->where('empoyee_id', $request->employee_id)
                     ->where('created_at', '<', $task->created_at)
                     ->orderBy('created_at', 'asc')
                     ->get();

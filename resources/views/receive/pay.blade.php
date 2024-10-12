@@ -33,7 +33,7 @@
                             <div>
                                 <div class="mr-3" style="float:inline-end; margin-right:24px;">
                                     <small class="text-danger">* Pay date </small>
-                                    <input type="date" name="pay_date" id="pay_date" value="" class="form-control" />
+                                    <input type="date" name="pay_date" id="pay_date" class="form-control" />
                                 </div>
                             </div>
                         </div>

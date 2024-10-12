@@ -1404,12 +1404,13 @@
                     console.log({
                         response:html.data
                     });
-                    console.log("html data ===>>", html.data.sub_total);
+                    console.log("html data ===>>", new Date());
                     save_method = "add";
                     $('.receive_account').text('Shop: ' + html.data.account_name);
                     $('.receive_employee_number').text('Employee: ' + html.data.employee_number);
                     $('.receive_date').text('Latest payment: ' + html.data.last_paid)
-                    $('#pay_date').val(new Date().toDateString());
+                    var today = new Date().toISOString().split('T')[0]; // Get current date in 'YYYY-MM-DD' format
+                    $('#pay_date').val(today);
                     $('#paid_total').val(html.data.amount_paid);
                     $('#expected_total').val(html.data.sub_total);
                     $('#received_total').val(0);

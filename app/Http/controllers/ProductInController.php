@@ -313,7 +313,8 @@ class ProductInController extends Controller
                 ->whereBetween('product_in.date_in', array($request->from, $request->to))
                 ->where('product_in.product_id', $request->product_id1)
                 ->sum('product_in.qty');
-            $pdf = PDF::loadView('product_in.productInAllPDF', compact('product_in', 'from', 'to', 'sum'));
+                $loggedInUser = Auth::User();
+            $pdf = PDF::loadView('product_in.productInAllPDF', compact('loggedInUser','product_in', 'from', 'to', 'sum'));
             //  return response()->file($pathToFile);
             return $pdf->stream('product_in.pdf');
         }

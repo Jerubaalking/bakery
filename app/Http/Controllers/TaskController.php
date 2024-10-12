@@ -92,10 +92,10 @@ class TaskController extends Controller
 
         // Fetch supplier and employee details
         $supplier = DB::table('account')
-    ->where('account.id', '=', $request->supplier_id) // Specify the table for the 'id' column
-    ->join('employee', 'employee.account_id', 'account.id')
-    ->select('account.*', 'employee.employee_number as employee_number', 'employee.id as employee_id')
-    ->first();
+            ->where('account.id', '=', $request->supplier_id) // Specify the table for the 'id' column
+            ->join('employee', 'employee.account_id', 'account.id')
+            ->select('account.*', 'employee.employee_number as employee_number', 'employee.id as employee_id')
+            ->first();
 
         // info(json_encode($employee));
         // Check for existing task
@@ -251,7 +251,7 @@ class TaskController extends Controller
             if ($data) {
                 return response()->json(['data' => $data]);
             }
-            return view('casual.staffing.index', comapact('data'));
+            return view('casual.staffing.index', compact('data'));
         }
     }
 

@@ -147,7 +147,9 @@ Route::resource('cash_advance',CashAdvance::class);
 Route::get('/apiCash', [CashAdvance::class,'apiCash']);
 
 //supplier root
-Route::resource('designation',DesignationController::class);
+// Route::resource('designation',DesignationController::class);
+Route::resource('/designation', DesignationController::class);
+Route::get('/designation/{id}/edit', [DesignationController::class,'edit']);
 Route::get('/apiDesignation', [DesignationController::class,'apiDesignation']);
 Route::get('/empo_info/{id}', [DesignationController::class,'empo_info']);
 Route::post('/supplier_report', [DesignationController::class,'supplier_report']);

@@ -251,7 +251,6 @@
 
                     function editForm(id) {
 
-
                         $('#form-account')[0].reset();
                         save_method = 'edit';
                         $('input[name=_method]').val('PATCH');
@@ -264,7 +263,7 @@
                             type: "GET",
                             dataType: "JSON",
                             success: function(html) {
-                                console.log("response --->>", html.data)
+                                console.log("response --->>", html)
                                 $('#modal-account').modal('show');
                                 $('.modal-title').text(' Edit Designation');
                                 $('#id').val(html.data.id);
@@ -282,6 +281,7 @@
                         });
 
                     }
+
                     $(function() {
                         $('#modal-account form').validator().on('submit', function(e) {
                             if (!e.isDefaultPrevented()) {

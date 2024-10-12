@@ -48,7 +48,6 @@ class DesignationController extends Controller
         //
         $newAccount = $request->all();
         info('new account designation store -->'.$newAccount);
-
     }
 
     /**
@@ -70,12 +69,12 @@ class DesignationController extends Controller
      */
     public function edit($id)
     {
-        if(request()->ajax()){
+        info('deignation edit here --->'.$id);
+        if (request()->ajax()) {
             $currentAccount = DB::table('account')
-            ->where('id', $id)
-            ->first();
-
-            return response()->json(['data'=>$currentAccount]);
+                ->where('id', $id)
+                ->first();
+            return response()->json(['data' => $currentAccount]);
         }
     }
 
@@ -90,6 +89,7 @@ class DesignationController extends Controller
     {
         //
         $updatedAccount = $request->all();
+
     }
 
     /**

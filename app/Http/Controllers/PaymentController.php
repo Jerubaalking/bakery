@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use PDF;
 use Yajra\DataTables\DataTables;
 use Illuminate\Support\Facades\DB;
+
 class PaymentController extends Controller
 {
     public function __construct()
@@ -89,15 +90,22 @@ class PaymentController extends Controller
         //
     }
 
-    public function apiPayment(){
+    public function apiPayment()
+    {
 
-        $product=DB::table('employee')
-        ->join('task','task.empoyee_id','=','employee.id')
-        ->join('receive_sales','receive_sales.task_id','=','task.id')
-        ->select('receive_sales.*','task.amount_due','task.task_number','employee.employee_number'
-        ,'employee.first_name','employee.last_name')
-        ->get();
-       
+        $product = DB::table('employee')
+            ->join('task', 'task.empoyee_id', '=', 'employee.id')
+            ->join('receive_sales', 'receive_sales.task_id', '=', 'task.id')
+            ->select(
+                'receive_sales.*',
+                'task.amount_due',
+                'task.task_number',
+                'employee.employee_number',
+                'employee.first_name',
+                'employee.last_name'
+            )
+            ->get();
+
         return Datatables::of($product)
             // ->addColumn('action', function($product){
             //     return 
@@ -106,27 +114,44 @@ class PaymentController extends Controller
             // })
             // ->rawColumns(['category_name','show_photo','action'])
             ->make(true);
-
     }
 
-  public function  export_pay(Request $request){
-    $from=$request->from;
-    $to=$request->to;
-    $export=DB::table('employee')
-    ->join('task','task.empoyee_id','=','employee.id')
-    ->join('receive_sales','receive_sales.task_id','=','task.id')
-    ->select('receive_sales.*','task.amount_due','task.task_number','employee.employee_number','employee.first_name'
-    ,'employee.last_name')
-    ->whereBetween('receive_sales.created_at',array($request->from,$request->to))
-    ->get();
-    $sum_amount=DB::table('employee')
-    ->join('task','task.empoyee_id','=','employee.id')
-    ->join('receive_sales','receive_sales.task_id','=','task.id')
-    ->select('receive_sales.*','task.amount_due','task.task_number','employee.employee_number')
-    ->whereBetween('receive_sales.created_at',array($request->from,$request->to))
-    ->sum('amount');
-    $pdf = PDF::loadView('receive.report',compact('export','from','to','sum_amount'));
-    return $pdf->stream('payment.pdf');
-
+    public function export_pay(Request $request)
+    {
+        $from = $request->from;
+        $to = $request->to;
+    
+        // Fetch employee sales within the date range
+        $salesData = DB::table('employee')
+            ->join('task', 'task.empoyee_id', '=', 'employee.id')
+            ->join('receive_sales', 'receive_sales.task_id', '=', 'task.id')
+            ->select(
+                'employee.id as employee_id',
+                DB::raw('CONCAT(employee.first_name, " ", employee.last_name) as name'),
+                'receive_sales.amount',
+                'receive_sales.created_at'
+            )
+            ->whereBetween('receive_sales.created_at', [$from, $to])
+            ->get();
+    info('info of slaes --->>'.$salesData);
+        // Structure the data
+        $structuredData = $salesData->groupBy('employee_id')->map(function ($sales, $key) {
+            return [
+                'id' => $key,
+                'name' => $sales->first()->name, // Get the employee's name
+                'receive_sales' => $sales->map(function ($sale) {
+                    return [
+                        'amount' => $sale->amount,
+                        'created_at' => $sale->created_at,
+                    ];
+                })->toArray(),
+            ];
+        })->values(); // Reset keys to 0, 1, 2, ...
+    
+        info('info of structured Date --->>'.$structuredData);
+        // Return the structured data to the view or generate PDF as needed
+        $pdf = PDF::loadView('receive.report', compact('structuredData', 'from', 'to'));
+        return $pdf->setPaper('A4', 'landscape')->stream('payment.pdf');
     }
+    
 }

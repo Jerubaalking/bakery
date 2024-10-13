@@ -1304,7 +1304,7 @@ class TaskController extends Controller
         // Additional logic for employee-specific processing
 
         // Generate PDF
-        return $this->generateEmployeePdf($product_out, $sums->date, $count, $sum_qty, $sum_amt, $sum_return_qty, $sum_return_amt, $employee);
+        return $this->generateEmployeePdf($product_out,  $count, $sum_qty, $sum_amt, $sum_return_qty, $sum_return_amt, $employee);
     }
 
     // Helper functions can be defined here for better structure, like:
@@ -1321,6 +1321,7 @@ class TaskController extends Controller
                 'sales.qty',                  // Quantity sold
                 'sales.amt as amount',        // Amount for this sale
                 'task.amount_paid',           // Amount paid for the task
+                'task.task_number',           // Amount paid for the task
                 'task.sub_total',             // Subtotal for the task
                 DB::raw('CONCAT(employee.first_name, " ", employee.last_name) as employee_name'), // Full employee name
                 'products.product_name',      // Product name
@@ -1424,6 +1425,7 @@ class TaskController extends Controller
         $pdf = PDF::loadView('task.export_task', [
             'from' => $from,
             'to' => $to,
+            'x'=>$x,
             'loggedInUser' => Auth::user(),
             'dates' => $sums[0]->date, // Use date from the first item or modify as needed
             'count' => count($product_out),

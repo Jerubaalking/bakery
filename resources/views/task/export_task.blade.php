@@ -160,7 +160,8 @@
     }
 </style>
 <div class="section__content section__content--p30">
-    <div class="container-fluid"><div>
+    <div class="container-fluid">
+        <div>
             <span style="font-family:sans-serif; font-size:10px;">
                 <?php
                 date_default_timezone_set("Africa/Nairobi");
@@ -169,9 +170,9 @@
             </span>
         </div>
         <div id="watermark">
-                     <img src="assets/img/misana.png" alt="logo" height="100" width="150" style="float:right;padding-right:62px;margin-top:-25px;">
-                     <!-- <img src="assets/img/misana.png" height="100%" width="100%" style="opacity: 0.05;"/> -->
-                        </div>
+            <img src="assets/img/misana.png" alt="logo" height="100" width="150" style="float:right;padding-right:62px;margin-top:-25px;">
+            <!-- <img src="assets/img/misana.png" height="100%" width="100%" style="opacity: 0.05;"/> -->
+        </div>
 
         <div class="row" style="margin-top:0px;">
             <center>
@@ -231,11 +232,11 @@
                                             <th scope="col" class="border-0 pl-0">Date</th>
                                             <th scope="col" class="border-0 pl-0">Employee</th>
                                             <th scope="col" class="border-0 pl-0">Item</th>
+                                            <th scope="col" class="border-0 pl-0">Dispatch</th>
                                             <th scope="col" class="border-0 pl-0">Qty</th>
-                                            <th scope="col" class="border-0 pl-0">Retail-Qty</th>
-                                            <th scope="col" class="border-0 pl-0">Bulk-Qty</th>
+                                            <th scope="col" class="border-0 pl-0">Rtl-Qty</th>
+                                            <th scope="col" class="border-0 pl-0">Blk-Qty</th>
                                             <th scope="col" class="border-0 pl-0">Total</th>
-                                            <th scope="col" class="border-0 pl-0">Received</th>
                                         </tr>
                                     </thead>
                                     <tbody style="text-align:right;">
@@ -244,24 +245,72 @@
                                             <td class="pl-0">{{ $product->created_at }}</td>
                                             <td class="pl-0">{{ $product->employee_name }}</td>
                                             <td class="pl-0">{{ $product->product_name }}</td>
+                                            <td class="pl-0">{{ $product->task_number }}</td>
                                             <td class="pl-0">{{ $product->qty }}</td>
                                             <td class="pl-0">{{ $product->retail }}</td> <!-- Assuming you have a retail_qty field -->
                                             <td class="pl-0">{{ $product->bulk }}</td> <!-- Assuming you have a bulk_qty field -->
                                             <td class="pl-0">{{ number_format(($product->bulk * $product->price) + ($product->retail * $product->retail_price), 2) }}</td>
-                                            <td class="pl-0">{{ number_format($product->amount_paid, 2) }}</td>
                                         </tr>
                                         @endforeach
                                         <tr>
                                             <td>Total:</td>
                                             <td></td>
+                                            <td></td>
+                                            <td></td>
                                             <td style="color:green">{{ $sum_qty }}</td>
                                             <td></td>
                                             <td></td>
-                                            <td></td>
                                             <td style="color:green; text-align:right;">{{ number_format($sum_amt, 2) }} /=</td>
-                                            <td style="color:green; text-align:right;">{{ number_format($sum_recive, 2) }} /=</td>
                                         </tr>
                                     </tbody>
+                                </table>
+                            </div>
+                        </div>
+
+                        <div class="row top_tag col-lg-12" style="margin-top:30px;">
+                            <h3 class="title-5 m-b-35" style="color:red">Payment Information</h3>
+                            <div class="table-responsive">
+                                <table class="table">
+                                    <thead>
+                                        <tr>
+                                            <th scope="col" class="border-0 pl-0">Date</th>
+                                            <th scope="col" class="border-0 pl-0">Account Number</th>
+                                            <th scope="col" class="border-0 pl-0">Dispatch</th>
+                                            <th scope="col" class="border-0 pl-0">Amount Paid</th>
+
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @foreach($x as $x)
+                                        <tr>
+                                            <td class="pl-0">
+                                                {{$x->created_at}}
+                                            </td>
+                                            <td class="pl-0">
+                                                {{$x->employee_number}}
+                                            </td>
+
+
+                                            <td class="pl-0">
+                                                {{$x->task_number}}
+                                            </td>
+                                            <td class="pl-0" style="text-align:right;">
+                                                {{number_format($x->amount,2)}}/=
+                                            </td>
+                                        </tr>
+                                        @endforeach
+                                        <tr>
+                                            <td>Total:</td>
+                                            <td>
+                                            </td>
+                                            <td></td>
+                                            <td style="font-weight:bold;color:green; text-align:right;">
+                                                {{number_format($sum_recive,2)}}
+                                            </td>
+
+                                        </tr>
+                                    </tbody>
+
                                 </table>
                             </div>
                         </div>

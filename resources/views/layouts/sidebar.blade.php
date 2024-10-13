@@ -1,258 +1,140 @@
 <aside id="sidebar" class="menu-sidebar d-none d-lg-block">
     <div class="sidebar-header logo" style="background-color:#494a4a;">
         <a href="#">
-            <img src="{{asset('assets/img/user.png')}}" alt="misana home bakery" height="60" width="60" />
+            <img src="{{ asset('assets/img/user.png') }}" alt="misana home bakery" height="60" width="60" />
         </a>
     </div>
     <div class="menu-sidebar__content js-scrollbar1 ">
         <nav class="navbar-sidebar">
             <div class="collapse navbar-collapse">
-            <!-- <div class="navbar-nav"></div> -->
-            <ul class="list-unstyled navbar__list">
-                @if(\Auth::user()->role=='Superadministrator')
-                <li class="active has-sub ">
-                    <a class="js-arrow"  href="/home">
-                        <i class="fas fa-tachometer-alt"></i>Dashboard</a>
-                    <!-- <ul class="list-unstyled navbar__sub-list js-sub-list">
-                                <li>
-                                    <a href="index.html">Dashboard 1</a>
-                                </li>
-                                <li>
-                                    <a href="index2.html">Dashboard 2</a>
-                                </li>
-                                <li>
-                                    <a href="index3.html">Dashboard 3</a>
-                                </li>
-                                <li>
-                                    <a href="index4.html">Dashboard 4</a>
-                                </li>
-                            </ul> -->
-                </li>
-                <li class="active has-sub">
-                    <a class="js-arrow" href="#">
-                        <i class="fa fa-cog"></i>Setting</a>
-                    <ul class="list-unstyled navbar__sub-list js-sub-list">
-                        <li class="active"><a href="{{ url('/user') }}"><i class="fa fa-users"></i>
-                                <span>Users</span></a></li>
-                    </ul>
-                </li>
-                <li class="active has-sub">
-                    <a class="js-arrow " href="#">
-                        <i class="fa fa-money"></i>Payroll</a>
-                    <ul class="list-unstyled navbar__sub-list js-sub-list">
-                        <li class="active">
-                            <a href="{{ url('/department') }}"><i class="fa fa-list"></i>Department</a>
-                        </li>
-                        <li class="active">
-                            <a href="{{ url('/position') }}"><i class="fa fa-list"></i>Position</a>
-                        </li>
-                        <li class="active">
-                            <a href="{{ url('/employee') }}"><i class="fa fa-users"></i>Employees</a>
-                        </li>
-                        <li class="active">
-                            <a href="{{ url('/cash_advance') }}"><i class="fa fa-money"></i>Cash in Advance</a>
-                        </li>
-                    </ul>
-                </li>
-                <li class="active">
-                    <a href="/categories" class="js-arrow" >
-                        <i class="fa fa-list"></i>Categories</a>
-                </li>
-                <li class="active has-sub">
-                    <a class="js-arrow" href="#">
-                        <i class="fa fa-bank"></i>Production</a>
-                    <ul class="list-unstyled navbar__sub-list js-sub-list">
-                        <li class="active">
-                            <a href="/measurements">
-                                <i class="fas fa-table"></i>Measurements</a>
-                        </li>
-                        <li class="active">
+                <ul class="list-unstyled navbar__list">
+                    @php
+                        $menuItems = [
+                            'Dashboard' => [
+                                'icon' => 'fas fa-tachometer-alt',
+                                'url' => '/home',
+                                'roles' => ['Superadministrator', 'Manager'],
+                            ],
+                            'Product Stock' => [  // Changed from "Manage Stock" to "Product Stock"
+                                'icon' => 'fa fa-list',
+                                'subItems' => [
+                                    'Categories' => [
+                                        'url' => '/categories',
+                                        'icon' => 'fa fa-list',
+                                        'roles' => ['Superadministrator', 'Manager'],
+                                    ],
+                                    'Products' => [
+                                        'url' => '/products',
+                                        'icon' => 'fa fa-list',
+                                        'roles' => ['Superadministrator', 'Manager'],
+                                    ],
+                                    'Product In' => [
+                                        'url' => '/productsIn',
+                                        'icon' => 'fa fa-plus',
+                                        'roles' => ['Superadministrator', 'Manager'],
+                                    ],
+                                    'Damage Products' => [
+                                        'url' => '/demage_products',
+                                        'icon' => 'fa fa-minus',
+                                        'roles' => ['Superadministrator', 'Manager'],
+                                    ],
+                                ],
+                                'roles' => ['Superadministrator', 'Manager'],
+                            ],
+                            'Production' => [
+                                'icon' => 'fa fa-bank',
+                                'subItems' => [
+                                    'Measurements' => [
+                                        'url' => '/measurements',
+                                        'icon' => 'fas fa-table',
+                                        'roles' => ['Superadministrator', 'Manager'],
+                                    ],
+                                    'Material' => [
+                                        'url' => '/materials',
+                                        'icon' => 'fas fa-history',
+                                        'roles' => ['Superadministrator', 'Manager'],
+                                    ],
+                                    'Store' => [
+                                        'url' => '/intoStore',
+                                        'icon' => 'fas fa-history',
+                                        'roles' => ['Superadministrator', 'Manager'],
+                                    ],
+                                ],
+                                'roles' => ['Superadministrator', 'Manager'],
+                            ],
+                            'Sales' => [
+                                'icon' => 'fas fa-shopping-cart',
+                                'subItems' => [
+                                    'Sales Accounts' => [
+                                        'url' => '/task',
+                                        'icon' => 'fa fa-list',
+                                        'roles' => ['Superadministrator', 'Manager'],
+                                    ],
+                                    'Sales Payment Hist' => [
+                                        'url' => '/payment_history',
+                                        'icon' => 'fa fa-history',
+                                        'roles' => ['Superadministrator', 'Manager'],
+                                    ],
+                                    'Expenses' => [
+                                        'url' => '/Expensive',
+                                        'icon' => 'fas fa-table',
+                                        'roles' => ['Superadministrator', 'Manager'],
+                                    ],
+                                ],
+                                'roles' => ['Superadministrator', 'Manager'],
+                            ],
+                            'Place of Work' => [ // New menu item for Place of Work
+                                'icon' => 'fa fa-building',
+                                'subItems' => [
+                                    'Designation' => [
+                                        'url' => '/designation',
+                                        'icon' => 'fa fa-map-marker',
+                                        'roles' => ['Superadministrator', 'Manager'],
+                                    ],
+                                    'Departments' => [
+                                        'url' => '/department',
+                                        'icon' => 'fa fa-sitemap',
+                                        'roles' => ['Superadministrator', 'Manager'],
+                                    ],
+                                ],
+                                'roles' => ['Superadministrator', 'Manager'],
+                            ],
+                            'Settings' => [
+                                'icon' => 'fa fa-cog',
+                                'subItems' => [
+                                    'Users' => [
+                                        'url' => url('/user'),
+                                        'icon' => 'fa fa-users',
+                                        'roles' => ['Superadministrator'],
+                                    ],
+                                ],
+                                'roles' => ['Superadministrator'],
+                            ],
+                        ];
+                    @endphp
 
-                            <a href="/materials">
-                                <i class="fas fa-history"></i>Material</a>
-                        </li>
-                        <li class="active">
-
-                            <a href="/materialCategories">
-                                <i class="fas fa-history"></i>Material Categories</a>
-                        </li>
-                        <li class="active">
-
-                            <a href="/intoStore">
-                                <i class="fas fa-history"></i>Store</a>
-                        </li>
-                        <li class="active">
-
-                            <a href="/productionSessions">
-                                <i class="fas fa-history"></i>Production Sessions</a>
-                        </li>
-                    </ul>
-                </li>
-                <li class="active">
-                    <a class="js-arrow" href="/get_audit">
-                        <i class="fas fa-history"></i>Log activity</a>
-                </li>
-                </li>
-                <li class="active has-sub">
-                    <a class="js-arrow" href="#">
-                        <i class="fa fa-list"></i>Manage Stock</a>
-                    <ul class="list-unstyled navbar__sub-list js-sub-list">
-                        <li class="active">
-                            <a href="{{ url('/products') }}"><i class="fa fa-list"></i>Stock</a>
-                        </li>
-                        <li class="active">
-                            <a href="/productsIn">
-                                <i class="fa fa-plus"></i>Product In</a>
-                        </li>
-                        <li class="active">
-                            <a href="{{ url('/demage_products') }}"><i class="fa fa-minus"></i>Demage Products</a>
-                        </li>
-
-                    </ul>
-                </li>
-
-                <!-- <li class="active">
-                    <a href="/productsOut" class="js-arrow" >
-                        <i class="fa fa-minus"></i>Product Out</a>
-                </li> -->
-
-                <li class="active"><a class="js-arrow"  href="{{ url('/designation') }}"><i class="fa fa-truck"></i>
-                        <span>Place of work</span></a></li>
-                <li class="active"><a href="{{ url('/task') }}"><i class="fa fa-list"></i> <span>Sales Accounts</span></a></li>
-                <li class="active"><a href="{{ url('/payment_history') }}"><i class="fa fa-history"></i> <span>Sales
-                            Payment hist</span></a></li>
-                <li class="active">
-                    <a href="/Expensive">
-                        <i class="fas fa-table"></i>Expenses</a>
-                </li>
-                <li class="active has-sub">
-                    <a class="js-arrow" href="#">
-                        <i class="fa fa-briefcase"></i>Accounting</a>
-                    <ul class="list-unstyled navbar__sub-list js-sub-list">
-                        <li class="active">
-                            <a href="/Account">
-                                <i class="fas fa-table"></i>Account Chart</a>
-                        </li>
-                        <!-- <li class="active">
-                                 <a href="/account_group">
-                                <i class="fas fa-table"></i>Account Group</a>
-                               </li> -->
-
-
-
-                        <li class="active">
-
-                            <a href="/cash_flow" style="color:#F23810">
-                                <i class="fas fa-file" style="color:red"></i>Cash Flow Report</a>
-                        </li>
-
-                        <li class="active">
-
-                            <a href="/profit_loss" style="color:#F23810 ">
-                                <i class="fas fa-file" style="color:red"></i>Income and Expenditure</a>
-                        </li>
-                    </ul>
-                </li>
-
-
-                <li class="active has-sub">
-                    <a class="js-arrow" href="#">
-                        <i class="fa fa-bank"></i>Banking</a>
-                    <ul class="list-unstyled navbar__sub-list js-sub-list">
-                        <li class="active">
-                            <a href="/transfer">
-                                <i class="fas fa-table"></i>Transfer Fund</a>
-                        </li>
-                        <li class="active">
-
-                            <a href="/deposite">
-                                <i class="fas fa-history"></i>Deposite Fund</a>
-                        </li>
-                        <li class="active">
-                            <a href="/get_audit">
-                                <i class="fas fa-history"></i>Log activity</a>
-                        </li>
-                    </ul>
-                </li>
-                @endif
-
-                @if(\Auth::user()->role=='Manager')
-                <li class="active has-sub">
-                    <a class="js-arrow" href="/home">
-                        <i class="fas fa-tachometer-alt"></i>Dashboard</a>
-                </li>
-                <li class="active">
-                    <a href="/categories">
-                        <i class="fa fa-list"></i>Categories</a>
-                </li>
-                <li class="active has-sub">
-                    <a class="js-arrow" href="#">
-                        <i class="fa fa-list"></i>Manage Stock</a>
-                    <ul class="list-unstyled navbar__sub-list js-sub-list">
-                        <li class="active">
-                            <a href="{{ url('/products') }}"><i class="fa fa-list"></i>Stock</a>
-                        </li>
-                        <li class="active">
-                            <a href="/productsIn">
-                                <i class="fa fa-plus"></i>Product In</a>
-                        </li>
-                        <li class="active">
-                            <a href="{{ url('/demage_products') }}"><i class="fa fa-minus"></i>Demage Products</a>
-                        </li>
-
-                    </ul>
-                </li>
-
-                
-                <li class="active has-sub">
-                    <a class="js-arrow" href="#">
-                        <i class="fa fa-bank"></i>Production</a>
-                    <ul class="list-unstyled navbar__sub-list js-sub-list">
-                        <li class="active">
-                            <a href="/measurements">
-                                <i class="fas fa-table"></i>Measurements</a>
-                        </li>
-                        <li class="active">
-
-                            <a href="/materials">
-                                <i class="fas fa-history"></i>Material</a>
-                        </li>
-                        <li class="active">
-
-                            <a href="/materialCategories">
-                                <i class="fas fa-history"></i>Material Categories</a>
-                        </li>
-                        <li class="active">
-
-                            <a href="/intoStore">
-                                <i class="fas fa-history"></i>Store</a>
-                        </li>
-                        <li class="active">
-
-                            <a href="/productionSessions">
-                                <i class="fas fa-history"></i>Production Sessions</a>
-                        </li>
-                    </ul>
-                </li>
-
-                <li class="active"><a href="{{ url('/designation') }}"><i class="fa fa-truck"></i>
-                        <span>Place of work</span></a></li>
-
-                <li class="active"><a href="{{ url('/task') }}"><i class="fa fa-list"></i> <span>Sales Accounts</span></a></li>
-                <li class="active"><a href="{{ url('/payment_history') }}"><i class="fa fa-history"></i> <span>Sales
-                            Payment hist</span></a></li>
-
-                <li class="active">
-                    <a href="/Expensive">
-                        <i class="fas fa-table"></i>Expenses</a>
-                </li>
-            @endif
-            </ul>
-
+                    @foreach ($menuItems as $item => $data)
+                        @if (in_array(\Auth::user()->role, $data['roles']))
+                            <li class="active {{ isset($data['subItems']) ? 'has-sub' : '' }}">
+                                <a class="js-arrow" href="{{ $data['url'] ?? '#' }}">
+                                    <i class="{{ $data['icon'] }}"></i>{{ $item }}</a>
+                                @if (isset($data['subItems']))
+                                    <ul class="list-unstyled navbar__sub-list js-sub-list">
+                                        @foreach ($data['subItems'] as $subItem => $subData)
+                                            @if (in_array(\Auth::user()->role, $subData['roles']))
+                                                <li class="active">
+                                                    <a href="{{ $subData['url'] }}"><i class="{{ $subData['icon'] }}"></i>{{ $subItem }}</a>
+                                                </li>
+                                            @endif
+                                        @endforeach
+                                    </ul>
+                                @endif
+                            </li>
+                        @endif
+                    @endforeach
+                </ul>
             </div>
-            
         </nav>
     </div>
 </aside>
-@include('layouts.header') 
-
+@include('layouts.header')

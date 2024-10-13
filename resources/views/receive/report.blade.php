@@ -159,18 +159,24 @@
         z-index: -1000;
     }
 </style>
+<head>
+    <title>Receivable | Report</title>
 </head>
-
-<body>
-
-
+<body><div>
+            <span style="font-family:sans-serif; font-size:10px;">
+                <?php
+                date_default_timezone_set("Africa/Nairobi");
+                echo 'Downloaded by ' . $loggedInUser->name . ' on ' . date("D d, M Y") . ' ' . date("h:i:sa");
+                ?>
+            </span>
+        </div>
     <div id="watermark">
-        <img src="assets/img/misana.png" alt="logo" height="100" width="150" style="float:right;padding-right:22px;margin-top:-25px;">
-        <img src="assets/img/misana.png" height="100%" width="100%" style="opacity: 0.05;" />
+        <img src="assets/img/misana.png" alt="logo" height="70" width="120" style="float:right;padding-right:22px;">
+        <!-- <img src="assets/img/misana.png" height="100%" width="100%" style="opacity: 0.05;" /> -->
     </div>
     {{-- Header --}}
     <section>
-        <div class="box" style="margin-top:80px;">
+        <div class="box" style="margin-top:0px;">
 
             <center>
                 <h1 style="color:red;"><strong>Misana Home Bakery</strong></h1>

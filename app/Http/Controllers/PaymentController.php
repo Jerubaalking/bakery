@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use PDF;
+use Auth;
 use Yajra\DataTables\DataTables;
 use Illuminate\Support\Facades\DB;
 
@@ -149,8 +150,9 @@ class PaymentController extends Controller
         })->values(); // Reset keys to 0, 1, 2, ...
     
         info('info of structured Date --->>'.$structuredData);
+        $loggedInUser = Auth::User();
         // Return the structured data to the view or generate PDF as needed
-        $pdf = PDF::loadView('receive.report', compact('structuredData', 'from', 'to'));
+        $pdf = PDF::loadView('receive.report', compact('structuredData','loggedInUser', 'from', 'to'));
         return $pdf->setPaper('A4', 'landscape')->stream('payment.pdf');
     }
     

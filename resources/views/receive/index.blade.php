@@ -43,7 +43,6 @@
                         <th>Amount Paid</th>
                         <th>Date Paid</th>
                         <th>Payment Method</th>
-                        <th>Amount Due</th>
 
                     </tr>
                 </thead>
@@ -95,10 +94,6 @@
             {
                 data: 'payment_methode',
                 name: 'payment_methode'
-            },
-            {
-                data: 'amount_due',
-                name: 'amount_due'
             },
         ]
     });

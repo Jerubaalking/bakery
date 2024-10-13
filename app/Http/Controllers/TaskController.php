@@ -119,10 +119,10 @@ class TaskController extends Controller
                     // Split the task number and increment the numeric part
                     $parts = explode('-', $lastTask->task_number);
                     $numericPart = intval($parts[1]); // Ensure this is an integer
-                    $nextTask = 'TASK-' . sprintf("%04d", $numericPart + 1);
+                    $nextTask = 'DISPATCH-' . sprintf("%04d", $numericPart + 1);
                 } else {
                     // No valid previous task, or the task number format is incorrect
-                    $nextTask = 'TASK-0001';
+                    $nextTask = 'DISPATCH-0001';
                 }
 
                 // Create the new task with the generated task number
@@ -1046,7 +1046,7 @@ class TaskController extends Controller
     public function task_info($id)
     {
         // Fetching task-related data
-        $taskData = $this->getTaskData($id);
+        $data = $this->getTaskData($id);
         $pay = $this->getPayData($id);
         $returnTask = $this->getReturnTaskData($id);
         $damageProducts = $this->getDamageProductData($id);
@@ -1058,10 +1058,10 @@ class TaskController extends Controller
         $created = $employeeInfo->created_at;
 
         // Fetching previous and latest tasks
-        $previousTasks = $this->getPreviousTasks($empId, $created);
-        $latestTasks = $this->getLatestTasks($empId, $created);
+        $previous_task = $this->getPreviousTasks($empId, $created);
+        $latest_task = $this->getLatestTasks($empId, $created);
 
-        return view('task.task_info', compact('taskData', 'previousTasks', 'pay', 'employeeInfo', 'returnTask', 'latestTasks', 'damageProducts', 'id'));
+        return view('task.task_info', compact('data', 'previous_task', 'pay', 'employeeInfo', 'returnTask', 'latest_task', 'damageProducts', 'id'));
     }
 
     private function getTaskData($id)
@@ -1570,14 +1570,12 @@ class TaskController extends Controller
         // Fetch all necessary data in one query with joins to minimize repeated DB calls
         $product_outs = DB::table('sales')
             ->join('task', 'task.id', '=', 'sales.task_id')
+            ->join('receive_sales', 'task.id', '=', 'receive_sales.task_id')
             ->join('employee', 'employee.id', '=', 'task.empoyee_id')
             ->join('products', 'sales.product_id', '=', 'products.id')
             ->where('task.id', '=', $id)
             ->select(
-                'sales.price',
-                'sales.qty',
-                'sales.amt',
-                'sales.product_id',
+                'sales.*',
                 'task.sub_total',
                 'sales.task_id',
                 'products.product_name',
@@ -1585,7 +1583,8 @@ class TaskController extends Controller
                 'employee.employee_number',
                 'employee.first_name',
                 'employee.last_name',
-                'employee.phone'
+                'employee.phone',
+                // 'SUM(receive_sales.amount) as paid_amount'
             )
             ->orderBy('sales.created_at', 'ASC')
             ->get();
@@ -1685,6 +1684,8 @@ class TaskController extends Controller
             ->where('task.id', '=', $id)
             ->selectRaw('
                 SUM(sales.qty) as sum_qty,
+                SUM(sales.retail) as sum_retail,
+                SUM(sales.bulk) as sum_bulk,
                 SUM(sales.amt) as sum_amt,
                 SUM(stock_return.qty) as sum_return_qty,
                 SUM(stock_return.amt) as sum_return_amt,
@@ -1698,10 +1699,13 @@ class TaskController extends Controller
         info($sums->sum_recive);
         // Generate the PDF using fetched data
         $pdf = PDF::loadView('task.single_report', [
+            'loggedInUser'=>Auth::User(),
             'dates' => $start,
             'count' => count($product_out),
             'product_out' => $product_out,
             'sum_qty' => $sums->sum_qty,
+            'sum_retail' => $sums->sum_retail,
+            'sum_bulk' => $sums->sum_bulk,
             'sum_amt' => $sums->sum_amt,
             'sum_return_qty' => $sums->sum_return_qty,
             'sum_return_amt' => $sums->sum_return_amt,

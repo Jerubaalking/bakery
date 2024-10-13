@@ -1567,101 +1567,75 @@ class TaskController extends Controller
      */
     public function single_report($id)
     {
-        // Fetch all necessary data in one query with joins to minimize repeated DB calls
+        // Fetch all necessary data in a single query
         $product_outs = DB::table('sales')
-            ->join('task', 'task.id', '=', 'sales.task_id')
-            ->join('receive_sales', 'task.id', '=', 'receive_sales.task_id')
-            ->join('employee', 'employee.id', '=', 'task.empoyee_id')
-            ->join('products', 'sales.product_id', '=', 'products.id')
-            ->where('task.id', '=', $id)
-            ->select(
-                'sales.*',
-                'task.sub_total',
-                'sales.task_id',
-                'products.product_name',
-                'task.created_at',
-                'employee.employee_number',
-                'employee.first_name',
-                'employee.last_name',
-                'employee.phone',
-                // 'SUM(receive_sales.amount) as paid_amount'
-            )
-            ->orderBy('sales.created_at', 'ASC')
-            ->get();
+        ->join('task', 'task.id', '=', 'sales.task_id')
+        ->leftJoin('receive_sales', 'task.id', '=', 'receive_sales.task_id') // Changed to leftJoin
+        ->join('employee', 'employee.id', '=', 'task.empoyee_id')
+        ->join('products', 'sales.product_id', '=', 'products.id')
+        ->where('task.id', '=', $id)
+        ->select(
+            'sales.*',
+            'task.sub_total',
+            'sales.task_id',
+            'products.product_name',
+            'task.created_at',
+            'employee.employee_number',
+            'employee.first_name',
+            'employee.last_name',
+            'employee.phone'
+        )
+        ->orderBy('sales.created_at', 'ASC')
+        ->get();
+    
 
-        // Get total payments in one query
+        // Calculate total payments in a single query
         $payments = DB::table('receive_sales')
             ->where('task_id', '=', $id)
-            ->sum('receive_sales.amount');
+            ->sum('amount');
 
-        // Preload all demages in one query to avoid repeated queries in the loop
+        // Preload demages by product to avoid redundant queries
         $demagesByProduct = DB::table('product_demage')
             ->whereIn('product_id', $product_outs->pluck('product_id'))
             ->where('task_id', $id)
             ->get()
             ->groupBy('product_id');
 
-        // Prepare results, avoid querying in loop
+        // Process each product
         $product_out = [];
         $pded = 0;
-        $start = null;
-        $end = null;
 
         foreach ($product_outs as $key => $value) {
             $ppay = $payments - $pded;
-
-            // Set default values
             $value->demages = 0;
             $value->amount_paid = 0;
 
-            // Track start and end dates
+            // Determine start and end dates
             if ($key == 0) $start = $value->created_at;
             if ($key == sizeof($product_outs) - 1) $end = $value->created_at;
 
-            // Check if there are any demages for the product
+            // Get demages for the current product
             $demages = $demagesByProduct[$value->product_id] ?? collect();
 
             if ($demages->isNotEmpty()) {
-                $demage = $demages->first();  // Assume one demage per product
+                $demage = $demages->first();
                 $value->amt += ($value->sub_total - $value->amt);
-
-                if ($ppay > $value->amt) {
-                    $value->amount_paid = $value->amt;
-                    $value->demage_qty = $demage->qty;
-                    $value->demages += $demage->amt;
-                    $pded += $value->amt;
-                } else {
-                    $value->amount_paid = max($ppay, 0);
-                    $pded += $value->amt;
-                }
+                $value->amount_paid = ($ppay > $value->amt) ? $value->amt : max($ppay, 0);
+                $value->demage_qty = $demage->qty;
+                $value->demages += $demage->amt;
+                $pded += $value->amt;
             } else {
-                // Handle case when no demages exist
                 $value->amount_paid = ($ppay > $value->amt) ? $value->amt : max($ppay, 0);
                 $pded += $value->amt;
             }
 
-            // Add to final output
             $product_out[] = $value;
         }
 
-        // Fetch all related data in one go using appropriate joins and queries
-        $x = DB::table('receive_sales')
-            ->join('task', 'receive_sales.task_id', '=', 'task.id')
-            ->join('employee', 'task.empoyee_id', '=', 'employee.id')
-            ->where('task.id', '=', $id)
-            ->select(
-                'receive_sales.*',
-                'task.task_number',
-                'employee.employee_number',
-                'employee.first_name',
-                'employee.last_name',
-                'employee.phone'
-            )
-            ->get();
-
+        // Fetch demage records
         $demage = DB::table('product_demage')
             ->join('task', 'task.id', '=', 'product_demage.task_id')
-            ->join('employee', 'task.empoyee_id', '=', 'employee.id')
+            ->join('employee', 'employee.id', '=', 'task.empoyee_id')
             ->join('products', 'product_demage.product_id', '=', 'products.id')
             ->where('task.id', '=', $id)
             ->select(
@@ -1675,14 +1649,18 @@ class TaskController extends Controller
             )
             ->get();
 
-        // Combine sum queries to minimize DB queries
+        // Fetch sums and necessary data
         $sums = DB::table('task')
             ->leftJoin('sales', 'sales.task_id', '=', 'task.id')
             ->leftJoin('stock_return', 'task.id', '=', 'stock_return.task_id')
+            ->leftJoin('employee', 'employee.id', '=', 'task.empoyee_id')
             ->leftJoin('product_demage', 'task.id', '=', 'product_demage.task_id')
             ->leftJoin('receive_sales', 'receive_sales.task_id', '=', 'task.id')
             ->where('task.id', '=', $id)
             ->selectRaw('
+                CONCAT(employee.first_name, " ", employee.last_name) as employee_name,
+                task.task_number as dispatch,
+                sales.created_at as date,
                 SUM(sales.qty) as sum_qty,
                 SUM(sales.retail) as sum_retail,
                 SUM(sales.bulk) as sum_bulk,
@@ -1693,14 +1671,29 @@ class TaskController extends Controller
                 SUM(task.amount_due) as sum_due,
                 SUM(product_demage.qty) as sum_demage_qty,
                 SUM(product_demage.amt) as sum_demage_amt,
-                SUM(receive_sales.amount) as sum_recive
+                SUM(receive_sales.amount) as sum_receive
             ')
+            ->groupBy('employee.first_name','sales.created_at', 'employee.last_name', 'task.task_number')  // Add this line
             ->first();
-        info($sums->sum_recive);
-        // Generate the PDF using fetched data
+
+        $x = DB::table('receive_sales')
+            ->join('task', 'receive_sales.task_id', '=', 'task.id')
+            ->join('employee', 'task.empoyee_id', '=', 'employee.id')
+            ->where('task.id', '=', $id)
+            ->select(
+                'receive_sales.*',
+                'task.task_number',
+                'employee.employee_number',
+                'employee.first_name',
+                'employee.last_name',
+                'employee.phone'
+            )
+            ->get();
+            $start = null;
+        // Generate the PDF
         $pdf = PDF::loadView('task.single_report', [
-            'loggedInUser'=>Auth::User(),
-            'dates' => $start,
+            'loggedInUser' => Auth::User(),
+            'dates' => $sums->date,
             'count' => count($product_out),
             'product_out' => $product_out,
             'sum_qty' => $sums->sum_qty,
@@ -1711,16 +1704,18 @@ class TaskController extends Controller
             'sum_return_amt' => $sums->sum_return_amt,
             'sum_return' => $sums->sum_return,
             'sum_due' => $sums->sum_due,
-            'demage' => $demage,
-            'sum_recive' => $payments,
             'x' => $x,
+            'demage' => $demage,
+            'employee' => $sums->employee_name,
+            'dispatch' => $sums->dispatch,
+            'sum_recive' => $payments,
             'sum_demage_qty' => $sums->sum_demage_qty,
             'sum_demage_amt' => $sums->sum_demage_amt
         ]);
 
-        $pdf->setPaper('A4', 'landscape');
-        return $pdf->stream('supplier.pdf');
+        return $pdf->setPaper('A4', 'landscape')->stream('supplier.pdf');
     }
+
 
 
 

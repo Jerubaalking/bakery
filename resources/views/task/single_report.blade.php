@@ -204,20 +204,20 @@
             <img src="assets/img/misana.png" alt="logo" height="40" width="80" style="float:right;padding-right:62px;margin-top:5px;">
             <!-- <img src="assets/img/misana.png" height="70%" width="80%" style="opacity: 0.05;"/> -->
         </div>
-        <div class="row top_tag" style="margin-top:80px;">
+        <div class="row top_tag" style="margin-top:0px;">
             <div class="col-lg-12" style="text-align:center;">
                 <h1 style="color:red;"><strong>Misana Home Bakery</strong></h1>
             </div>
             <div class="col-lg-12" style="text-align:center;">
                 <h3 style="margin-left:30px;margin-top:-10px;">
-                    <strong style="color:green">{{$product_out[0]->first_name??''}} -- {{$product_out[0]->last_name??''}}
-                        <span style="color:red"> Sales Report</span>
+                    <strong style="color:green">{{$employee}} -- 
+                        <span style="color:red"> {{$dispatch}} Report</span>
                     </strong>
                 </h3>
             </div>
         </div>
         <div class="row top_tag" style="position:relative;">
-            <div class=" row col-lg-12" style="margin-top:50px;">
+            <div class=" row col-lg-12" >
                 <!-- TOP CAMPAIGN-->
                 <div class="top-campaign">
                     <h3 class="title-3 m-b-35">Summary</h3>
@@ -248,16 +248,6 @@
                                     <td>Amount Received</td>
                                     <td style="text-align:right;">{{number_format($sum_recive,2)}}</td>
 
-                                </tr>
-                                <tr>
-                                    <td style="color:red">Cost Returned</td>
-                                    <td style="color:red; text-align:right;">{{number_format($sum_return_amt,2)}}
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td style="color:red">Demage Product Cost</td>
-                                    <td style="color:red; text-align:right;">{{number_format($sum_demage_amt,2)}}
-                                    </td>
                                 </tr>
                                 <tr>
                                     <td style="color:red">Amount Due</td>
@@ -311,7 +301,7 @@
                                     {{number_format($product_out->price,2)}}
                                 </td>
                                 <td class="pl-0" style="text-align:right;">
-                                    {{number_format($product_out->sub_total,2)}}
+                                    {{number_format(($product_out->bulk*$product_out->price)+($product_out->retail*$product_out->retail_price),2)}}
                                 </td>
                                 <td class="pl-0" style="text-align:right;">
                                     {{number_format($product_out->amount_paid,2)}}

@@ -185,12 +185,11 @@
     }
 </style>
 
-<div>
-
-</div>
+<head>
+    <title>{{$dispatch}}|Report</title>
+</head>
 <div class="section__content section__content--p30">
     <div class="container-fluid">
-
         <div>
             <span style="font-family:sans-serif; font-size:10px;">
                 <?php
@@ -220,7 +219,7 @@
             <div class=" row col-lg-12" >
                 <!-- TOP CAMPAIGN-->
                 <div class="top-campaign">
-                    <h3 class="title-3 m-b-35">Summary</h3>
+                    <h3 class="title-3 m-b-3">Summary</h3>
                     <div class="table-responsive">
                         <table class="table table-top-campaign">
                             <tbody>
@@ -233,11 +232,6 @@
                                     <td style=" text-align:right;">{{$sum_qty}}</td>
 
                                 </tr>
-                                <tr>
-                                    <td>Demage Product Qty</td>
-                                    <td style=" text-align:right;">{{$sum_demage_qty}}</td>
-                                </tr>
-
                                 <tr>
                                     <td>Amount Required</td>
                                     <td style=" text-align:right;">{{number_format($sum_amt,2)}}</td>
@@ -259,8 +253,8 @@
                     </div>
                 </div>
             </div>
-            <div class="row col-lg-12" style="margin-top:110px;">
-                <h3 class="title-5 m-b-35" style="color:red">Sales Information</h3>
+            <div class="row col-lg-12" style="margin-top:10px;">
+                <h3 class="title-5 m-b-3" style="color:red">Sales Information</h3>
                 <div class="table-responsive">
                     <table class="table">
                         <thead>

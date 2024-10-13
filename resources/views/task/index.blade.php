@@ -45,8 +45,8 @@
                         <label>Dispatch</label> <br>
                         <select class="form-control" onchange="populateTable('apiTask')" name="status" id="status">
                             <!--<option value="all">all</option>-->
-                            <option value="task" selected>Active Tasks</option>
-                            <option value="closed">Closed Task</option>
+                            <option value="task" selected>Active Dispatchs</option>
+                            <option value="closed">Closed Dispatch</option>
                             <option value="damaged">Damages</option>
 
                             @if(\Auth::user()->role=='Superadministrator')
@@ -388,7 +388,7 @@
                                 <tr>
                                     <th>Sales Account</th>
                                     <!-- <th>Supplier Number</th> -->
-                                    <!--<th>Task Number</th>-->
+                                    <!--<th>Dispatch</th>-->
                                     <th>Total Amount</th>
                                     <th>Amount Paid</th>
                                     <th>Amount due</th>
@@ -409,7 +409,7 @@
                                 <tr>
                                     <th>Sales Account</th>
                                     <!-- <th>Supplier Number</th> -->
-                                    <th>Task Number</th>
+                                    <th>Dispatch</th>
                                     <th>Total Amount</th>
                                     <th>Amount Paid</th>
                                     <th>Amount due</th>
@@ -430,7 +430,7 @@
                                 <tr>
                                     <th>Sales Account</th>
                                     <!-- <th>Supplier Number</th> -->
-                                    <th>Task Number</th>
+                                    <th>Dispatch</th>
                                     <th>Total Amount</th>
                                     <th>Amount Paid</th>
                                     <th>Amount due</th>
@@ -451,7 +451,7 @@
                                 <tr>
                                     <th>Sales Account</th>
                                     <!-- <th>Supplier Number</th> -->
-                                    <th>Task Number</th>
+                                    <th>Dispatch</th>
                                     <th>Total Amount</th>
                                     <th>Amount Paid</th>
                                     <th>Amount due</th>
@@ -472,7 +472,7 @@
                                 <tr>
                                     <th>Sales Account</th>
                                     <!-- <th>Supplier Number</th> -->
-                                    <!--<th>Task Number</th>-->
+                                    <!--<th>Dispatch</th>-->
                                     <th>Total Amount</th>
                                     <th>Amount Paid</th>
                                     <th>Amount due</th>

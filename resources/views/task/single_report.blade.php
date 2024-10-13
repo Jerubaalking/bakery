@@ -210,7 +210,7 @@
             </div>
             <div class="col-lg-12" style="text-align:center;">
                 <h3 style="margin-left:30px;margin-top:-10px;">
-                    <strong style="color:green">{{$product_out[0]->first_name}} -- {{$product_out[0]->last_name}}
+                    <strong style="color:green">{{$product_out[0]->first_name??''}} -- {{$product_out[0]->last_name??''}}
                         <span style="color:red"> Sales Report</span>
                     </strong>
                 </h3>
@@ -346,7 +346,7 @@
                         <tr>
                             <th scope="col" class="border-0 pl-0">Date</th>
                             <th scope="col" class="border-0 pl-0">Account Number</th>
-                            <th scope="col" class="border-0 pl-0">Task Number</th>
+                            <th scope="col" class="border-0 pl-0">Dispatch</th>
                             <th scope="col" class="border-0 pl-0">Amount Paid</th>
 
                         </tr>

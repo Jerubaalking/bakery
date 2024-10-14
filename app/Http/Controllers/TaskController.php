@@ -972,7 +972,6 @@ class TaskController extends Controller
                         account.account_name,
                         employee.employee_number,
                         CONCAT(employee.first_name, " ", employee.last_name) as employee_name,
-                        SUM(task.amount_paid) as amount_paid,
                         SUM(task.returned) as returned,
                         SUM(task.demage_cost) as demage_cost
                     ')
@@ -986,24 +985,34 @@ class TaskController extends Controller
 
                 $paid = DB::table('receive_sales')
                     ->where('receive_sales.task_id', '=', $data->id)
-                    ->selectRaw('
-                        SUM(receive_sales.amount) as total_paid_amount,
-                        MAX(receive_sales.updated_at) as latest_payment_date
-                    ')
-                    ->first(); // To fetch a single result
+                    ->sum('receive_sales.amount');
+                // $latest_payment_date = DB::table('receive_sales')
+                //     ->where('receive_sales.task_id', '=', $data->id)
+                //     ->max('receive_sales.updated_at');
+                // Assuming $paid is fetched from the database
+                // Example: $paid = DB::table('receive_sales')->where('task_id', $task_id)->sum('amount');
 
-                $data->last_paid = $paid->latest_payment_date;
+                if (is_object($paid) && property_exists($paid, 'paid')) {
+                    $data['amount_paid'] = $paid->paid;
+                } else if (is_numeric($paid)) {
+                    // If $paid is a numeric value (likely from a sum operation), use it directly
+                    $data->amount_paid = $paid;
+                } else {
+                    // Handle the case where $paid is not an object or a number (unexpected case)
+                    $data['amount_paid'] = 0; // Set a default value
+                }
+
+                // Continue with the calculation
+                $subTotal = floatval($data->sub_total);
+                $amountPaid = floatval($data->amount_paid);
+                $data->amount_due = $subTotal - $amountPaid;
+
+                // Log information about the task
                 info('task id ==>' . json_encode($data));
-                // Calculate the amount due
-                $subTotal = intval($data->sub_total);
-                $amountPaid = intval($data->amount_paid);
-                $demageCost = intval($data->demage_cost);
-                $returned = intval($data->returned);
 
-                $data->amount_due = $subTotal - ($amountPaid + $demageCost + $returned);
 
                 // Fetch the associated sales data
-                info('this is data: ');
+                info('this is data: ' . $paid);
                 $salesData = DB::table('sales') // Or 'sale' if the table is named singular
                     ->where('sales.task_id', '=', $data->id)  // Ensure $id refers to a valid task_id
                     ->join('products', 'sales.product_id', '=', 'products.id')  // Join products on product_id
@@ -1029,7 +1038,8 @@ class TaskController extends Controller
 
                 // Add the sales data to the result
                 $data->sales = $salesData->toArray();  // Sales data as an array
-                
+                $data->amount_paid = $paid;
+
                 // Return the result as JSON
                 return response()->json(['success' => true, 'data' => $data]);
             } catch (\Exception $e) {

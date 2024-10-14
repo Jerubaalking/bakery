@@ -1,30 +1,24 @@
 <?php
 
-namespace App\Providers;
+namespace App\Http\Controllers;
 
-use Illuminate\Support\Facades\View;
-use Illuminate\Support\ServiceProvider;
+use Auth;
 
-class AppServiceProvider extends ServiceProvider
+class HomeController extends Controller
 {
     /**
-     * Register any application services.
+     * Create a new controller instance.
      *
      * @return void
      */
-    public function register()
+    // public function __construct()
+    // {
+    //     $this->middleware('auth');
+    // }
+    // In your relevant Controller
+    public function MenuList()
     {
-        //
-    }
-
-    /**
-     * Bootstrap any application services.
-     *
-     * @return void
-     */
-    public function boot()
-    {
-        // Define the menu items based on user roles
+        // Define the menu items here
         $menuItems = [
             'Dashboard' => [
                 'icon' => 'fas fa-tachometer-alt',
@@ -133,9 +127,6 @@ class AppServiceProvider extends ServiceProvider
             ],
         ];
 
-        // Share the menu items with both views
-        View::composer(['layouts.mobileNav', 'layouts.sidebar'], function ($view) use ($menuItems) {
-            $view->with('menuItems', $menuItems);
-        });
+        return view('layouts.mobileNav', compact('menuItems'));
     }
-}
+};

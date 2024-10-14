@@ -498,14 +498,12 @@
     }
 
     function materialData(batch_number) {
-        if (batch_number == '' || null) {
-
-        } else {
-
+        if (batch_number !== '' || null) {
             $.ajax({
                 url: '/intoStoreShow/' + batch_number,
                 success: function(html) {
                     let datas = JSON.parse(html)
+                    $('#currentBatch').text(batch_number);
                     $('#materialData-body').html('');
                     let table = '';
                     let sum = 0;
@@ -520,7 +518,7 @@
                             <td>${data.name}</td>
                             <td>${data.category_name}</td>
                             <td>${data.qty} ${data.symbol}</td>
-                            <td>${data.cost}</td>
+                            <td>${data.cost.toLocaleString('TZ', {})}/=</td>
                             </tr>`
                         console.log(data)
                     };
@@ -528,7 +526,7 @@
                             <td>Total</td>
                             <td>-</td>
                             <td>-</td>
-                            <td>${sum}</td>
+                            <td>${sum.toLocaleString('TZ', {})}/=</td>
                             </tr>`;
                     $('#batch_number_report').html('');
                     $('#batch_number_report').append(batch_number);

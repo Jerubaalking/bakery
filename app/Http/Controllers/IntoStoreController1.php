@@ -44,16 +44,30 @@ class IntoStoreController extends Controller
         return view('intoStore.index',compact('into_stores', 'materials', 'measurements', 'material_categories', 'batches', 'products'));
     }
 
-    public function show(){
-         //
-         $into_stores=DB::table('into_store')
-         ->join('materials', 'materials.id', '=', 'into_store.material_id')
-         ->join('material_categories','material_categories.id','=','materials.material_category_id')
-         ->join('measurements','measurements.id','=','materials.measurement_id')
-         ->select('into_store.*', 'materials.name','material_categories.type', 'materials.unit_cost','materials.material_category_id', 'materials.measurement_id', 'measurements.measurement', 'measurements.symbol')
-         ->get();
-         return json_encode($into_stores);
+    public function show() {
+        $into_stores = DB::table('into_store')
+            ->join('materials', 'materials.id', '=', 'into_store.material_id')
+            ->join('material_categories','material_categories.id','=','materials.material_category_id')
+            ->join('measurements','measurements.id','=','materials.measurement_id')
+            ->select(
+                'into_store.*',
+                'materials.name',
+                'material_categories.type', 
+                'materials.unit_cost',
+                'materials.material_category_id',
+                'materials.measurement_id',
+                'measurements.measurement',
+                'measurements.symbol',
+                DB::raw('SUM(CASE WHEN into_store.status = "in" THEN into_store.qty ELSE 0 END) as totalInQty'),
+                DB::raw('SUM(CASE WHEN into_store.status IN ("process", "finished") THEN into_store.qty ELSE 0 END) as totalOutQty')
+            )
+            ->groupBy('materials.id')
+            ->get();
+    
+        return json_encode($into_stores);
     }
+    
+    
     public function showBatch($batch_number){
         //
         $data=DB::table('into_store')

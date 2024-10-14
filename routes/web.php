@@ -29,6 +29,7 @@ use App\Http\Controllers\CashFlow;
 use App\Http\Controllers\Expensive_Income;
 use App\Http\Controllers\AuditController;
 use App\Http\Controllers\DesignationController;
+use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Auth;
 
 /*
@@ -122,6 +123,11 @@ Route::post('/exportProduct_outAll', [ProductOutController::class,'exportProduct
 Route::get('/exportProduct_outAllExcel', [ProductOutController::class,'exportExcel']);
 Route::get('/sales_info/{id}', [ProductOutController::class,'sales_info']);
 
+// Profiel 
+
+Route::get('/profile', [ProfileController::class, 'show'])->name('profile.show');
+Route::get('/profile/edit', [ProfileController::class, 'edit'])->name('profile.edit');
+Route::post('/profile', [ProfileController::class, 'update'])->name('profile.update');
 
 Route::get('/apiCategories', [CategoryController::class,'apiCategories']);
 

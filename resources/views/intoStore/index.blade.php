@@ -508,7 +508,7 @@
             obj.end = ed.toString() + ' 23:59:59';
             obj.status = status;
         }
-        if(status =='in'){
+        if (status == 'in') {
             toggleSpinner('batch_print_btn', false);
             alert('Batch report only available for processes.');
             return;
@@ -759,23 +759,23 @@
 
         $.ajax({
             url: "{{ url('intoStoreShow') }}",
-            success: function(html) {
-                var datas = JSON.parse(html);
-                var totalInQty = 0;
-                var totalOutQty = 0;
-                var totalQty = 0;
-                datas.map(function(item) {
-                    if (item.status == 'in' && item.material_id == id) {
-                        totalInQty += parseInt(item.qty);
-                    }
-                    if (item.status == 'process' && item.material_id == id || item.status == 'finished' && item.material_id == id) {
-                        totalOutQty += parseInt(item.qty);
+            success: function(response) {
+                var datas = JSON.parse(response);
+
+                datas.forEach(function(item) {
+                    if (item.material_id == id) {
+                        // Total quantities are now already calculated by the backend
+                        var totalInQty = parseInt(item.totalInQty) || 0;
+                        var totalOutQty = parseInt(item.totalOutQty) || 0;
+                        var availableQty = totalInQty - totalOutQty;
+
+                        // Update the relevant input fields
+                        $(`.cqty${prev}`).val(availableQty);
+                        $(`.total${prev}`).val(availableQty);
                     }
                 });
-                var availableQty = totalInQty - totalOutQty;
-                $(`.cqty${prev}`).val(availableQty);
-                $(`.total${prev}`).val(availableQty);
             }
+
         });
     }
 

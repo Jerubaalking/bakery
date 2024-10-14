@@ -7,7 +7,7 @@
                 <center>
                     <h5 style="margin-left:30px;margin-top:10px;"><strong style="color:green">Material Report <br> Batch-<span id="batch_number_report"></span>
                     <br> Date-<span id="date_report"></span>
-                            <?php //echo $batch_number ?>
+                    <span id="currentBatch"></span>
                         </strong></h5>
             <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                 <span aria-hidden="true" style="font-size:20px;">&times;</span></button>

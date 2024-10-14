@@ -1029,7 +1029,7 @@ class TaskController extends Controller
 
                 // Add the sales data to the result
                 $data->sales = $salesData->toArray();  // Sales data as an array
-
+                
                 // Return the result as JSON
                 return response()->json(['success' => true, 'data' => $data]);
             } catch (\Exception $e) {

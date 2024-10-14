@@ -137,6 +137,7 @@ class ReceivePayment extends Controller
     
             // Calculate the total from the amt[] in the request
             $total_amt = array_sum($request->amt);
+            $total_retial_amt = array_sum($request->retail_amt);
     
             // Prepare the payment data
             $payment_data = [
@@ -161,12 +162,14 @@ class ReceivePayment extends Controller
                 ->sum('amount');
     
             // Calculate amount_due as total_amt - total received
-            $amount_due = $total_amt - $total_received;
+            $amount_due = ($total_amt+$total_retial_amt) - $total_received;
+            $sub_total = ($total_amt+$total_retial_amt);
+
     
             // Update the task's sub_total and amount_due
             $task_data = [
                 'amount_paid' => $total_received,
-                'sub_total' => $total_amt,
+                'sub_total' => $sub_total,
                 'amount_due' => max($amount_due, 0),  // Ensuring amount_due does not go negative
                 'updated_at' => Carbon::now(),
             ];

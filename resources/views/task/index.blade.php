@@ -1450,6 +1450,7 @@
                         html_form += '<div class="col-md-2">';
                         html_form += '<label>Expected</label><br>';
                         html_form += '<input type="number" min=0 name="amt[]" id="amt" readonly  value="' + (parseFloat(html.data.sales[i].amt)) + '" class="form-control" placeholder="price"/>';
+                        html_form += '<input type="hidden"  name="retail_amt[]" id="retail_amt" readonly  value="' + (parseFloat(html.data.sales[i].retail_amt)) + '" class="form-control" placeholder="price"/>';
                         html_form += '</div>';
 
                         html_form += '</div></div><br /></span>';
@@ -1475,6 +1476,7 @@
             const bulkInput = row.find('.bulk');
             const qty = parseInt(row.find('#qty').val()) || 0;
             const amtInput = row.find('#amt'); // Find the amount input field
+            const retailAmtInput = row.find('#retail_amt'); // Find the amount input field
 
             // Function to prevent negative values and round them to zero
             function sanitizeValue(value) {
@@ -1501,8 +1503,9 @@
             }
 
             // Update the amt value: bulk * sale.price + retail * sale.retail_price
-            const totalAmt = (bulkFinal * sale.price) + (retailFinal * sale.retail_price);
-            amtInput.val(totalAmt); // Update the amt input with the calculated value
+            const totalAmt = (bulkFinal * sale.price)+(retailFinal * sale.retail_price);
+            amtInput.val(bulkFinal * sale.price); // Update the amt input with the calculated value
+            retailAmtInput.val(retailFinal * sale.retail_price); // Update the amt input with the calculated value
 
             // Recalculate the total for all amt[] inputs
             calculateExpectedTotal();
@@ -1512,6 +1515,9 @@
         function calculateExpectedTotal(data) {
             let total = 0;
             $('input[name="amt[]"]').each(function() {
+                total += parseFloat($(this).val()) || 0; // Accumulate the value
+            }); 
+            $('input[name="retail_amt[]"]').each(function() {
                 total += parseFloat($(this).val()) || 0; // Accumulate the value
             });
 

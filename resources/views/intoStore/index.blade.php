@@ -595,7 +595,6 @@
 
     $('#use_btn').on('click', function() {
 
-        alert("use button clicked")
         save_method = "use";
         $('input[name=_method]').val('POST');
         $('#modal-form').modal('show');
@@ -610,7 +609,6 @@
     });
 
     function add_expensive_row() {
-        alert('am here bost add expensive rows')
         var prev = parseInt($("#indexer").val()) + 1;
         var tr = $(this).parent().parent();
         var html = '';

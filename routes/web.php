@@ -2,6 +2,7 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\AccountController;
+use App\Http\Controllers\ActivityController;
 use App\Http\Controllers\ExpensiveController;
 use App\Http\Controllers\DepositeController;
 use App\Http\Controllers\ProductController;
@@ -225,6 +226,7 @@ route::resource('/income_expenditure',Expensive_Income::class);
 route::post('/profit_loss', [Expensive_Income::class,'income_exp']);
 
 route::resource('/get_audit', AuditController::class);
+route::resource('/activities', ActivityController::class);
 Route::get('/home', [HomeController::class, 'index'])->name('home');
 
 Route::get('/', function () {

@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Traits\LogsActivity;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -10,6 +11,7 @@ use Yajra\DataTables\DataTables;
 
 class ReceivePayment extends Controller
 {
+    use LogsActivity;
     public function __construct()
     {
         $this->middleware('auth');
@@ -120,11 +122,13 @@ class ReceivePayment extends Controller
     public function save_public(Request $request)
     {
         if ($request->ajax()) {
-            info('incoming form ===>>', $request->all());
+            info('Incoming form ===>>', $request->all());
             
             // Retrieve the task based on the task ID
             $task = DB::table('task')->where('id', $request->task_id_receive)->first();
             if (!$task) {
+                // Log activity for task not found
+                $this->logActivity('Task not found', 'error', 'Task ID: ' . $request->task_id_receive);
                 return response()->json([
                     'success' => false,
                     'message' => 'Task not found',
@@ -148,6 +152,9 @@ class ReceivePayment extends Controller
             // Insert the payment data into the receive_sales table
             DB::table('receive_sales')->insert($payment_data);
     
+            // Log successful payment insertion
+            $this->logActivity('Payment recorded', 'success', json_encode($payment_data));
+    
             // Sum the amounts from receive_sales for the current task
             $total_received = DB::table('receive_sales')
                 ->where('task_id', $request->task_id_receive)
@@ -155,8 +162,6 @@ class ReceivePayment extends Controller
     
             // Calculate amount_due as total_amt - total received
             $amount_due = $total_amt - $total_received;
-    
-            // Calculate the remainder of the received payment
     
             // Update the task's sub_total and amount_due
             $task_data = [
@@ -167,12 +172,17 @@ class ReceivePayment extends Controller
             ];
     
             DB::table('task')->where('id', $task->id)->update($task_data);
+            
+            // Log successful task update
+            $this->logActivity('Dispatch updated with payment information', 'success', json_encode($task_data));
+    
             return response()->json([
                 'success' => true,
                 'message' => 'Payment and sales successfully recorded',
             ]);
         }
     }
+    
     
 
 

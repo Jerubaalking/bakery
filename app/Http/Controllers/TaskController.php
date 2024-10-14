@@ -14,10 +14,12 @@ use PDF;
 use Auth;
 use Yajra\DataTables\DataTables;
 use App\Models\SalesModel;
-
+use App\Traits\LogsActivity;
 
 class TaskController extends Controller
 {
+
+    use LogsActivity;
     public function __construct()
     {
         $this->middleware('auth');
@@ -188,6 +190,9 @@ class TaskController extends Controller
             // Commit the transaction after everything is successful
             DB::commit();
 
+            // Log success completion
+            $this->logActivity('Dispatch creation', 'success', json_encode($sales_data));
+
             // Return success response
             return response()->json([
                 'success' => true,
@@ -197,8 +202,8 @@ class TaskController extends Controller
             // Rollback transaction if something goes wrong
             DB::rollBack();
 
-            // Log the error
-            \Log::error($e->getMessage());
+            // Log the error with exception details
+            $this->logActivity('Dispatch creation', 'failed', $e->getMessage());
 
             // Return failure response
             return response()->json([
@@ -1425,7 +1430,7 @@ class TaskController extends Controller
         $pdf = PDF::loadView('task.export_task', [
             'from' => $from,
             'to' => $to,
-            'x'=>$x,
+            'x' => $x,
             'loggedInUser' => Auth::user(),
             'dates' => $sums[0]->date, // Use date from the first item or modify as needed
             'count' => count($product_out),

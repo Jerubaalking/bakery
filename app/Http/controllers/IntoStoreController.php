@@ -53,6 +53,25 @@ class IntoStoreController extends Controller
          ->get();
          return json_encode($into_stores);
     }
+    public function qtyOf($id)
+    {
+        // Get total quantity where status is 'in'
+        $inQty = DB::table('into_store')
+            ->where('material_id', $id) // Using the dynamic $id parameter
+            ->where('status', 'in')
+            ->sum('qty');
+    
+        // Get total quantity where status is not 'in'
+        $outQty = DB::table('into_store')
+            ->where('material_id', $id) // Using the dynamic $id parameter
+            ->where('status', '<>', 'in')
+            ->sum('qty');
+    
+        // Calculate the difference between the two quantities
+        $qtyDifference = $inQty - $outQty;
+    
+        return json_encode($qtyDifference);
+    }
     public function showBatch($batch_number){
         //
         $data=DB::table('into_store')

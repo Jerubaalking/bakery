@@ -36,3 +36,4 @@
         </nav>
     </div>
 </aside>
+@include('layouts.header')

@@ -56,7 +56,7 @@ Route::get('/apiProductionSession',[ProductionSessionController::class, 'apiProd
 Route::resource('/intoStore',IntoStoreController::class);
 Route::get('/apiIntoStore',[IntoStoreController::class, 'apiIntoStore']);
 Route::post('/apiUseStore',[IntoStoreController::class, 'apiUseStore']);
-Route::get('/intoStoreShow',[IntoStoreController::class, 'show']);
+Route::get('/intoStoreShow/{id}',[IntoStoreController::class, 'qtyOf']);
 Route::get('/intoStoreShow/{batch_number}',[IntoStoreController::class, 'showBatch']);
 Route::get('/intoStoreShowByDates',[IntoStoreController::class, 'showByDates']);
 Route::get('/exportIntoStorePDF',[IntoStoreController::class, 'exportPDF']);
@@ -127,7 +127,7 @@ Route::get('/sales_info/{id}', [ProductOutController::class,'sales_info']);
 
 Route::get('/profile', [ProfileController::class, 'show'])->name('profile.show');
 Route::get('/profile/edit', [ProfileController::class, 'edit'])->name('profile.edit');
-Route::post('/profile', [ProfileController::class, 'update'])->name('profile.update');
+Route::put('/profile/{id}', [ProfileController::class, 'update'])->name('profile.update');
 
 Route::get('/apiCategories', [CategoryController::class,'apiCategories']);
 

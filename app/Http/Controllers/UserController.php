@@ -1,6 +1,7 @@
 <?php
 
 namespace App\Http\Controllers;
+
 use App\User;
 use Excel;
 use Illuminate\Http\Request;
@@ -10,20 +11,22 @@ use App\Models\UserModel;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Carbon\Carbon;
-class UserController extends Controller {
+
+class UserController extends Controller
+{
 
 	public function __construct()
-    {
-        $this->middleware('auth');
-    }
+	{
+		$this->middleware('auth');
+	}
 	/**
 	 * Display a listing of the resource.
 	 *
 	 * @return \Illuminate\Http\Response
 	 */
-	public function index() {
-	    return view('user.index');
-		
+	public function index()
+	{
+		return view('user.index');
 	}
 
 	/**
@@ -31,7 +34,8 @@ class UserController extends Controller {
 	 *
 	 * @return \Illuminate\Http\Response
 	 */
-	public function create() {
+	public function create()
+	{
 		//
 	}
 
@@ -41,29 +45,29 @@ class UserController extends Controller {
 	 * @param  \Illuminate\Http\Request  $request
 	 * @return \Illuminate\Http\Response
 	 */
-	public function store(Request $request) {
+	public function store(Request $request)
+	{
 		$this->validate($request, [
 			'name' => 'required',
 			'email' => 'required',
 			'password' => 'required',
 			'role' => 'required',
 			'password' => 'required',
-		
+
 		]);
-			$form_data = array(
-				'name' => $request->name,
-				'email' => $request->email,
-				'phone' => $request->phone,
-				'role' => $request->role,
-				'password' => Hash::make( $request->password)	
-			);
-         DB::table('users')->insert($form_data);
+		$form_data = array(
+			'name' => $request->name,
+			'email' => $request->email,
+			'phone' => $request->phone,
+			'role' => $request->role,
+			'password' => Hash::make($request->password)
+		);
+		DB::table('users')->insert($form_data);
 
 		return response()->json([
 			'success' => true,
 			'message' => 'User Created',
 		]);
-
 	}
 
 	/**
@@ -72,7 +76,8 @@ class UserController extends Controller {
 	 * @param  int  $id
 	 * @return \Illuminate\Http\Response
 	 */
-	public function show($id) {
+	public function show($id)
+	{
 		//
 	}
 
@@ -82,11 +87,12 @@ class UserController extends Controller {
 	 * @param  int  $id
 	 * @return \Illuminate\Http\Response
 	 */
-	public function edit($id) {
-		if(request()->ajax()){
-            $data =DB::table('users')->find($id);
-            return response()->json(['data' => $data]);   
-           }
+	public function edit($id)
+	{
+		if (request()->ajax()) {
+			$data = DB::table('users')->find($id);
+			return response()->json(['data' => $data]);
+		}
 	}
 
 	/**
@@ -96,28 +102,56 @@ class UserController extends Controller {
 	 * @param  int  $id
 	 * @return \Illuminate\Http\Response
 	 */
-	public function update(Request $request, $id) {
-		// $this->validate($request, [
-		// 	'email' => 'required|string|email|max:255|unique:users',
-		// ]);
+	public function update(Request $request, $id)
+	{
+		// Start a database transaction
+		DB::beginTransaction();
 
-		info('user request data ===>', $request->all());
-		$updated_at= Carbon::now();
-    
-		$form_data = array(
-			'name' => $request->name,
-			'email' => $request->email,
-			'phone' => $request->phone,
-			'role' => $request->role,
-			'password' => Hash::make( $request->password),
-			'updated_at'=>$updated_at
-		);
+		try {
+			// Log incoming request data
+			info('user request data ===>', $request->all());
 
-	  DB::table('users')->where('id','=',$id)->update($form_data);
-	  return response()->json([
-		'success' => true,
-		'message' => 'User Updated',
-	  ]);
+			$updated_at = Carbon::now();
+
+			// Prepare the data for updating
+			$form_data = [
+				'name' => $request->name,
+				'email' => $request->email,
+				'phone' => $request->phone,
+				'role' => $request->role,
+				'updated_at' => $updated_at,
+			];
+			$passwordChanged = false;
+			// Only include the password in the update if it is provided
+			if ($request->filled('password')) {
+				// Update the password
+				$form_data['password'] = Hash::make($request->password);
+				$passwordChanged = true;
+			} 
+
+			// Update the user in the database
+			DB::table('users')->where('id', '=', $id)->update($form_data);
+
+			// Commit the transaction
+			DB::commit();
+
+			return response()->json([
+				'success' => true,
+				'password_changed' => $passwordChanged,
+				'message' => 'User Updated',
+			]);
+		} catch (\Exception $e) {
+			// Rollback the transaction if anything goes wrong
+			DB::rollBack();
+
+			// Log the error
+			\Log::error('Error updating user: ' . $e->getMessage());
+
+			return response()->json([
+				'success' => false,
+				'message' => 'Failed to update user. Please try again.',
+			], 500);
+		}
 	}
 
 	/**
@@ -126,29 +160,31 @@ class UserController extends Controller {
 	 * @param  int  $id
 	 * @return \Illuminate\Http\Response
 	 */
-	public function destroy($id) {
+	public function destroy($id)
+	{
 		// User::destroy($id);
-	       DB::table('users')->delete($id);
+		DB::table('users')->delete($id);
 		return response()->json([
 			'success' => true,
 			'message' => 'User Delete',
 		]);
 	}
 
-	public function apiUsers() {
+	public function apiUsers()
+	{
 		$users = DB::table('users')->get();
 
 		return Datatables::of($users)
 			->addColumn('action', function ($users) {
-				return 
-				'<a onclick="editForm(' . $users->id . ')" class="btn btn-primary btn-xs"><i class="glyphicon glyphicon-edit"></i> Edit</a> '.
-				'<a onclick="deleteData(' . $users->id . ')" class="btn btn-danger btn-xs"><i class="glyphicon glyphicon-trush"></i> Delete</a> ';
-
+				return
+					'<a onclick="editForm(' . $users->id . ')" class="btn btn-primary btn-xs"><i class="glyphicon glyphicon-edit"></i> Edit</a> ' .
+					'<a onclick="deleteData(' . $users->id . ')" class="btn btn-danger btn-xs"><i class="glyphicon glyphicon-trush"></i> Delete</a> ';
 			})
 			->rawColumns(['action'])->make(true);
 	}
 
-	public function ImportExcel(Request $request) {
+	public function ImportExcel(Request $request)
+	{
 		//Validasi
 		$this->validate($request, [
 			'file' => 'required|mimes:xls,xlsx',
@@ -164,13 +200,15 @@ class UserController extends Controller {
 		return redirect()->back()->with(['error' => 'Please choose file before!']);
 	}
 
-	public function exportSuppliersAll() {
+	public function exportSuppliersAll()
+	{
 		$suppliers = Supplier::all();
 		$pdf = PDF::loadView('suppliers.SuppliersAllPDF', compact('suppliers'));
 		return $pdf->download('suppliers.pdf');
 	}
 
-	public function exportExcel() {
+	public function exportExcel()
+	{
 		return (new ExportSuppliers)->download('suppliers.xlsx');
 	}
 }

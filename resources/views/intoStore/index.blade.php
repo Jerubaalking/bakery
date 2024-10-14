@@ -580,7 +580,6 @@
     })
 
     $('#add_btn').on('click', function() {
-
         save_method = "add";
         $('input[name=_method]').val('POST');
         $('#modal-form').modal('show');
@@ -596,6 +595,7 @@
 
     $('#use_btn').on('click', function() {
 
+        alert("use button clicked")
         save_method = "use";
         $('input[name=_method]').val('POST');
         $('#modal-form').modal('show');
@@ -610,6 +610,7 @@
     });
 
     function add_expensive_row() {
+        alert('am here bost add expensive rows')
         var prev = parseInt($("#indexer").val()) + 1;
         var tr = $(this).parent().parent();
         var html = '';
@@ -758,22 +759,15 @@
         var id = $(`.selectMaterial_id${prev}`).val();
 
         $.ajax({
-            url: "{{ url('intoStoreShow') }}",
-            success: function(response) {
-                var datas = JSON.parse(response);
-
-                datas.forEach(function(item) {
-                    if (item.material_id == id) {
-                        // Total quantities are now already calculated by the backend
-                        var totalInQty = parseInt(item.totalInQty) || 0;
-                        var totalOutQty = parseInt(item.totalOutQty) || 0;
-                        var availableQty = totalInQty - totalOutQty;
-
-                        // Update the relevant input fields
-                        $(`.cqty${prev}`).val(availableQty);
-                        $(`.total${prev}`).val(availableQty);
-                    }
+            url: "{{ url('intoStoreShow') }}/" + id,
+            success: function(qty) {
+                var datas = JSON.parse(qty);
+                console.log({
+                    datas
                 });
+
+                $(`.cqty${prev}`).val(qty);
+                $(`.total${prev}`).val(qty);
             }
 
         });

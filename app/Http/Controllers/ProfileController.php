@@ -1,13 +1,21 @@
 <?php
-
 namespace App\Http\Controllers;
 
+use App\User;
+use Excel;
 use Illuminate\Http\Request;
-use Auth;
-use Illuminate\Support\Facades\Storage;
+use PDF;
+use App\Models\UserModel;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Hash;
+use Carbon\Carbon;
 
 class ProfileController extends Controller
 {
+    public function __construct()
+    {
+        $this->middleware('auth');
+    }
     /**
      * Display the authenticated user's profile.
      */
@@ -27,40 +35,56 @@ class ProfileController extends Controller
     /**
      * Update the authenticated user's profile.
      */
-    public function update(Request $request)
-    {
-        $user = Auth::user();
+    public function update(Request $request, $id)
+	{
+        info('am here --->>');
+		// Start a database transaction
+		DB::beginTransaction();
 
-        // Validate incoming data
-        $validatedData = $request->validate([
-            'name' => 'required|string|max:255',
-            'email' => 'required|string|email|max:255',
-            'phone' => 'nullable|string|max:20',
-            'designation' => 'nullable|string|max:255',
-            'profile_picture' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
-        ]);
+		try {
+			// Log incoming request data
+			info('user request data ===>', $request->all());
 
-        // Update user details
-        $user->name = $validatedData['name'];
-        $user->email = $validatedData['email'];
-        $user->phone = $validatedData['phone'] ?? $user->phone;
-        $user->designation = $validatedData['designation'] ?? $user->designation;
+			$updated_at = Carbon::now();
 
-        // Handle profile picture upload
-        if ($request->hasFile('profile_picture')) {
-            // Delete old profile picture if exists
-            if ($user->profile_picture && Storage::exists('public/' . $user->profile_picture)) {
-                Storage::delete('public/' . $user->profile_picture);
-            }
+			// Prepare the data for updating
+			$form_data = [
+				'name' => $request->name,
+				'email' => $request->email,
+				'phone' => $request->phone,
+				'role' => $request->role,
+				'updated_at' => $updated_at,
+			];
+			$passwordChanged = false;
+			// Only include the password in the update if it is provided
+			if ($request->filled('password')) {
+				// Update the password
+				$form_data['password'] = Hash::make($request->password);
+				$passwordChanged = true;
+			} 
 
-            // Store new profile picture
-            $path = $request->file('profile_picture')->store('profile_pictures', 'public');
-            $user->profile_picture = $path;
-        }
+			// Update the user in the database
+			DB::table('users')->where('id', '=', $id)->update($form_data);
 
-        // Save the updated user
-        $user->save();
+			// Commit the transaction
+			DB::commit();
 
-        return redirect()->route('profile.show')->with('success', 'Profile updated successfully.');
-    }
+			return response()->json([
+				'success' => true,
+				'password_changed' => $passwordChanged,
+				'message' => 'User Updated',
+			]);
+		} catch (\Exception $e) {
+			// Rollback the transaction if anything goes wrong
+			DB::rollBack();
+
+			// Log the error
+			\Log::error('Error updating user: ' . $e->getMessage());
+
+			return response()->json([
+				'success' => false,
+				'message' => 'Failed to update user. Please try again.',
+			], 500);
+		}
+	}
 }

@@ -51,7 +51,7 @@ class ReceivePayment extends Controller
         //     'amount' => 'required|string',
         //     'payment_methode' => 'required',
         // ]);
-        info('requested payment received ===>>'.$request->all());
+        info('requested payment received ===>>' . $request->all());
         // $date = Carbon::now()->format('Y-m-d H:m:s');
         // $task_id = $request->task_id_receive;
         // info($task_id);
@@ -119,75 +119,112 @@ class ReceivePayment extends Controller
         // }
         // }
     }
+
     public function save_public(Request $request)
     {
         if ($request->ajax()) {
-            info('Incoming form ===>>', $request->all());
-            
-            // Retrieve the task based on the task ID
-            $task = DB::table('task')->where('id', $request->task_id_receive)->first();
-            if (!$task) {
-                // Log activity for task not found
-                $this->logActivity('Task not found', 'error', 'Task ID: ' . $request->task_id_receive);
+            DB::beginTransaction(); // Start transaction
+
+            try {
+                info('Incoming form ===>>', $request->all());
+
+                // Retrieve the task based on the task ID
+                $task = DB::table('task')->where('id', $request->task_id_receive)->first();
+                if (!$task) {
+                    // Log activity for task not found
+                    $this->logActivity('Task not found', 'error', 'Task ID: ' . $request->task_id_receive);
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'Task not found',
+                    ], 404);
+                }
+
+                // Calculate the total from the amt[] in the request
+                $total_amt = array_sum($request->amt);
+                $total_retial_amt = array_sum($request->retail_amt);
+
+                // Prepare the payment data
+                $payment_data = [
+                    'task_id' => $request->task_id_receive,
+                    'account_id' => $request->account_id,
+                    'employee_id' => $request->employee_id,
+                    'amount' => $request->received_total,
+                    'payment_methode' => $request->payment_methode,
+                    'created_at' => Carbon::now(),
+                    'updated_at' => Carbon::now(),
+                ];
+
+                // Insert the payment data into the receive_sales table
+                DB::table('receive_sales')->insert($payment_data);
+                // Updated sales
+                $task_sales = DB::table('sales')->where('task_id', $request->task_id_receive)->get();
+
+                $task_sales = DB::table('sales')->where('task_id', $request->task_id_receive)->get();
+
+                // Use an index to match each sale with the corresponding values from the request arrays
+                foreach ($task_sales as $index => $sale) {
+                    // Ensure the index exists in the request arrays
+                    if (isset($request->retail[$index]) && isset($request->bulk[$index])) {
+                        $retail_value = $request->retail[$index];
+                        $bulk_value = $request->bulk[$index];
+
+                        // Update the sale with the corresponding retail and bulk values
+                        DB::table('sales')
+                            ->where('id', $sale->id)  // Update the specific sale by its ID
+                            ->update([
+                                'updated_at' => Carbon::now(),
+                                'retail' => $retail_value,
+                                'bulk' => $bulk_value,
+                                'retail_amt' => $retail_value * $sale->retail_price,
+                                'amt' => $bulk_value * $sale->price,
+                            ]);
+                    }
+                }
+
+                // Log successful payment insertion
+                $this->logActivity('Payment recorded', 'success', json_encode($payment_data));
+
+                // Sum the amounts from receive_sales for the current task
+                $total_received = DB::table('receive_sales')
+                    ->where('task_id', $request->task_id_receive)
+                    ->sum('amount');
+
+                // Calculate amount_due as total_amt - total received
+                $amount_due = ($total_amt + $total_retial_amt) - $total_received;
+                $sub_total = ($total_amt + $total_retial_amt);
+
+                // Update the task's sub_total and amount_due
+                $task_data = [
+                    'amount_paid' => $total_received,
+                    'sub_total' => $sub_total,
+                    'amount_due' => max($amount_due, 0),  // Ensuring amount_due does not go negative
+                    'updated_at' => Carbon::now(),
+                ];
+
+                DB::table('task')->where('id', $request->task_id_receive)->update($task_data);
+
+                info('niko hapa ===>> bb');
+                // Log successful task update
+                $this->logActivity('Dispatch updated with payment information', 'success', json_encode($task_data));
+
+                DB::commit(); // Commit transaction
+
+                return response()->json([
+                    'success' => true,
+                    'message' => 'Payment and sales successfully recorded',
+                ]);
+            } catch (\Exception $e) {
+                DB::rollBack(); // Rollback transaction on error
+
+                // Log the error
+                $this->logActivity('Error processing payment', 'error', $e->getMessage());
                 return response()->json([
                     'success' => false,
-                    'message' => 'Task not found',
-                ], 404);
+                    'message' => 'An error occurred while processing your request.',
+                ], 500);
             }
-    
-            // Calculate the total from the amt[] in the request
-            $total_amt = array_sum($request->amt);
-            $total_retial_amt = array_sum($request->retail_amt);
-    
-            // Prepare the payment data
-            $payment_data = [
-                'task_id' => $request->task_id_receive,
-                'account_id' => $request->account_id,
-                'employee_id' => $request->employee_id,
-                'amount' => $request->received_total,
-                'payment_methode' => $request->payment_methode,
-                'created_at' => Carbon::now(),
-                'updated_at' => Carbon::now(),
-            ];
-    
-            // Insert the payment data into the receive_sales table
-            DB::table('receive_sales')->insert($payment_data);
-    
-            // Log successful payment insertion
-            $this->logActivity('Payment recorded', 'success', json_encode($payment_data));
-    
-            // Sum the amounts from receive_sales for the current task
-            $total_received = DB::table('receive_sales')
-                ->where('task_id', $request->task_id_receive)
-                ->sum('amount');
-    
-            // Calculate amount_due as total_amt - total received
-            $amount_due = ($total_amt+$total_retial_amt) - $total_received;
-            $sub_total = ($total_amt+$total_retial_amt);
-
-    
-            // Update the task's sub_total and amount_due
-            $task_data = [
-                'amount_paid' => $total_received,
-                'sub_total' => $sub_total,
-                'amount_due' => max($amount_due, 0),  // Ensuring amount_due does not go negative
-                'updated_at' => Carbon::now(),
-            ];
-    
-            DB::table('task')->where('id', $task->id)->update($task_data);
-            
-            // Log successful task update
-            $this->logActivity('Dispatch updated with payment information', 'success', json_encode($task_data));
-    
-            return response()->json([
-                'success' => true,
-                'message' => 'Payment and sales successfully recorded',
-            ]);
         }
     }
-    
-    
-
 
     /**
      * Display the specified resource.

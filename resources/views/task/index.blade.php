@@ -1448,9 +1448,13 @@
 
 
                         html_form += '<div class="col-md-2">';
-                        html_form += '<label>Expected</label><br>';
-                        html_form += '<input type="number" min=0 name="amt[]" id="amt" readonly  value="' + (parseFloat(html.data.sales[i].amt)) + '" class="form-control" placeholder="price"/>';
-                        html_form += '<input type="hidden"  name="retail_amt[]" id="retail_amt" readonly  value="' + (parseFloat(html.data.sales[i].retail_amt)) + '" class="form-control" placeholder="price"/>';
+                        html_form += '<label>Ex Retail</label><br>';
+                        html_form += '<input type="number"  name="retail_amt[]" id="retail_amt" readonly  value="' + (parseFloat(html.data.sales[i].retail_amt)) + '" class="form-control" placeholder="cost"/>';
+                        html_form += '</div>';
+                        html_form += '<div class="col-md-2">';
+
+                        html_form += '<label>Ex Bulk</label><br>';
+                        html_form += '<input type="number" min=0 name="amt[]" id="amt" readonly  value="' + (parseFloat(html.data.sales[i].amt)) + '" class="form-control" placeholder="cost"/>';
                         html_form += '</div>';
 
                         html_form += '</div></div><br /></span>';
@@ -1513,12 +1517,12 @@
 
         // Function to calculate the sum of all amt[] fields
         function calculateExpectedTotal(data) {
-            let total = 0;
+            let sub_total = 0;
             $('input[name="amt[]"]').each(function() {
-                total += parseFloat($(this).val()) || 0; // Accumulate the value
+                sub_total += parseFloat($(this).val()) || 0; // Accumulate the value
             }); 
             $('input[name="retail_amt[]"]').each(function() {
-                total += parseFloat($(this).val()) || 0; // Accumulate the value
+                sub_total += parseFloat($(this).val()) || 0; // Accumulate the value
             });
 
             let received = $('#received_total').val();
@@ -1528,16 +1532,16 @@
                 $('#received_total').val(received);
             }
             let totalP = $('#paid_total').val();
-            console.log("totalp===>", received, totalP, total);
+            console.log("totalp===>", received, totalP, sub_total);
 
             // Calculate the balance and round to 2 decimal places
             let balance;
             if (data) {
                 $('#paid_total').val(data.amount_paid);
-                balance = (total - data.amount_paid - received).toFixed(2);
+                balance = (sub_total - data.amount_paid - received).toFixed(2);
                 balance < 0 ? balance = 0 : balance;
             } else {
-                balance = (total - totalP - received).toFixed(2);
+                balance = (sub_total - totalP - received).toFixed(2);
                 balance < 0 ? balance = 0 : balance;
             }
 
@@ -1771,50 +1775,50 @@
         $(function() {
             $('#form-return').validator().on('submit', function(e) {
                 // alert("here");
-                if (!e.isDefaultPrevented()) {
-                    var id = $('#id').val();
-                    if (save_method == 'add') url = "{{ url('remains') }}";
-                    else url = "{{ url('remains') . '/' }}" + id;
+                // if (!e.isDefaultPrevented()) {
+                //     var id = $('#id').val();
+                //     if (save_method == 'add') url = "{{ url('remains') }}";
+                //     else url = "{{ url('remains') . '/' }}" + id;
 
-                    $.ajax({
-                        url: url,
-                        type: "POST",
-                        //hanya untuk input data tanpa dokumen
-                        //data : $('#modal-form form').serialize(),
-                        data: new FormData($("#form-return")[0]),
-                        contentType: false,
-                        processData: false,
-                        beforeSend: function() {
-                            $(".subBtn").attr("disabled", true);
-                            $(".subBtn").html("Please Wait..");
+                //     $.ajax({
+                //         url: url,
+                //         type: "POST",
+                //         //hanya untuk input data tanpa dokumen
+                //         //data : $('#modal-form form').serialize(),
+                //         data: new FormData($("#form-return")[0]),
+                //         contentType: false,
+                //         processData: false,
+                //         beforeSend: function() {
+                //             $(".subBtn").attr("disabled", true);
+                //             $(".subBtn").html("Please Wait..");
 
-                        },
-                        success: function(data) {
-                            $(".subBtn").attr("disabled", false);
-                            $(".subBtn").html("Save");
-                            $('#modal-return').modal('hide');
-                            // table.ajax.reload();
-                            populateTable('apiTask');
-                            swal({
-                                title: 'Success!',
-                                text: data.message,
-                                type: 'success',
-                                timer: '1500'
-                            })
-                        },
-                        error: function(data) {
-                            $(".subBtn").attr("disabled", false);
-                            $(".subBtn").html("Save");
-                            swal({
-                                title: 'Oops...',
-                                text: data.message,
-                                type: 'error',
-                                timer: '1500'
-                            })
-                        }
-                    });
-                    return false;
-                }
+                //         },
+                //         success: function(data) {
+                //             $(".subBtn").attr("disabled", false);
+                //             $(".subBtn").html("Save");
+                //             $('#modal-return').modal('hide');
+                //             // table.ajax.reload();
+                //             populateTable('apiTask');
+                //             swal({
+                //                 title: 'Success!',
+                //                 text: data.message,
+                //                 type: 'success',
+                //                 timer: '1500'
+                //             })
+                //         },
+                //         error: function(data) {
+                //             $(".subBtn").attr("disabled", false);
+                //             $(".subBtn").html("Save");
+                //             swal({
+                //                 title: 'Oops...',
+                //                 text: data.message,
+                //                 type: 'error',
+                //                 timer: '1500'
+                //             })
+                //         }
+                //     });
+                //     return false;
+                // }
             });
 
         });
@@ -1822,43 +1826,43 @@
         //form damage
         $('.form-demage').validator().on('submit', function(e) {
             // e.preventDefault();
-            if (!e.isDefaultPrevented()) {
-                var id = $('#id').val();
-                if (save_method == 'add_damage') {
-                    url = "{{ url('demage_products'). '/'  }}" + id;
-                }
-                // console.log(new FormData($(".form-demage")[0]))
-                $.ajax({
-                    url: url,
-                    type: "POST",
-                    //hanya untuk input data tanpa dokumen
-                    // data :$('.form-demage').serialize(),
-                    data: new FormData($(".form-demage")[0]),
-                    contentType: false,
-                    processData: false,
-                    success: function(data) {
-                        $('#modal-form-demage').modal('hide');
-                        // table1.ajax.reload();
-                        populateTable('apiTask');
+            // if (!e.isDefaultPrevented()) {
+            //     var id = $('#id').val();
+            //     if (save_method == 'add_damage') {
+            //         url = "{{ url('demage_products'). '/'  }}" + id;
+            //     }
+            //     // console.log(new FormData($(".form-demage")[0]))
+            //     $.ajax({
+            //         url: url,
+            //         type: "POST",
+            //         //hanya untuk input data tanpa dokumen
+            //         // data :$('.form-demage').serialize(),
+            //         data: new FormData($(".form-demage")[0]),
+            //         contentType: false,
+            //         processData: false,
+            //         success: function(data) {
+            //             $('#modal-form-demage').modal('hide');
+            //             // table1.ajax.reload();
+            //             populateTable('apiTask');
 
-                        swal({
-                            title: 'Success!',
-                            text: data.message,
-                            type: 'success',
-                            timer: '1500'
-                        })
-                    },
-                    error: function(data) {
-                        swal({
-                            title: data.responseJSON.message,
-                            text: data.message,
-                            type: 'error',
-                            timer: '1500'
-                        })
-                    }
-                });
-                return false;
-            }
+            //             swal({
+            //                 title: 'Success!',
+            //                 text: data.message,
+            //                 type: 'success',
+            //                 timer: '1500'
+            //             })
+            //         },
+            //         error: function(data) {
+            //             swal({
+            //                 title: data.responseJSON.message,
+            //                 text: data.message,
+            //                 type: 'error',
+            //                 timer: '1500'
+            //             })
+            //         }
+            //     });
+            //     return false;
+            // }
         });
         //demage_products
         $(function() {
@@ -1873,6 +1877,7 @@
                     } else {
                         console.log("task_id is null");
                         url = "{{ url('/') }}";
+                        
                     }
 
                     $(".subBtn").attr("disabled", true);
@@ -1884,7 +1889,6 @@
                         contentType: false,
                         processData: false,
                         success: function(data) {
-                            $('#form-payment')[0].reset();
                             $('#form-payment')[0].reset();
                             $('#modal_payment').modal('hide');
                             $(".subBtn").attr("disabled", false);

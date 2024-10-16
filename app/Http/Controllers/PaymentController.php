@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use PDF;
 use Auth;
+use Carbon\Carbon;
 use Yajra\DataTables\DataTables;
 use Illuminate\Support\Facades\DB;
 
@@ -123,6 +124,10 @@ class PaymentController extends Controller
         $to = $request->to;
     
         // Fetch employee sales within the date range
+        if ($from === $to) {
+            // Adjust the 'to' date to the end of the day (23:59:59)
+            $to = Carbon::parse($to)->endOfDay();
+        }
         $salesData = DB::table('employee')
             ->join('task', 'task.empoyee_id', '=', 'employee.id')
             ->join('receive_sales', 'receive_sales.task_id', '=', 'task.id')
@@ -134,7 +139,7 @@ class PaymentController extends Controller
             )
             ->whereBetween('receive_sales.created_at', [$from, $to])
             ->get();
-    info('info of slaes --->>'.$salesData);
+    // info('info of slaes --->>'.$salesData);
         // Structure the data
         $structuredData = $salesData->groupBy('employee_id')->map(function ($sales, $key) {
             return [
@@ -149,7 +154,7 @@ class PaymentController extends Controller
             ];
         })->values(); // Reset keys to 0, 1, 2, ...
     
-        info('info of structured Date --->>'.$structuredData);
+        // info('info of structured Date --->>'.$structuredData);
         $loggedInUser = Auth::User();
         // Return the structured data to the view or generate PDF as needed
         $pdf = PDF::loadView('receive.report', compact('structuredData','loggedInUser', 'from', 'to'));

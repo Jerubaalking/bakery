@@ -457,28 +457,37 @@ class TaskController extends Controller
             // You have to create a link option to view account
             if (Auth::user()->role == "Superadministrator") {
                 return Datatables::of($task)
-                    ->addColumn('action', function ($task) {
-                        return '
+                ->addColumn('action', function ($task) {
+                    return '
                     <div class="dropdown" style="width:100%">
                         <a href="#" class="dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                            <i class="fa fa-cog"></i> Actions <span class="caret"></span>
+                            <span><i class="fa fa-ellipsis-h"></i></span>
                         </a>
-                        <ul class="dropdown-menu">
-                            <li><a href="#" class="pays" id="' . $task->id . '" test="' . $task->id . '">
-                                <i class="fa fa-money"></i> Receive Payment
-                            </a></li>
-                            <li><a href="#" id="' . $task->id . '" class="demageForm">
-                                <i class="glyphicon glyphicon-plus"></i> Add Damaged
-                            </a></li>
-                            <li><a href="javascript:void(0)" onclick="deleteData(' . $task->id . ')" id="' . $task->id . '">
-                                <i class="glyphicon glyphicon-trash"></i> Delete
-                            </a></li>
-                            <li><a href="task_info/' . $task->id . '" class="more_details">
-                                <i class="glyphicon glyphicon-eye-open"></i> More Details
-                            </a></li>
+                        <ul class="dropdown-menu dropdown-menu-right">
+                            <li>
+                                <a href="#" class="pays" id="' . $task->id . '" test="' . $task->id . '">
+                                    <i class="fa fa-receipt"></i> Receive Payment
+                                </a>
+                            </li>
+                            <li>
+                                <a href="#" id="' . $task->id . '" class="demageForm">
+                                    <i class="fa fa-plus-square"></i> Add Damaged
+                                </a>
+                            </li>
+                            <li>
+                                <a href="javascript:void(0)" onclick="deleteData(' . $task->id . ')" id="' . $task->id . '">
+                                    <i class="fa fa-trash-alt"></i> Delete
+                                </a>
+                            </li>
+                            <li>
+                                <a href="task_info/' . $task->id . '" class="more_details">
+                                    <i class="fa fa-eye"></i> More Details
+                                </a>
+                            </li>
                         </ul>
                     </div>';
-                    })
+                })
+                
                     ->editColumn('created_at', function ($task) {
                         return '<div class="text-warning">' . $task->created_at . '</div>';
                     })
@@ -503,7 +512,7 @@ class TaskController extends Controller
                         return '
                        <div class="btn-group" style="width: 100%;">
                         <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                            Action <span class="caret"></span>
+                        <span class="caret"></span>
                         </button>
                         <ul class="dropdown-menu">
                             <li>

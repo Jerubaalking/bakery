@@ -80,8 +80,6 @@
                             <th>Total Amount</th>
                             <th>Amount Paid</th>
                             <th>Amount due</th>
-                            <th>Product Returned Cost</th>
-                            <th>Product demage Cost</th>
                             <th>Lastest Date</th>
                             <th></th>
                         </tr>
@@ -230,14 +228,6 @@
                     name: 'amount_due'
                 },
                 {
-                    data: 'returned',
-                    name: 'returned'
-                },
-                {
-                    data: 'demage_cost',
-                    name: 'demage_cost'
-                },
-                {
                     data: 'created_at',
                     name: 'created_at'
                 },
@@ -270,14 +260,6 @@
                 {
                     data: 'amount_due',
                     name: 'amount_due'
-                },
-                {
-                    data: 'returned',
-                    name: 'returned'
-                },
-                {
-                    data: 'demage_cost',
-                    name: 'demage_cost'
                 },
                 {
                     data: 'created_at',
@@ -314,14 +296,6 @@
                     name: 'amount_due'
                 },
                 {
-                    data: 'returned',
-                    name: 'returned'
-                },
-                {
-                    data: 'demage_cost',
-                    name: 'demage_cost'
-                },
-                {
                     data: 'created_at',
                     name: 'created_at'
                 },
@@ -356,14 +330,6 @@
                     name: 'amount_due'
                 },
                 {
-                    data: 'returned',
-                    name: 'returned'
-                },
-                {
-                    data: 'demage_cost',
-                    name: 'demage_cost'
-                },
-                {
                     data: 'created_at',
                     name: 'created_at'
                 },
@@ -392,8 +358,6 @@
                                     <th>Total Amount</th>
                                     <th>Amount Paid</th>
                                     <th>Amount due</th>
-                                    <th>Product Returned Cost</th>
-                                    <th>Product demage Cost</th>
                                     <th>Lastest Date</th>
                                     <th></th>
                                 </tr>
@@ -413,10 +377,8 @@
                                     <th>Total Amount</th>
                                     <th>Amount Paid</th>
                                     <th>Amount due</th>
-                                    <th>Product Returned Cost</th>
-                                    <th>Product demage Cost</th>
                                     <th>Lastest Date</th>
-                                    <th></th>
+                                    <th>Actions</th>
                                 </tr>
                             </thead>
                             <tbody></tbody>`;
@@ -434,8 +396,6 @@
                                     <th>Total Amount</th>
                                     <th>Amount Paid</th>
                                     <th>Amount due</th>
-                                    <th>Product Returned Cost</th>
-                                    <th>Product demage Cost</th>
                                     <th>Lastest Date</th>
                                     <th></th>
                                 </tr>
@@ -455,8 +415,6 @@
                                     <th>Total Amount</th>
                                     <th>Amount Paid</th>
                                     <th>Amount due</th>
-                                    <th>Product Returned Cost</th>
-                                    <th>Product demage Cost</th>
                                     <th>Lastest Date</th>
                                     <th></th>
                                 </tr>
@@ -476,8 +434,6 @@
                                     <th>Total Amount</th>
                                     <th>Amount Paid</th>
                                     <th>Amount due</th>
-                                    <th>Product Returned Cost</th>
-                                    <th>Product demage Cost</th>
                                     <th>Lastest Date</th>
                                     <th></th>
                                 </tr>

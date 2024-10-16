@@ -59,7 +59,7 @@ Route::get('/apiIntoStore',[IntoStoreController::class, 'apiIntoStore']);
 Route::post('/apiUseStore',[IntoStoreController::class, 'apiUseStore']);
 Route::get('/intoStoreShow',[IntoStoreController::class, 'show']);
 Route::get('/intoStoreShow/{id}',[IntoStoreController::class, 'qtyOf']);
-Route::get('/intoStoreShow/{batch_number}',[IntoStoreController::class, 'showBatch']);
+Route::get('/storeShow/{batch_number}',[IntoStoreController::class, 'showBatch']);
 Route::get('/intoStoreShowByDates',[IntoStoreController::class, 'showByDates']);
 Route::get('/exportIntoStorePDF',[IntoStoreController::class, 'exportPDF']);
 Route::get('/batchReport',[IntoStoreController::class, 'batchReport']);

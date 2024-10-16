@@ -457,37 +457,37 @@ class TaskController extends Controller
             // You have to create a link option to view account
             if (Auth::user()->role == "Superadministrator") {
                 return Datatables::of($task)
-                ->addColumn('action', function ($task) {
-                    return '
+                    ->addColumn('action', function ($task) {
+                        return '
                     <div class="dropdown" style="width:100%">
                         <a href="#" class="dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                            <span><i class="fa fa-ellipsis-h"></i></span>
+                            <button class="m-5 btn btn-outline btn-default btn-sm"><i class="fa fa-ellipsis-v"></i></button>
                         </a>
                         <ul class="dropdown-menu dropdown-menu-right">
                             <li>
                                 <a href="#" class="pays" id="' . $task->id . '" test="' . $task->id . '">
-                                    <i class="fa fa-receipt"></i> Receive Payment
-                                </a>
-                            </li>
-                            <li>
-                                <a href="#" id="' . $task->id . '" class="demageForm">
-                                    <i class="fa fa-plus-square"></i> Add Damaged
+                                    <i class="fa fa-money text-success"></i> Receive Payment
                                 </a>
                             </li>
                             <li>
                                 <a href="javascript:void(0)" onclick="deleteData(' . $task->id . ')" id="' . $task->id . '">
-                                    <i class="fa fa-trash-alt"></i> Delete
+                                    <i class="fas fa-trash-alt text-danger"></i> Delete
                                 </a>
                             </li>
                             <li>
-                                <a href="task_info/' . $task->id . '" class="more_details">
-                                    <i class="fa fa-eye"></i> More Details
+                                <a href="single_report/' . $task->id . '" target="_blank" class="more_details ">
+                                    <i class="fa fa-file-pdf text-danger"></i> Report
                                 </a>
                             </li>
+                           <!-- <li>
+                                <a href="task_info/' . $task->id . '" class="more_details">
+                                    <i class="fa fa-info text-info"></i> More 
+                                </a>
+                            </li> -->
                         </ul>
                     </div>';
-                })
-                
+                    })
+
                     ->editColumn('created_at', function ($task) {
                         return '<div class="text-warning">' . $task->created_at . '</div>';
                     })
@@ -510,24 +510,24 @@ class TaskController extends Controller
                 return Datatables::of($task)
                     ->addColumn('action', function ($task) {
                         return '
-                       <div class="btn-group" style="width: 100%;">
-                        <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                        <span class="caret"></span>
-                        </button>
-                        <ul class="dropdown-menu">
+                      <div class="dropdown" style="width:100%">
+                        <a href="#" class="dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                            <button class="m-5 btn btn-outline btn-default btn-sm"><i class="fa fa-ellipsis-v"></i></button>
+                        </a>
+                        <ul class="dropdown-menu dropdown-menu-right">
                             <li>
-                                <a href="#" class="btn btn-warning btn-xs pays" data-task-id="{{ task.id }}" data-employee-id="{{ task.id }}">
+                                <a href="#" class=" pays" data-task-id="{{ task.id }}" data-employee-id="{{ task.id }}">
                                     <i class="fa fa-money"></i> Receive Payment
                                 </a>
                             </li>
-                            <li>
-                                <a href="#" class="btn btn-warning btn-xs damageForm" data-task-id="{{ task.id }}">
-                                    <i class="glyphicon glyphicon-plus"></i> download form
-                                </a>
-                            </li>
-                            <li>
-                                <a href="task_info/{{ task.id }}" class="btn btn-success btn-xs more_details">
-                                    <i class="glyphicon glyphicon-eye-open"></i> More Details
+                            <!-- <li>
+                                <a href="#" class=" damageForm" data-task-id="{{ task.id }}">
+                                    <i class="fa fa-download"></i> download form
+                                </a> 
+                            </li> -->
+                             <li>
+                                <a href="single_report/' . $task->id . '" target="_blank" class="more_details ">
+                                    <i class="fa fa-file-pdf text-danger"></i> Report
                                 </a>
                             </li>
                         </ul>
@@ -688,16 +688,17 @@ class TaskController extends Controller
                        Action <span class="caret"></span>
                    </button>
                    <ul class="dropdown-menu">
-                   <!--<li><a href="#" class="btn btn-warning btn-xs pays" style="color:white" task="' . $task->id . '" id="' . $task->empoyee_id . '" ><i class="fa fa-money" style="color:white"></i>Receive Payment</a></li>-->
-                       <li><a href="task_info/' . $task->id . '" class="btn btn-success btn-xs more_details" style="color:white" ><i class="glyphicon glyphicon-eye-open" style="color:white"></i>More</a></li>
-                       <li><a href="#" class="btn btn-warning btn-xs block" style="color:white" id="' . $task->empoyee_id . '"><i class="fa fa-money" style="color:white"></i>Block Account</a></li>
+                   <!--<li><a href="#" class="pays" style="color:white" task="' . $task->id . '" id="' . $task->empoyee_id . '" ><i class="fa fa-money" style="color:white"></i>Receive Payment</a></li>-->
+                            <li>
+                                <a href="single_report/' . $task->id . '" target="_blank" class="more_details ">
+                                    <i class="fa fa-file-pdf text-danger"></i> Report
+                                </a>
+                            </li>
+                       <li><a href="#" class="block" style="color:white" id="' . $task->empoyee_id . '"><i class="fa fa-money" style="color:white"></i>Block Account</a></li>
                    </ul>
                </div> ';
                 })
-                ->editColumn('demage_cost', function ($task) {
 
-                    return '<div class="text-warning">' . number_format($task->demage_cost, 2) . '</div>';
-                })
                 ->editColumn('amount_due', function ($task) {
 
                     return '<div class="text-danger">' . number_format($task->amount_due, 2) . '</div>';
@@ -705,10 +706,6 @@ class TaskController extends Controller
                 ->editColumn('amount_paid', function ($task) {
 
                     return '<div class="text-success">' . number_format($task->amount_paid, 2) . '</div>';
-                })
-                ->editColumn('returned', function ($task) {
-
-                    return '<div class="text-primary">' . number_format($task->returned, 2) . '</div>';
                 })
                 ->editColumn('sub_total', function ($task) {
 
@@ -725,15 +722,15 @@ class TaskController extends Controller
                        Action <span class="caret"></span>
                    </button>
                    <ul class="dropdown-menu">
-                   <li><a href="#" class="btn btn-warning btn-xs pays" style="color:white" task="' . $task->id . '"  id="' . $task->empoyee_id . '"><i class="fa fa-money" style="color:white"></i>Receive Payment</a></li>
+                   <li><a href="#" class="btn btn-warning btn-xs pays" style="color:white" task="' . $task->id . '"  id="' . $task->empoyee_id . '"><i class="fa fa-money" style="color:white"></i> Receive Payment</a></li>
 
-                       <li><a href="task_info/' . $task->id . '" class="btn btn-success btn-xs more_details" style="color:white" ><i class="glyphicon glyphicon-eye-open" style="color:white"></i>More Details</a></li>
+                            <li>
+                                <a href="single_report/' . $task->id . '" target="_blank" class="more_details ">
+                                    <i class="fa fa-file-pdf text-danger"></i> Report
+                                </a>
+                            </li>
                    </ul>
                </div> ';
-                })
-                ->editColumn('demage_cost', function ($task) {
-
-                    return '<div class="text-warning">' . number_format($task->demage_cost, 2) . '</div>';
                 })
                 ->editColumn('amount_due', function ($task) {
 
@@ -742,10 +739,6 @@ class TaskController extends Controller
                 ->editColumn('amount_paid', function ($task) {
 
                     return '<div class="text-success">' . number_format($task->amount_paid, 2) . '</div>';
-                })
-                ->editColumn('returned', function ($task) {
-
-                    return '<div class="text-primary">' . number_format($task->returned, 2) . '</div>';
                 })
                 ->editColumn('sub_total', function ($task) {
 
@@ -757,7 +750,7 @@ class TaskController extends Controller
     }
     public function apiClosedTask($start, $end, $empId)
     {
-        $task;
+        $task=null;
         if ($empId == 'all') {
             $task = DB::table('task')
                 ->join('employee', 'task.empoyee_id', '=', 'employee.id')
@@ -783,19 +776,19 @@ class TaskController extends Controller
         return Datatables::of($task)
             ->addColumn('action', function ($task) {
                 return '
-                <div class="btn-group" style="width:100%">
-                   <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                       Action <span class="caret"></span>
-                   </button>
-                   <ul class="dropdown-menu">
+               <div class="dropdown" style="width:100%">
+                        <a href="#" class="dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                            <button class="m-5 btn btn-outline btn-default btn-sm"><i class="fa fa-ellipsis-v"></i></button>
+                        </a>
+                        <ul class="dropdown-menu dropdown-menu-right">
                    <li>
-                       <li><a href="task_info/' . $task->id . '" class="btn btn-success btn-xs more_details" style="color:white" ><i class="glyphicon glyphicon-eye-open" style="color:white"></i>More Details</a></li>
+                            <li>
+                                <a href="single_report/' . $task->id . '" target="_blank" class="more_details ">
+                                    <i class="fa fa-file-pdf text-danger"></i> Report
+                                </a>
+                            </li>
                    </ul>
                </div> ';
-            })
-            ->editColumn('demage_cost', function ($task) {
-
-                return '<div class="text-warning">' . number_format($task->demage_cost, 2) . '</div>';
             })
             ->editColumn('amount_due', function ($task) {
 
@@ -804,10 +797,6 @@ class TaskController extends Controller
             ->editColumn('amount_paid', function ($task) {
 
                 return '<div class="text-success">' . number_format($task->amount_paid, 2) . '</div>';
-            })
-            ->editColumn('returned', function ($task) {
-
-                return '<div class="text-primary">' . number_format($task->returned, 2) . '</div>';
             })
             ->editColumn('sub_total', function ($task) {
 
@@ -819,7 +808,7 @@ class TaskController extends Controller
     public function apiDamagedTask($start, $end, $empId)
     {
 
-        $task;
+        $task = null;
         if ($empId == 'all') {
             $task = DB::table('task')
                 ->join('employee', 'task.empoyee_id', '=', 'employee.id')
@@ -844,20 +833,16 @@ class TaskController extends Controller
         return Datatables::of($task)
             ->addColumn('action', function ($task) {
                 return '
-                <div class="btn-group" style="width:100%">
-                   <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                       Action <span class="caret"></span>
-                   </button>
-                   <ul class="dropdown-menu">
+                <div class="dropdown" style="width:100%">
+                        <a href="#" class="dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                            <button class="m-5 btn btn-outline btn-default btn-sm"><i class="fa fa-ellipsis-v"></i></button>
+                        </a>
+                        <ul class="dropdown-menu dropdown-menu-right">
                    <li>
 
                        <li><a href="task_info/' . $task->id . '" class="btn btn-success btn-xs more_details" style="color:white" ><i class="glyphicon glyphicon-eye-open" style="color:white"></i>More Details</a></li>
                    </ul>
                </div> ';
-            })
-            ->editColumn('demage_cost', function ($task) {
-
-                return '<div class="text-warning">' . number_format($task->demage_cost, 2) . '</div>';
             })
             ->editColumn('amount_due', function ($task) {
 
@@ -866,10 +851,6 @@ class TaskController extends Controller
             ->editColumn('amount_paid', function ($task) {
 
                 return '<div class="text-success">' . number_format($task->amount_paid, 2) . '</div>';
-            })
-            ->editColumn('returned', function ($task) {
-
-                return '<div class="text-primary">' . number_format($task->returned, 2) . '</div>';
             })
             ->editColumn('sub_total', function ($task) {
 

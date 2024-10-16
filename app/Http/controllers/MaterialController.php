@@ -353,44 +353,31 @@ class MaterialController extends Controller
     
       
     }
-    public function materialReport(){
-        $materialz=DB::table('materials')
-                    ->join('measurements','measurements.id','=','materials.measurement_id')
-                    ->join('material_categories','material_categories.id','=','materials.material_category_id')
-                    ->select('materials.*', 'measurements.symbol','measurements.measurement', 'material_categories.category_name','material_categories.type')
-                    ->get();
-
-                    $into_stores=DB::table('into_store')
-                    ->join('materials', 'materials.id', '=', 'into_store.material_id')
-                    ->join('material_categories','material_categories.id','=','materials.material_category_id')
-                    ->join('measurements','measurements.id','=','materials.measurement_id')
-                    ->select('into_store.*', 'materials.name','material_categories.type', 'materials.unit_cost','materials.material_category_id', 'materials.measurement_id', 'measurements.measurement', 'measurements.symbol')
-                    ->get();
-
-                    $materials = array();
-                    foreach ($materialz as $value) {
-                        // info(json_encode($value->id));
-                        
-                        $inTotal = 0;
-                        $outTotal = 0;
-                    foreach ($into_stores as $store) {
-                        if($store->status == 'in' && $store->material_id == $value->id){
-                            $inTotal += intVal($store->qty);
-                        }
-                        if($store->status != 'in' && $store->material_id == $value->id){
-                            $outTotal += intVal($store->qty);
-                        }
-                    }
-                       if($outTotal > $inTotal){
-                        $value->available = -($inTotal - $outTotal);
-                       } else{
-                        $value->available = $inTotal - $outTotal;
-                       }
-                        array_push($materials, $value);
-                    }
-        $pdf = PDF::loadView('materials.material_report',compact('materials'));
-           return $pdf->stream();
-        
+    public function materialReport() {
+        // Fetch materials with their related measurements and categories
+        $materials = DB::table('materials')
+            ->join('measurements', 'measurements.id', '=', 'materials.measurement_id')
+            ->join('material_categories', 'material_categories.id', '=', 'materials.material_category_id')
+            ->select('materials.*', 'measurements.symbol', 'measurements.measurement', 'material_categories.category_name', 'material_categories.type')
+            ->get()
+            ->map(function ($material) {
+                // Calculate in and out totals directly in the query
+                $totals = DB::table('into_store')
+                    ->selectRaw('SUM(CASE WHEN status = "in" AND material_id = ? THEN qty ELSE 0 END) as inTotal, 
+                                 SUM(CASE WHEN status != "in" AND material_id = ? THEN qty ELSE 0 END) as outTotal', [$material->id, $material->id])
+                    ->first();
+    
+                // Calculate available quantity
+                $material->available = $totals->outTotal > $totals->inTotal
+                    ? -($totals->inTotal - $totals->outTotal)
+                    : $totals->inTotal - $totals->outTotal;
+    
+                return $material;
+            });
+        $loggedInUser = Auth::User();
+        $pdf = PDF::loadView('materials.material_report', compact('loggedInUser','materials'));
+        return $pdf->stream();
     }
+    
 
 }

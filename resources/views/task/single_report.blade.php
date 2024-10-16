@@ -14,6 +14,7 @@
         background-color: #fff;
         font-size: 10px;
         margin: 30px;
+        position: relative; /* Ensure body has relative positioning */
     }
 
     h4 {
@@ -140,23 +141,33 @@
 
     .vl {
         border-left: 3px solid black;
-
         margin-top: 150px;
     }
 
+    #watermark,
+    #report-logo {
+        position: absolute; /* Change to absolute for repeatable effect */
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        z-index: -1; /* Keep it behind all other content */
+        pointer-events: none; /* Make sure it's non-interactive */
+    }
+
     #watermark {
-        position: fixed;
-        bottom: 0px;
-        left: 0px;
+        opacity: 0.04; /* Light opacity for subtle visibility */
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        background: url('assets/img/misana.png') no-repeat center center;
+        background-size: contain; /* Adjust the image size to fit the container */
+    }
 
-        /** The width and height may change 
-                    according to the dimensions of your letterhead
-                **/
-        width: 21.8cm;
-        height: 28cm;
-
-        /** Your watermark should be behind every content**/
-        z-index: -1000;
+    #report-logo {
+        opacity: 1; /* Full visibility for the logo */
+        background: url('path/to/your/watermark-image.png') no-repeat center center;
+        background-size: contain; /* Adjust the image size to fit the container */
     }
 
     .page {
@@ -167,12 +178,11 @@
         display: block;
         background: rgba(255, 255, 255, 0.9) !important;
         margin: 0 auto 15px;
-        page-break-after: always;
-        /*This style rule makes every page element start at the top of a new page:*/
-        counter-increment: page
+        page-break-after: always; /* This style rule makes every page element start at the top of a new page */
+        counter-increment: page;
     }
 
-    /*page numbers*/
+    /* Page numbers */
     div.page:after {
         content: " PAGE - " counter(page);
         position: absolute;
@@ -185,8 +195,11 @@
     }
 </style>
 
+
 <head>
     <title>{{$dispatch}}|Report</title>
+    <link rel="apple-touch-icon" sizes="76x76" href="{{asset('assets/img/misana.png')}}">
+    <link rel="icon" type="image/png" sizes="96x96" href="{{asset('assets/img/misana.png')}}">
 </head>
 <div class="section__content section__content--p30">
     <div class="container-fluid">
@@ -199,24 +212,25 @@
             </span>
         </div>
 
-        <div id="watermark">
-            <img src="assets/img/misana.png" alt="logo" height="40" width="80" style="float:right;padding-right:62px;margin-top:5px;">
-            <!-- <img src="assets/img/misana.png" height="70%" width="80%" style="opacity: 0.05;"/> -->
+        <div id="report-logo">
+            <img  src="assets/img/misana.png" alt="logo" height="70" width="120" style="float:right;padding-right:22px;">
+            <!-- <img src="assets/img/misana.png" height="100%" width="100%" style="opacity: 0.05;" /> -->
         </div>
+        <div id="watermark" class="mt-5"></div>
         <div class="row top_tag" style="margin-top:0px;">
             <div class="col-lg-12" style="text-align:center;">
                 <h1 style="color:red;"><strong>Misana Home Bakery</strong></h1>
             </div>
             <div class="col-lg-12" style="text-align:center;">
                 <h3 style="margin-left:30px;margin-top:-10px;">
-                    <strong style="color:green">{{$employee}} -- 
+                    <strong style="color:green">{{$employee}} --
                         <span style="color:red"> {{$dispatch}} Report</span>
                     </strong>
                 </h3>
             </div>
         </div>
         <div class="row top_tag" style="position:relative;">
-            <div class=" row col-lg-12" >
+            <div class=" row col-lg-12">
                 <!-- TOP CAMPAIGN-->
                 <div class="top-campaign">
                     <h3 class="title-3 m-b-3">Summary</h3>

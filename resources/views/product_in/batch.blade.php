@@ -19,7 +19,7 @@
                 style="float:right;"> -->
             <img src="assets/img/misana.png" height="100%" width="100%" style="opacity: 0.05;" />
         </div>
-        <section class="modal-body">
+        <section class="modal-body" id="materialModalPrint">
             <div class="box" style="margin-top:-70%; z-index:0;">
                
 
@@ -43,7 +43,7 @@
 
         <div class="modal-footer nonPrintable">
                     <button type="button" class="btn btn-default pull-left" data-dismiss="modal">Cancel</button>
-                    <button type="button" onclick="printModal()" class="btn btn-primary subBtn">Print</button>
+                    <!-- <button type="button" onclick="printModal()" class="btn btn-primary subBtn">Print</button> -->
                 </div>
         </div>
         <!-- /.modal-content -->

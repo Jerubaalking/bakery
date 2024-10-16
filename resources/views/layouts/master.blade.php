@@ -8,8 +8,9 @@
     <meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport">
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
+    <!-- Favicon -->
+    <link href="img/misana.png" rel="icon">
     <!-- Title Page-->
-    <title>misana home bakery</title>
       <!-- Fontfaces CSS-->
       <link href="{{ asset('css/font-face.css') }}" rel="stylesheet" media="all">
     <link href="{{ asset('vendor/font-awesome-4.7/css/font-awesome.min.css') }}" rel="stylesheet" media="all">

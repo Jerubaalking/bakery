@@ -26,37 +26,12 @@
 <div class="box nonPrintable" id="noPrintable">
 
     <h3 class="title-5 m-b-35">ProductIn Details</h3>
-    <div class="table-data__tool">
-        <div class="table-data__tool-left">
-            <div class="rs-select2--light rs-select2--md">
-                <select class="js-select2" name="property">
-                    <option selected="selected">All Properties</option>
-                    <option value="">Option 1</option>
-                    <option value="">Option 2</option>
-                </select>
-                <div class="dropDownSelect2"></div>
-            </div>
-            <div class="rs-select2--light rs-select2--sm">
-                <select class="js-select2" name="time">
-                    <option selected="selected">Today</option>
-                    <option value="">3 Days</option>
-                    <option value="">1 Week</option>
-                </select>
-                <div class="dropDownSelect2"></div>
-            </div>
-            <button class="au-btn-filter">
-                <i class="zmdi zmdi-filter-list"></i>filters</button>
-        </div>
-        <div class="table-data__tool-right">
 
-            <a onclick="addForm()" class="au-btn au-btn-icon au-btn--green au-btn--small">
-                <i class="zmdi zmdi-plus"></i>Add</a>
-        </div>
-    </div>
-    <br>
+    <div class="table-data__tool-right">
 
-
-    <!-- /.box-header -->
+        <a onclick="addForm()" class="au-btn au-btn-icon au-btn--green au-btn--small">
+            <i class="zmdi zmdi-plus"></i>Add</a>
+    </div> <!-- /.box-header -->
     <div class="box-body">
         <form action="exportProduct_inAll" method="POST" enctype="multipart/form-data">
             {{ csrf_field() }} {{ method_field('POST') }}
@@ -188,7 +163,7 @@
         dom: 'lBfrtip',
         "scrollCollapse": true,
         buttons: [
-            'excel', 'pdf', 'print'
+            'excel', 'print'
         ],
         "lengthMenu": [10, 20, 30, 50, 100, 500],
         ajax: "{{ url('apiProducts_in') }}",
@@ -500,9 +475,10 @@
     function materialData(batch_number) {
         if (batch_number !== '' || null) {
             $.ajax({
-                url: '/intoStoreShow/' + batch_number,
+                url: '/storeShow/' + batch_number,
                 success: function(html) {
                     let datas = JSON.parse(html)
+                    console.log(html);
                     $('#currentBatch').text(batch_number);
                     $('#materialData-body').html('');
                     let table = '';

@@ -13,7 +13,9 @@
         text-align: left;
         background-color: #fff;
         font-size: 10px;
-        margin: 36pt;
+        margin: 30px;
+        position: relative;
+        /* Ensure body has relative positioning */
     }
 
     h4 {
@@ -140,47 +142,88 @@
 
     .vl {
         border-left: 3px solid black;
-
         margin-top: 150px;
     }
 
     #watermark {
         position: fixed;
+        /* Keep it fixed so it appears on every page */
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        opacity: 0.05;
+        /* Adjust as necessary for visibility */
+        z-index: -1;
+        /* Behind all content */
+        background: url('assets/img/misana.png') no-repeat center center;
+        background-size: cover;
+        /* Cover the entire background */
+    }
+
+    #report-logo {
+        position: fixed;
+        /* Keep it fixed to top right */
+        top: 20px;
+        /* Adjust as needed */
+        right: 20px;
+        /* Adjust as needed */
+        z-index: 1;
+        /* Above watermark */
+    }
+
+
+
+    .page {
+        position: relative;
+        height: auto;
+        min-height: 750px;
+        min-width: 590px;
+        display: block;
+        background: rgba(255, 255, 255, 0.9) !important;
+        margin: 0 auto 15px;
+        page-break-after: always;
+        /* This style rule makes every page element start at the top of a new page */
+        counter-increment: page;
+    }
+
+    /* Page numbers */
+    div.page:after {
+        content: " PAGE - " counter(page);
+        position: absolute;
         bottom: 0px;
-        left: 0px;
-
-        /** The width and height may change 
-                    according to the dimensions of your letterhead
-                **/
-        width: 21.8cm;
-        height: 28cm;
-
-        /** Your watermark should be behind every content**/
-        z-index: -1000;
+        right: 15px;
+        z-index: 999;
+        padding: 2px 12px;
+        border-right: 2px solid #23b8e7;
+        font-size: 12px;
     }
 </style>
 <head>
     <title>Receivable | Report</title>
+    <link rel="apple-touch-icon" sizes="76x76" href="{{asset('assets/img/misana.png')}}">
+    <link rel="icon" type="image/png" sizes="96x96" href="{{asset('assets/img/misana.png')}}">
 </head>
-<body><div>
-            <span style="font-family:sans-serif; font-size:10px;">
-                <?php
-                date_default_timezone_set("Africa/Nairobi");
-                echo 'Downloaded by ' . $loggedInUser->name . ' on ' . date("D d, M Y") . ' ' . date("h:i:sa");
-                ?>
-            </span>
+<div class="section__content section__content--p30">
+    <div class="container-fluid">
+        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px;">
+            <div style="flex: 1;">
+                <span style="font-family: sans-serif; font-size: 10px;">
+                    <?php
+                    date_default_timezone_set("Africa/Nairobi");
+                    echo 'Downloaded by ' . $loggedInUser->name . ' on ' . date("D d, M Y") . ' ' . date("h:i:sa");
+                    ?>
+                </span>
+            </div>
+            <h1 style="color: red; margin: 0; text-align: center; flex: 0 0 auto;">
+                <strong>Misana Home Bakery</strong>
+            </h1>
+            <div id="report-logo" style="flex: 0 1 auto;">
+                <img src="assets/img/misana.png" alt="logo" height="70" width="120" style="opacity: 1;">
+            </div>
         </div>
-    <div id="watermark">
-        <img src="assets/img/misana.png" alt="logo" height="70" width="120" style="float:right;padding-right:22px;">
-        <!-- <img src="assets/img/misana.png" height="100%" width="100%" style="opacity: 0.05;" /> -->
-    </div>
-    {{-- Header --}}
     <section>
         <div class="box" style="margin-top:0px;">
-
-            <center>
-                <h1 style="color:red;"><strong>Misana Home Bakery</strong></h1>
-            </center>
             <center>
                 <h3 style="margin-left:30px;margin-top:-10px;"><strong style="color:green">Repayments Report<p style="color:red">From</p>{{$from}}
                         <p style="color:red">To</p>{{$to}}

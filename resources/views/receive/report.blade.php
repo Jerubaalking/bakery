@@ -186,7 +186,10 @@
                         <p style="color:red">To</p>{{$to}}
                     </strong></h3>
             </center>
-
+            @php
+                $grand  = 0;
+            @endphp
+            
             <table class="table table-striped">
     <thead>
         <tr>
@@ -208,6 +211,7 @@
                         foreach ($employee['receive_sales'] as $sale) {
                             if (\Carbon\Carbon::parse($sale['created_at'])->isSameDay($date)) {
                                 $amount = number_format($sale['amount'], 2); // Format the amount if found
+                                $grand +=$sale['amount'];
                                 break; // Exit the loop since we found the matching date
                             }
                         }
@@ -218,6 +222,9 @@
         @endforeach
     </tbody>
 </table>
+<div>
+                <span>Grand Total: TZS {{number_format($grand, 2)}}/=</span>
+            </div>
 
 
 

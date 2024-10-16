@@ -120,14 +120,9 @@ class PaymentController extends Controller
 
     public function export_pay(Request $request)
     {
-        $from = $request->from;
-        $to = $request->to;
+        $from =Carbon::parse($request->from)->startOfDay();
+        $to = Carbon::parse($request->to)->endOfDay();
     
-        // Fetch employee sales within the date range
-        if ($from === $to) {
-            // Adjust the 'to' date to the end of the day (23:59:59)
-            $to = Carbon::parse($to)->endOfDay();
-        }
         $salesData = DB::table('employee')
             ->join('task', 'task.empoyee_id', '=', 'employee.id')
             ->join('receive_sales', 'receive_sales.task_id', '=', 'task.id')

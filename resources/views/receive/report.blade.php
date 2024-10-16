@@ -159,17 +159,20 @@
         z-index: -1000;
     }
 </style>
+
 <head>
     <title>Receivable | Report</title>
 </head>
-<body><div>
-            <span style="font-family:sans-serif; font-size:10px;">
-                <?php
-                date_default_timezone_set("Africa/Nairobi");
-                echo 'Downloaded by ' . $loggedInUser->name . ' on ' . date("D d, M Y") . ' ' . date("h:i:sa");
-                ?>
-            </span>
-        </div>
+
+<body>
+    <div>
+        <span style="font-family:sans-serif; font-size:10px;">
+            <?php
+            date_default_timezone_set("Africa/Nairobi");
+            echo 'Downloaded by ' . $loggedInUser->name . ' on ' . date("D d, M Y") . ' ' . date("h:i:sa");
+            ?>
+        </span>
+    </div>
     <div id="watermark">
         <img src="assets/img/misana.png" alt="logo" height="70" width="120" style="float:right;padding-right:22px;">
         <!-- <img src="assets/img/misana.png" height="100%" width="100%" style="opacity: 0.05;" /> -->
@@ -188,36 +191,36 @@
             </center>
 
             <table class="table table-striped">
-    <thead>
-        <tr>
-            <th scope="col" class="border-0 pl-0">Date</th>
-            @foreach($structuredData as $employee)
-                <th scope="col" class="border-0 pl-0">{{ $employee['name'] }}</th>
-            @endforeach
-        </tr>
-    </thead>
-    <tbody>
-        @foreach (new \Carbon\CarbonPeriod($from, $to) as $date)
-            <tr>
-                <td class="pl-0">{{ $date->format('Y-m-d') }}</td>
-                @foreach($structuredData as $employee)
-                    @php
+                <thead>
+                    <tr>
+                        <th scope="col" class="border-0 pl-0">Date</th>
+                        @foreach($structuredData as $employee)
+                        <th scope="col" class="border-0 pl-0">{{ $employee['name'] }}</th>
+                        @endforeach
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (new \Carbon\CarbonPeriod($from, $to) as $date)
+                    <tr>
+                        <td class="pl-0">{{ $date->format('Y-m-d') }}</td>
+                        @foreach($structuredData as $employee)
+                        @php
                         $amount = '0.00'; // Default amount to 0.00
-                        
+
                         // Loop through the employee's receive_sales to find a matching date
-                        foreach ($employee['receive_sales'] as $sale) {
-                            if (\Carbon\Carbon::parse($sale['created_at'])->isSameDay($date)) {
-                                $amount = number_format($sale['amount'], 2); // Format the amount if found
-                                break; // Exit the loop since we found the matching date
-                            }
+ v                       foreach ($employee['receive_sales'] as $sale) {
+                        if (\Carbon\Carbon::parse($sale['created_at'])->isSameDay($date)) {
+                        $amount = number_format($sale['amount'], 2); // Format the amount if found
+                        break; // Exit the loop since we found the matching date
                         }
-                    @endphp
-                    <td class="pl-0">{{ $amount }}</td> <!-- Display the amount or 0.00 -->
-                @endforeach
-            </tr>
-        @endforeach
-    </tbody>
-</table>
+                        }
+                        @endphp
+                        <td class="pl-0">{{ $amount }}/=</td> <!-- Display the amount or 0.00 -->
+                        @endforeach
+                    </tr>
+                    @endforeach
+                </tbody>
+            </table>
 
 
 

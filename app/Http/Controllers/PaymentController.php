@@ -120,7 +120,7 @@ class PaymentController extends Controller
 
     public function export_pay(Request $request)
     {
-        $from =Carbon::parse($request->from)->startOfDay();
+        $from = Carbon::parse($request->from)->startOfDay();
         $to = Carbon::parse($request->to)->endOfDay();
     
         $salesData = DB::table('employee')
@@ -130,29 +130,32 @@ class PaymentController extends Controller
                 'employee.id as employee_id',
                 DB::raw('CONCAT(employee.first_name, " ", employee.last_name) as name'),
                 'receive_sales.amount',
-                'receive_sales.created_at'
+                DB::raw('DATE(receive_sales.created_at) as date') // Group by date
             )
             ->whereBetween('receive_sales.created_at', [$from, $to])
             ->get();
-    // info('info of slaes --->>'.$salesData);
+    
         // Structure the data
         $structuredData = $salesData->groupBy('employee_id')->map(function ($sales, $key) {
+            // Group sales by date and sum the amounts
+            $groupedSales = $sales->groupBy('date')->map(function ($salesOnDate) {
+                return [
+                    'amount' => $salesOnDate->sum('amount'), // Sum the amounts for the same date
+                    'created_at' => $salesOnDate->first()->date, // Keep the date
+                ];
+            });
+    
             return [
                 'id' => $key,
                 'name' => $sales->first()->name, // Get the employee's name
-                'receive_sales' => $sales->map(function ($sale) {
-                    return [
-                        'amount' => $sale->amount,
-                        'created_at' => $sale->created_at,
-                    ];
-                })->toArray(),
+                'receive_sales' => $groupedSales->values()->toArray(), // Convert to array and reset keys
             ];
         })->values(); // Reset keys to 0, 1, 2, ...
     
-        // info('info of structured Date --->>'.$structuredData);
         $loggedInUser = Auth::User();
+        
         // Return the structured data to the view or generate PDF as needed
-        $pdf = PDF::loadView('receive.report', compact('structuredData','loggedInUser', 'from', 'to'));
+        $pdf = PDF::loadView('receive.report', compact('structuredData', 'loggedInUser', 'from', 'to'));
         return $pdf->setPaper('A4', 'landscape')->stream('payment.pdf');
     }
     

@@ -128,11 +128,11 @@ class AppServiceProvider extends ServiceProvider
                         'icon' => 'fa fa-users',
                         'roles' => ['Superadministrator'],
                     ],
-                    // 'Activities' => [
-                    //     'url' => url('/activities'),
-                    //     'icon' => 'fa fa-list',
-                    //     'roles' => ['Superadministrator'],
-                    // ],
+                    'Activities' => [
+                        'url' => url('/activities'),
+                        'icon' => 'fa fa-list',
+                        'roles' => ['Superadministrator'],
+                    ],
                 ],
                 'roles' => ['Superadministrator'],
             ],

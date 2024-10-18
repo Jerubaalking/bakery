@@ -18,7 +18,6 @@ use App\Http\Controllers\EmployeeController;
 use App\Http\Controllers\DepartmentController;
 use App\Http\Controllers\PositionController;
 use App\Http\Controllers\CashAdvance;
-use App\Http\Controllers\SupplierController;
 use App\Http\Controllers\TaskController;
 use App\Http\Controllers\StockReturn;
 use App\Http\Controllers\ReceivePayment;
@@ -78,14 +77,14 @@ Route::resource('/user',UserController::class);
 Route::get('/apiUser', [UserController::class,'apiUsers']);
 
 // will be here
-route::resource('/account',AccountController::class);
-route::get('/accountApi', [AccountController::class,'AccountApi']);
-route::post('/activateData/{id}',[AccountController::class,'activateData']);
+Route::resource('/account',AccountController::class);
+Route::get('/accountApi', [AccountController::class,'AccountApi']);
+Route::post('/activateData/{id}',[AccountController::class,'activateData']);
 // expensive will be here
-route::resource('/Expensive',ExpensiveController::class);
-route::get('/ExpensiveApi', [ExpensiveController::class,'ExpensiveApi']);
-route::resource('/deposite',DepositeController::class);
-route::get('/DepositeApi', [DepositeController::class,'DepositeApi']);
+Route::resource('/Expensive',ExpensiveController::class);
+Route::get('/ExpensiveApi', [ExpensiveController::class,'ExpensiveApi']);
+Route::resource('/deposite',DepositeController::class);
+Route::get('/DepositeApi', [DepositeController::class,'DepositeApi']);
 Route::get('/check_balance/{id}', [DepositeController::class,'check_balance']);
 Route::get('/check_account/{id}', [DepositeController::class,'check_account']);
 
@@ -196,8 +195,8 @@ Route::get('check_amount/{id}', [TaskController::class,'amount_due']);
 Route::get('/apiPay', [ReceivePayment::class,'apiTask']);
 
 
-route::post('/exportexpenses',[ExpensiveController::class,'exportexpenses']);
-route::post('/exportdeposite',[DepositeController::class,'exportdeposite']);
+Route::post('/exportexpenses',[ExpensiveController::class,'exportexpenses']);
+Route::post('/exportdeposite',[DepositeController::class,'exportdeposite']);
 
 
 // Route::resource('/demage_products',ProductDemage::class);
@@ -212,22 +211,23 @@ Route::resource('/payment_history',PaymentController::class);
 Route::get('/apiPayment',[PaymentController::class,'apiPayment']);
 Route::post('/exportpay',[PaymentController::class,'export_pay']);
 
-//transfer bank route
-route::get('/TransferApi', [TransferController::class,'TransferApi']);
-route::resource('/transfer',TransferController::class);
-route::post('/export_transfer', [TransferController::class,'export_transfer']);
+//transfer bank Route
+Route::get('/TransferApi', [TransferController::class,'TransferApi']);
+Route::resource('/transfer',TransferController::class);
+Route::post('/export_transfer', [TransferController::class,'export_transfer']);
 
-//cash flow route will be here
-route::resource('/cash_flow',CashFlow::class);
-route::post('/export_flow', [CashFlow::class,'export_flow']);
+//cash flow Route will be here
+Route::resource('/cash_flow',CashFlow::class);
+Route::post('/export_flow', [CashFlow::class,'export_flow']);
 
 
-//cash flow route will be here
-route::resource('/income_expenditure',Expensive_Income::class);
-route::post('/profit_loss', [Expensive_Income::class,'income_exp']);
+//cash flow Route will be here
+Route::resource('/income_expenditure',Expensive_Income::class);
+Route::post('/profit_loss', [Expensive_Income::class,'income_exp']);
 
-route::resource('/get_audit', AuditController::class);
-route::resource('/activities', ActivityController::class);
+Route::resource('/get_audit', AuditController::class);
+Route::resource('/activities', ActivityController::class);
+Route::get('/api/activities', [ActivityController::class, 'apiActivity']);
 Route::get('/home', [HomeController::class, 'index'])->name('home');
 
 Route::get('/', function () {

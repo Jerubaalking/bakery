@@ -2,8 +2,9 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\ActivityModel;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+use Yajra\DataTables\DataTables;
 
 class ActivityController extends Controller
 {
@@ -18,9 +19,11 @@ class ActivityController extends Controller
      */
     public function index()
     {
-        $activities = ActivityModel::all();
-       return view('activity.index',compact('activities'));
+        $activities = DB::table('activities')->get();
+
+        return view('activity.index', compact('activities'));
     }
+   
 
     /**
      * Show the form for creating a new resource.
@@ -86,5 +89,32 @@ class ActivityController extends Controller
     public function destroy($id)
     {
         //
+    }
+
+    public function apiActivity(Request $request)
+    {
+        info('am here at api activity');
+        if ($request->ajax()) {
+
+
+            $activity = DB::table('activities')->get();
+            // You have to create a link option to view account
+                return DataTables::of($activity)
+
+                    ->editColumn('time', function ($activity) {
+                        return '<div class="text-warning">' . $activity->created_at . '</div>';
+                    })
+                
+                    ->editColumn('action', function ($activity) {
+                        return '<small class="text-default text-wrap" style="max-width:30%;  display:flex;">' . $activity->action . '</small>';
+                    })
+                  
+                    ->editColumn('info', function ($activity) {
+                        return '<small class="bg-dark">' . $activity->output . '</small>';
+                    })
+                    ->rawColumns([])
+                    ->make(true);
+        }
+
     }
 }

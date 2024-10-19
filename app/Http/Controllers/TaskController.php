@@ -16,6 +16,8 @@ use Yajra\DataTables\DataTables;
 use App\Models\SalesModel;
 use App\Traits\LogsActivity;
 
+
+
 class TaskController extends Controller
 {
 
@@ -366,11 +368,14 @@ class TaskController extends Controller
     }
     public function apiTask($start, $end, $empId)
     {
+        
+
         if (request()->ajax()) {
 
             info($empId);
             info($end);
             $task = null;
+            
             if ($empId == 'all') {
                 $task = DB::table('task')
                     ->whereDate('task.created_at', '>=', $start)
@@ -416,7 +421,7 @@ class TaskController extends Controller
                     ->whereDate('task.created_at', '>=', $start)
                     ->whereDate('task.created_at', '<=', $end)
                     ->where('empoyee_id', '=', $empId)
-                    ->join('employee', 'employee.id', '=', 'task.empoyee_id')
+                    ->join('employee', 'employee.id', '=', $empId)
                     ->join('sales', 'task.id', '=', 'sales.task_id')
                     ->where('task.amount_due', '>', 0)
                     ->select(
@@ -1544,30 +1549,29 @@ class TaskController extends Controller
 
         // Fetch sums and necessary data
         $sums = DB::table('task')
-            ->leftJoin('sales', 'sales.task_id', '=', 'task.id')
-            ->leftJoin('stock_return', 'task.id', '=', 'stock_return.task_id')
-            ->leftJoin('employee', 'employee.id', '=', 'task.empoyee_id')
-            ->leftJoin('product_demage', 'task.id', '=', 'product_demage.task_id')
-            ->leftJoin('receive_sales', 'receive_sales.task_id', '=', 'task.id')
-            ->where('task.id', '=', $id)
-            ->selectRaw('
-                CONCAT(employee.first_name, " ", employee.last_name) as employee_name,
-                task.task_number as dispatch,
-                sales.created_at as date,
-                SUM(sales.qty) as sum_qty,
-                SUM(sales.retail) as sum_retail,
-                SUM(sales.bulk) as sum_bulk,
-                SUM(sales.amt) as sum_amt,
-                SUM(stock_return.qty) as sum_return_qty,
-                SUM(stock_return.amt) as sum_return_amt,
-                SUM(task.returned) as sum_return,
-                SUM(task.amount_due) as sum_due,
-                SUM(product_demage.qty) as sum_demage_qty,
-                SUM(product_demage.amt) as sum_demage_amt,
-                SUM(receive_sales.amount) as sum_receive
-            ')
-            ->groupBy('employee.first_name', 'sales.created_at', 'employee.last_name', 'task.task_number')  // Add this line
-            ->first();
+        ->leftJoin(DB::raw('(SELECT task_id, SUM(qty) as sum_qty, SUM(retail) as sum_retail, SUM(bulk) as sum_bulk, SUM(amt) as sum_amt, MIN(created_at) as created_at FROM sales GROUP BY task_id) as sales_summary'), 'sales_summary.task_id', '=', 'task.id')
+        ->leftJoin(DB::raw('(SELECT task_id, SUM(qty) as sum_return_qty, SUM(amt) as sum_return_amt FROM stock_return GROUP BY task_id) as stock_return_summary'), 'stock_return_summary.task_id', '=', 'task.id')
+        ->leftJoin(DB::raw('(SELECT task_id, SUM(qty) as sum_demage_qty, SUM(amt) as sum_demage_amt FROM product_demage GROUP BY task_id) as demage_summary'), 'demage_summary.task_id', '=', 'task.id')
+        ->leftJoin(DB::raw('(SELECT task_id, SUM(amount) as sum_receive FROM receive_sales GROUP BY task_id) as receive_sales_summary'), 'receive_sales_summary.task_id', '=', 'task.id')
+        ->leftJoin('employee', 'employee.id', '=', 'task.empoyee_id')
+        ->where('task.id', '=', $id)
+        ->selectRaw('
+            CONCAT(employee.first_name, " ", employee.last_name) as employee_name,
+            task.task_number as dispatch,
+            sales_summary.created_at as date,
+            sales_summary.sum_qty,
+            sales_summary.sum_retail,
+            sales_summary.sum_bulk,
+            sales_summary.sum_amt,
+            stock_return_summary.sum_return_qty,
+            stock_return_summary.sum_return_amt,
+            task.returned as sum_return,
+            task.amount_due as sum_due,
+            demage_summary.sum_demage_qty,
+            demage_summary.sum_demage_amt,
+            receive_sales_summary.sum_receive
+        ')
+        ->first();    
 
         $x = DB::table('receive_sales')
             ->join('task', 'receive_sales.task_id', '=', 'task.id')

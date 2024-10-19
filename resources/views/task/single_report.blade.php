@@ -197,7 +197,7 @@
 
 
 <head>
-    <title>{{$dispatch}}|Report</title>
+    <title>{{$dispatch}}| Report</title>
     <link rel="apple-touch-icon" sizes="76x76" href="{{asset('assets/img/misana.png')}}">
     <link rel="icon" type="image/png" sizes="96x96" href="{{asset('assets/img/misana.png')}}">
 </head>

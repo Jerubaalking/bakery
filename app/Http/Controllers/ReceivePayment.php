@@ -146,8 +146,8 @@ class ReceivePayment extends Controller
                 // Prepare the payment data
                 $payment_data = [
                     'task_id' => $request->task_id_receive,
-                    'account_id' => $request->account_id,
-                    'employee_id' => $request->employee_id,
+                    'account_id' => $task->account_id,
+                    'employee_id' => $task->empoyee_id,
                     'amount' => $request->received_total,
                     'payment_methode' => $request->payment_methode,
                     'created_at' => Carbon::now(),
@@ -157,8 +157,6 @@ class ReceivePayment extends Controller
                 // Insert the payment data into the receive_sales table
                 DB::table('receive_sales')->insert($payment_data);
                 // Updated sales
-                $task_sales = DB::table('sales')->where('task_id', $request->task_id_receive)->get();
-
                 $task_sales = DB::table('sales')->where('task_id', $request->task_id_receive)->get();
 
                 // Use an index to match each sale with the corresponding values from the request arrays

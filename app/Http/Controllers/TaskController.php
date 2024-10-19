@@ -368,14 +368,14 @@ class TaskController extends Controller
     }
     public function apiTask($start, $end, $empId)
     {
-        
+
 
         if (request()->ajax()) {
 
             info($empId);
             info($end);
             $task = null;
-            
+
             if ($empId == 'all') {
                 $task = DB::table('task')
                     ->whereDate('task.created_at', '>=', $start)
@@ -755,7 +755,7 @@ class TaskController extends Controller
     }
     public function apiClosedTask($start, $end, $empId)
     {
-        $task=null;
+        $task = null;
         if ($empId == 'all') {
             $task = DB::table('task')
                 ->join('employee', 'task.empoyee_id', '=', 'employee.id')
@@ -1548,14 +1548,15 @@ class TaskController extends Controller
             ->get();
 
         // Fetch sums and necessary data
+        $task = DB::table('task')->where('task.id', '=', $id)->first();
         $sums = DB::table('task')
-        ->leftJoin(DB::raw('(SELECT task_id, SUM(qty) as sum_qty, SUM(retail) as sum_retail, SUM(bulk) as sum_bulk, SUM(amt) as sum_amt, MIN(created_at) as created_at FROM sales GROUP BY task_id) as sales_summary'), 'sales_summary.task_id', '=', 'task.id')
-        ->leftJoin(DB::raw('(SELECT task_id, SUM(qty) as sum_return_qty, SUM(amt) as sum_return_amt FROM stock_return GROUP BY task_id) as stock_return_summary'), 'stock_return_summary.task_id', '=', 'task.id')
-        ->leftJoin(DB::raw('(SELECT task_id, SUM(qty) as sum_demage_qty, SUM(amt) as sum_demage_amt FROM product_demage GROUP BY task_id) as demage_summary'), 'demage_summary.task_id', '=', 'task.id')
-        ->leftJoin(DB::raw('(SELECT task_id, SUM(amount) as sum_receive FROM receive_sales GROUP BY task_id) as receive_sales_summary'), 'receive_sales_summary.task_id', '=', 'task.id')
-        ->leftJoin('employee', 'employee.id', '=', 'task.empoyee_id')
-        ->where('task.id', '=', $id)
-        ->selectRaw('
+            ->leftJoin(DB::raw('(SELECT task_id, SUM(qty) as sum_qty, SUM(retail) as sum_retail, SUM(bulk) as sum_bulk, SUM(amt) as sum_amt, SUM(retail_amt) as sum_retail_amt, MIN(created_at) as created_at FROM sales GROUP BY task_id) as sales_summary'), 'sales_summary.task_id', '=', 'task.id')
+            ->leftJoin(DB::raw('(SELECT task_id, SUM(qty) as sum_return_qty, SUM(amt) as sum_return_amt FROM stock_return GROUP BY task_id) as stock_return_summary'), 'stock_return_summary.task_id', '=', 'task.id')
+            ->leftJoin(DB::raw('(SELECT task_id, SUM(qty) as sum_demage_qty, SUM(amt) as sum_demage_amt FROM product_demage GROUP BY task_id) as demage_summary'), 'demage_summary.task_id', '=', 'task.id')
+            ->leftJoin(DB::raw('(SELECT task_id, SUM(amount) as sum_receive FROM receive_sales GROUP BY task_id) as receive_sales_summary'), 'receive_sales_summary.task_id', '=', 'task.id')
+            ->leftJoin('employee', 'employee.id', '=', 'task.empoyee_id')
+            ->where('task.id', '=', $id)
+            ->selectRaw('
             CONCAT(employee.first_name, " ", employee.last_name) as employee_name,
             task.task_number as dispatch,
             sales_summary.created_at as date,
@@ -1563,6 +1564,7 @@ class TaskController extends Controller
             sales_summary.sum_retail,
             sales_summary.sum_bulk,
             sales_summary.sum_amt,
+            sales_summary.sum_retail_amt,
             stock_return_summary.sum_return_qty,
             stock_return_summary.sum_return_amt,
             task.returned as sum_return,
@@ -1571,7 +1573,7 @@ class TaskController extends Controller
             demage_summary.sum_demage_amt,
             receive_sales_summary.sum_receive
         ')
-        ->first();    
+            ->first();
 
         $x = DB::table('receive_sales')
             ->join('task', 'receive_sales.task_id', '=', 'task.id')
@@ -1596,11 +1598,11 @@ class TaskController extends Controller
             'sum_qty' => $sums->sum_qty,
             'sum_retail' => $sums->sum_retail,
             'sum_bulk' => $sums->sum_bulk,
-            'sum_amt' => $sums->sum_amt,
+            'sum_amt' => $sums->sum_retail_amt+$sums->sum_amt,
             'sum_return_qty' => $sums->sum_return_qty,
             'sum_return_amt' => $sums->sum_return_amt,
             'sum_return' => $sums->sum_return,
-            'sum_due' => $sums->sum_due,
+            'sum_due' => ($sums->sum_retail_amt+$sums->sum_amt)-$payments,
             'x' => $x,
             'demage' => $demage,
             'employee' => $sums->employee_name,

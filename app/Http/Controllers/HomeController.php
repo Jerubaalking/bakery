@@ -132,6 +132,14 @@ class HomeController extends Controller
 
         // Income vs expenses report
         $sum_expenses = DB::table('expensive')->sum('amount');
+        $material_value = DB::table('into_store')
+            ->selectRaw('SUM(CASE WHEN status = "in" THEN cost ELSE 0 END) AS in_value,
+                 SUM(CASE WHEN status != "in" THEN cost ELSE 0 END) AS used_value')
+            ->first();
+
+        $material_value = $material_value->in_value - $material_value->used_value;
+
+        $account_count = DB::table('account')->count();
         $array_expenses = [
             'income' => $sum_paid,
             'expenses' => $sum_expenses,
@@ -164,7 +172,9 @@ class HomeController extends Controller
             'products_return_sum',
             'mydata',
             'data',
-            'expenses'
+            'expenses',
+            'account_count',
+            'material_value'
         ));
     }
 }

@@ -27,26 +27,41 @@
 
                     </div>
                     <div class="icon">
-                        <i class="fa fa-users" aria-hidden="true"></i>
+                        <i class="fa fa-list" aria-hidden="true"></i>
                     </div>
-                    <a href="#" class="card-box-footer">View More <i class="fa fa-arrow-circle-right"></i></a>
+                    <a href="/categories" class="card-box-footer">View More <i class="fa fa-arrow-circle-right"></i></a>
                 </div>
             </div>
-
+    
             <div class="col-lg-4 col-sm-6">
-                <div class="card-box bg-red">
+                <div class="card-box bg-green">
                     <div class="inner">
-                        <h3 class="title-3 m-b-30">{{number_format($products_demmage_sum,2)}}</h3>
-                        <span>Products Demage({{$products_demmage_count}})</span>
+
+                        <h3 class="title-3 m-b-30">{{$account_count}}</h3>
+                        <span>Shops</span>
+
+
                     </div>
                     <div class="icon">
                         <i class="fa fa-users" aria-hidden="true"></i>
                     </div>
-                    <a href="#" class="card-box-footer">View More <i class="fa fa-arrow-circle-right"></i></a>
+                    <a href="/designation" class="card-box-footer">View More <i class="fa fa-arrow-circle-right"></i></a>
                 </div>
             </div>
             <div class="col-lg-4 col-sm-6">
-                <div class="card-box bg-orange">
+                <div class="card-box bg-red">
+                    <div class="inner">
+                        <h3 class="title-3 m-b-30">{{number_format($material_value,2)}}</h3>
+                        <span>Available Material</span>
+                    </div>
+                    <div class="icon">
+                        <i class="fa fa-users" aria-hidden="true"></i>
+                    </div>
+                    <a href="/intoStore" class="card-box-footer">View More <i class="fa fa-arrow-circle-right"></i></a>
+                </div>
+            </div>
+            <div class="col-lg-4 col-sm-6">
+                <div class="card-box bg-red">
                     <div class="inner">
                         <h3 class="title-3 m-b-30">{{number_format($count_stock)}} /=</h3>
                         <span>Available stock value</span>
@@ -56,93 +71,21 @@
                     <div class="icon">
                         <i class="fa fa-money" aria-hidden="true"></i>
                     </div>
-                    <a href="#" class="card-box-footer">View More <i class="fa fa-arrow-circle-right"></i></a>
+                    <a href="/materials" class="card-box-footer">View More <i class="fa fa-arrow-circle-right"></i></a>
                 </div>
             </div>
 
         </div>
 
 
-        <!-- <div class="row">
-            <div class="col-lg-4 col-sm-6">
-                <div class="card-box bg-blue">
-                    <div class="inner">
-                        <h3 class="title-3 m-b-30">{{number_format($products_return_sum,2)}}</h3>
-                        <span>Products Returned({{$products_return_count}})</span>
-
-                    </div>
-                    <div class="icon">
-                        <i class="fa fa-money" aria-hidden="true"></i>
-                    </div>
-                    <a href="#" class="card-box-footer">View More <i class="fa fa-arrow-circle-right"></i></a>
-                </div>
-            </div>
-
-            <div class="col-lg-4 col-sm-6">
-                <div class="card-box bg-red">
-                    <div class="inner">
-                        <h3 class="title-3 m-b-30">{{$stock_in}}</h3>
-                        <span>Products In</span>
-                    </div>
-                    <div class="icon">
-                        <i class="fa fa-money" aria-hidden="true"></i>
-                    </div>
-                    <a href="#" class="card-box-footer">View More <i class="fa fa-arrow-circle-right"></i></a>
-                </div>
-            </div>
-            <div class="col-lg-4 col-sm-6">
-                <div class="card-box bg-blue">
-                    <div class="inner">
-                        <h3 class="title-3 m-b-30">{{number_format($sale_amt,2)}}</h3>
-                        <span>Product Out({{$sale_sum}})</span>
-
-
-                    </div>
-                    <div class="icon">
-                        <i class="fa fa-money" aria-hidden="true"></i>
-                    </div>
-                    <a href="#" class="card-box-footer">View More <i class="fa fa-arrow-circle-right"></i></a>
-                </div>
-            </div>
-
-        </div> -->
-
 
         <div class="row">
-            <div class="col-lg-4 col-sm-6">
-                <div class="card-box bg-orange">
-                    <div class="inner">
-
-                        <h3 class="title-3 m-b-30">{{$count_suppliers}}</h3>
-                        <span>Suppliers</span>
-
-
-                    </div>
-                    <div class="icon">
-                        <i class="fa fa-money" aria-hidden="true"></i>
-                    </div>
-                    <a href="#" class="card-box-footer">View More <i class="fa fa-arrow-circle-right"></i></a>
-                </div>
-            </div>
-
-            <div class="col-lg-4 col-sm-6">
-                <div class="card-box bg-red">
-                    <div class="inner">
-                        <h3 class="title-3 m-b-30">{{number_format($sum_balance,2)}}</h3>
-                        <span>Account Balance</span>
-                    </div>
-                    <div class="icon">
-                        <i class="fa fa-money" aria-hidden="true"></i>
-                    </div>
-                    <a href="#" class="card-box-footer">View More <i class="fa fa-arrow-circle-right"></i></a>
-                </div>
-            </div>
             <div class="col-lg-4 col-sm-6">
                 <div class="card-box bg-orange">
                     <div class="inner">
 
                         <h3 class="title-3 m-b-30">{{number_format($sum_task,2)}}</h3>
-                        <span>total Task({{$count_task}})</span>
+                        <span>total Dispatch({{$count_task}})</span>
 
 
                     </div>
@@ -152,29 +95,25 @@
                     <a href="#" class="card-box-footer">View More <i class="fa fa-arrow-circle-right"></i></a>
                 </div>
             </div>
-
-        </div>
-
-        <div class="row">
-            <div class="col-lg-4 col-sm-6">
-                <div class="card-box bg-red">
-                    <div class="inner">
-                        <h3 class="title-3 m-b-30">{{number_format($task_amount_paid,2)}}</h3>
-                        <span>Tasks Repayment({{$task_amount_paid_count}})</span>
-
-                    </div>
-                    <div class="icon">
-                        <i class="fa fa-money" aria-hidden="true"></i>
-                    </div>
-                    <a href="#" class="card-box-footer">View More <i class="fa fa-arrow-circle-right"></i></a>
-                </div>
-            </div>
-
             <div class="col-lg-4 col-sm-6">
                 <div class="card-box bg-green">
                     <div class="inner">
+                        <h3 class="title-3 m-b-30">{{number_format($task_amount_paid,2)}}</h3>
+                        <span>Dispatchs Repayment({{$task_amount_paid_count}})</span>
+
+                    </div>
+                    <div class="icon">
+                        <i class="fa fa-money" aria-hidden="true"></i>
+                    </div>
+                    <a href="#" class="card-box-footer">View More <i class="fa fa-arrow-circle-right"></i></a>
+                </div>
+            </div>
+
+            <div class="col-lg-4 col-sm-6">
+                <div class="card-box bg-red">
+                    <div class="inner">
                         <h3 class="title-3 m-b-30">{{number_format($task_amount_due,2)}}</h3>
-                        <span>Tasks Amount Due({{$task_amount_due_count}})</span>
+                        <span>Dispatchs Amount Due({{$task_amount_due_count}})</span>
                     </div>
                     <div class="icon">
                         <i class="fa fa-money" aria-hidden="true"></i>

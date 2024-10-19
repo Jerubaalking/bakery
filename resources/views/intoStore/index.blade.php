@@ -395,7 +395,8 @@
             data: obj,
             url: '/intoStoreShowByDates',
             success: function(html) {
-                let datas = JSON.parse(html);
+                let datas = html;
+                console.log({html});
                 let tcost_in = 0;
                 // let tcost_out = 0;
                 datas[0].map((item) => {
@@ -408,6 +409,9 @@
                 $('#in_total').text(tcost_in.toLocaleString("en-US"))
                 // $('#out_total').text(tcost_out.toLocaleString("en-US"))
                 console.log(datas, tcost_in);
+            },
+            error:function(){
+                alert('error fetching');
             }
         })
     }

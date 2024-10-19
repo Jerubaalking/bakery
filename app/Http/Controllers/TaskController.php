@@ -158,7 +158,6 @@ class TaskController extends Controller
 
                 $get_id = $recordDate->id;
             }
-            info('get_id ===>' . $return_qty);
             $currentSales = DB::table('sales')->where('sales.task_id', '=', $recordDate);
             // Inserting sales entries
             if ($qty) {
@@ -269,101 +268,196 @@ class TaskController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request)
+   
+    public function update(Request $request, $id)
     {
-        //
-        //
+        // Validation
+        $this->validate($request, [
+            "price.*" => 'required|integer|min:1',
+        ]);
+    
+        // Extracting input values
         $date = Carbon::now()->format('Y-m-d');
         $item_name = $request->item_name;
         $date_in = $request->date_in;
         $qty = $request->qty;
         $price = $request->price;
-        $id = $request->id;
-        $amt = $request->amt;
+        $retail_price = $request->retail_price;
         $subtotal = $request->sub_total;
-        $supplier_id = $request->supplier_id;
+        $account_id = $request->supplier_id;
         $product_id = $request->product_id;
-
-        //  $prove="Not approved";
-
-        $form_datas = array(
-            'sub_total' => round($subtotal, 2),
-            'empoyee_id' => $supplier_id,
-            'created_at' => $date,
-            'amount_paid' => '0',
-            'amount_due' => '0'
-
-        );
-
-        DB::table('task')
-            ->where('id', '=', $id)->update($form_datas);
-
-        $x = DB::table('sales')
-            ->where('task_id', '=', $id)
-            ->select('product_id', 'qty')
-            ->get()
-            ->toArray();
-
-        foreach ($x as $x) {
-            $ids[] = $x->product_id;
-            $qtys[] = $x->qty;
-            for ($count = 0; $count < count($ids); $count++) {
-                $xx = DB::table('products')->whereIn('id', [$ids[$count]])
-                    ->increment('stock', $qtys[$count]);
+        $return_qty = 0;
+        $return_price = 0;
+        $return_amt = 0;
+    
+        // Fetch supplier and employee details
+        $supplier = DB::table('account')
+            ->where('account.id', '=', $request->supplier_id)
+            ->join('employee', 'employee.account_id', 'account.id')
+            ->select('account.*', 'employee.employee_number as employee_number', 'employee.id as employee_id')
+            ->first();
+    
+        // Fetch the existing task record
+        $existingTask = DB::table('task')
+            ->where('id', '=', $id)
+            ->first();
+    
+        // Start transaction to ensure data consistency
+        DB::beginTransaction();
+        try {
+            // Check if the task exists
+            if ($existingTask) {
+                // Updating the existing task
+                $updated_data = [
+                    'sub_total' => round($existingTask->sub_total + $subtotal, 2),
+                    'amount_paid' => $existingTask->amount_paid,
+                    'amount_due' => $existingTask->amount_due + $subtotal,
+                    'returned' => $existingTask->returned + $return_amt,
+                    'updated_at' => $date,
+                ];
+    
+                // Update the task with new data
+                DB::table('task')
+                    ->where('id', $id)
+                    ->update($updated_data);
+            } else {
+                // If task doesn't exist, return a failure response
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Task not found',
+                ], 404);
             }
+    
+            // Update the sales entries associated with the task
+            if ($qty) {
+                $sales_data = [];
+    
+                for ($i = 0; $i < sizeof($qty); $i++) {
+                    $sales_data[] = [
+                        'task_id' => $id,
+                        'product_id' => $product_id[$i],
+                        'qty'  => $qty[$i],
+                        'price'  => round($price[$i], 2),
+                        'retail_price'  => round($retail_price[$i], 2),
+                        'bulk' => $qty[$i],
+                        'retail' => 0,
+                        'amt' => round($price[$i] * $qty[$i], 2),
+                        'retail_amt' => 0,
+                        'return_qty'  => 0,
+                        'return_price'  => 0,
+                        'return_amt'  => 0,
+                        'created_at'  => $date_in,
+                    ];
+    
+                    // Optional: Update product stock after each sale
+                    // DB::table('products')->where('id', $product_id[$i])->decrement('stock', $qty[$i]);
+                }
+    
+                // First delete the existing sales data for the task
+                DB::table('sales')->where('task_id', '=', $id)->delete();
+    
+                // Batch insert updated sales data
+                DB::table('sales')->insert($sales_data);
+            }
+    
+            // Commit the transaction after everything is successful
+            DB::commit();
+    
+            // Log success completion
+            $this->logActivity('Task update', 'success', json_encode($sales_data));
+    
+            // Return success response
+            return response()->json([
+                'success' => true,
+                'message' => 'Task successfully updated'
+            ]);
+        } catch (\Exception $e) {
+            // Rollback transaction if something goes wrong
+            DB::rollBack();
+    
+            // Log the error with exception details
+            $this->logActivity('Task update', 'failed', $e->getMessage());
+    
+            // Return failure response
+            return response()->json([
+                'success' => false,
+                'message' => 'Task update failed due to an error'
+            ]);
         }
-
-        for ($count = 0; $count < count($qty); $count++) {
-            $form_data[] = array(
-                'task_id' => $id,
-                'product_id' => $product_id[$count],
-                'qty'  => $qty[$count],
-                'price'  => round($price[$count], 2),
-                'amt' => round($price[$count] * $qty[$count], 2),
-                'created_at'  => $date_in,
-
-            );
-            DB::table('products')->where('id', $product_id[$count])->decrement('stock', $qty[$count]);
-        }
-
-
-        DB::table('sales')->where('task_id', '=', $id)->delete();
-
-        DB::table('sales')->insert($form_data);
-        return response()->json([
-            'success'    => true,
-            'message'    => 'Information Updated'
-        ]);
     }
-
+    
     /**
      * Remove the specified resource from storage.
      *
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
+    
     public function destroy($id)
     {
-        //
-
-
-        $x = DB::table('sales')
-            ->where('task_id', '=', $id)
-            ->select('product_id', 'qty')
-            ->get()
-            ->toArray();
-        foreach ($x as $x) {
-            $ids[] = $x->product_id;
-            $qtys[] = $x->qty;
-        }
-
-        $task =  DB::table('task')
-            ->where('id', '=', $id)->delete();
-        if ($task) {
-            for ($count = 0; $count < count($ids); $count++) {
-                $xx = DB::table('products')->whereIn('id', [$ids[$count]])
-                    ->increment('stock', $qtys[$count]);
+        // Start a database transaction
+        DB::beginTransaction();
+    
+        try {
+            // Fetch the task to be deleted
+            $task = DB::table('task')->where('id', '=', $id)->first();
+    
+            // If the task does not exist, return an error response
+            if (!$task) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Dispatch not found'
+                ], 404);
             }
+    
+            // Check if there are any entries in the receive_sales table for this task
+            $receiveSalesEntries = DB::table('receive_sales')
+                ->where('task_id', '=', $id)
+                ->count();
+    
+            // If there are receive_sales entries, notify the user that they need to be deleted first
+            if ($receiveSalesEntries > 0) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Dispatch cannot be deleted dispatch has received payments!'
+                ], 400);
+            }
+    
+            // If no receive_sales entries exist, proceed to delete the associated records
+    
+            // Delete sales associated with the task
+            DB::table('sales')->where('task_id', '=', $id)->delete();
+    
+            // Optionally, delete any other related data in other tables if required (e.g. logs, product stock adjustments, etc.)
+            // Example: DB::table('other_related_table')->where('task_id', '=', $id)->delete();
+    
+            // Delete the task itself
+            DB::table('task')->where('id', '=', $id)->delete();
+    
+            // Commit the transaction after successful deletion
+            DB::commit();
+    
+            // Log the task deletion activity
+            $this->logActivity('Dispatch deletion', 'success', 'Dispatch ID: ' . $id . ' and its associated records were deleted');
+    
+            // Return success response
+            return response()->json([
+                'success' => true,
+                'message' => 'Dispatch and its associated records successfully deleted'
+            ]);
+    
+        } catch (\Exception $e) {
+            // Rollback the transaction in case of an error
+            DB::rollBack();
+    
+            // Log the error
+            $this->logActivity('Dispatch deletion', 'failed', $e->getMessage());
+    
+            // Return error response
+            return response()->json([
+                'success' => false,
+                'message' => 'Dispatch deletion failed due to an error: ' . $e->getMessage()
+            ], 500);
         }
     }
     public function apiTask($start, $end, $empId)

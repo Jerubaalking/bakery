@@ -1644,7 +1644,7 @@
             }).then(function() {
                 $.ajax({
                     url: "{{ url('task') }}" + '/' + id,
-                    type: "POST",
+                    type: "DELETE",
                     data: {
                         '_method': 'DELETE',
                         '_token': csrf_token
@@ -1658,12 +1658,12 @@
                             timer: '1500'
                         })
                     },
-                    error: function() {
+                    error: function(data) {
                         swal({
                             title: 'Oops...',
-                            text: data.message,
+                            text: data.responseJSON.message,
                             type: 'error',
-                            timer: '1500'
+                            timer: '3000'
                         })
                     }
                 });
@@ -1716,7 +1716,7 @@
                             $(".subBtn").html("Save");
                             swal({
                                 title: 'Oops...',
-                                text: data.message,
+                                text: data.responseJSON.message,
                                 type: 'error',
                                 timer: '1500'
                             })
@@ -1867,7 +1867,7 @@
                             $(".subBtn").val("submit");
                             swal({
                                 title: 'Oops...',
-                                text: data.message,
+                                text: data.responseJSON.message,
                                 type: 'error',
                                 timer: '1500'
                             });

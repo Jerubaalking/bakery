@@ -122,6 +122,7 @@ class ReceivePayment extends Controller
 
     public function save_public(Request $request)
     {
+        $session_id = DB::table('sessions')->where('active','=', true)->first();
         if ($request->ajax()) {
             DB::beginTransaction(); // Start transaction
 
@@ -150,6 +151,7 @@ class ReceivePayment extends Controller
                     'employee_id' => $task->empoyee_id,
                     'amount' => $request->received_total,
                     'payment_methode' => $request->payment_methode,
+                    'session_id'=>$session_id,
                     'created_at' => Carbon::now(),
                     'updated_at' => Carbon::now(),
                 ];

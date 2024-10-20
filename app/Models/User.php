@@ -17,7 +17,7 @@ class User extends Authenticatable
     protected $table = 'users';
     // primary key
     public $primaryKey = 'id';
-    
+
     public $timestamps = false;
 
     /**
@@ -49,4 +49,9 @@ class User extends Authenticatable
     protected $casts = [
         'email_verified_at' => 'datetime',
     ];
+
+    public function session()
+    {
+        return $this->belongsTo(Session::class);
+    }
 }

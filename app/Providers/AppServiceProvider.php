@@ -2,7 +2,10 @@
 
 namespace App\Providers;
 
+use App\Models\SessionModel as Session;
 use Illuminate\Support\Facades\View;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
@@ -138,9 +141,19 @@ class AppServiceProvider extends ServiceProvider
             ],
         ];
 
-        // Share the menu items with both views
-        View::composer(['layouts.mobileNav', 'layouts.sidebar'], function ($view) use ($menuItems) {
-            $view->with('menuItems', $menuItems);
+        // Check if user is authenticated
+        $session = null;
+        if (Auth::check() && Auth::user()->session_id) {
+            $session = DB::table('sessions')->where('id','=',Auth::user()->session_id);
+        }
+
+        $sessions = DB::table('sessions')->get();
+
+        // Share the menu items and sessions with both views
+        View::composer(['layouts.mobileNav', 'layouts.sidebar'], function ($view) use ($menuItems, $sessions, $session) {
+            $view->with('menuItems', $menuItems)
+                 ->with('sessions', $sessions)
+                 ->with('session', $session);
         });
     }
 }

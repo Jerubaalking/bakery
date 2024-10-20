@@ -217,7 +217,8 @@
                             <th scope="col" class="border-0 pl-0">Category</th>
                             <th scope="col" class="border-0 pl-0">Quantity</th>
                             <th scope="col" class="border-0 pl-0">Cost</th>
-                            <th scope="col" class="border-0 pl-0">Entry-Date</th>
+                            <th scope="col" class="border-0 pl-0">Date</th>
+                            <th scope="col" class="border-0 pl-0">Entry</th>
 
                         </tr>
                     </thead>
@@ -249,6 +250,9 @@
                                     <?php echo $i->cost ?>
                                 </td>
                                 <td class="pl-0">
+                                    <?php echo $i->date ?>
+                                </td>
+                                <td class="pl-0">
                                     <?php echo $i->created_at ?>
                                 </td>
                             </tr>
@@ -265,6 +269,7 @@
                             <td>
                                 <strong style="color:#4682B4"><?php echo number_format($total, 2) ?>/=</strong>
                             </td>
+                            <td></td>
                             <td></td>
 
 

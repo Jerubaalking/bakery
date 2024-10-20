@@ -571,7 +571,7 @@ class IntoStoreController extends Controller
         if (!$status) {
             $status = 'all';
             $data = DB::table('into_store')
-                ->whereBetween('into_store.update_at', [$from, $to])
+                ->whereBetween('into_store.date', [$from, $to])
                 ->join('materials', 'materials.id', '=', 'into_store.material_id')
                 ->select('into_store.*', 'materials.name', 'materials.unit_cost', 'materials.material_category_id', 'materials.measurement_id', 'measurements.measurement', 'measurements.symbol', 'material_categories.category_name', 'material_categories.type')
                 ->join('measurements', 'measurements.id', '=', 'materials.measurement_id')
@@ -582,7 +582,7 @@ class IntoStoreController extends Controller
         } else {
             if (!$status == "in") {
                 $data = DB::table('into_store')
-                    ->whereBetween('into_store.updated_at', [$from, $to])
+                    ->whereBetween('into_store.date', [$from, $to])
                     ->where('into_store.status', '=', $status)
                     ->join('materials', 'materials.id', '=', 'into_store.material_id')
                     ->join('products', 'products.id', '=', 'into_store.product_id')
@@ -594,7 +594,7 @@ class IntoStoreController extends Controller
                     ->get();
             } else {
                 $data = DB::table('into_store')
-                    ->whereBetween('into_store.updated_at', [$from, $to])
+                    ->whereBetween('into_store.date', [$from, $to])
                     ->where('into_store.status', '=', $status)
                     ->join('materials', 'materials.id', '=', 'into_store.material_id')
                     ->select('into_store.*', 'materials.name', 'materials.unit_cost', 'materials.material_category_id', 'materials.measurement_id', 'measurements.measurement', 'measurements.symbol', 'material_categories.category_name', 'material_categories.type')

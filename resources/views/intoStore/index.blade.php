@@ -396,7 +396,9 @@
             url: '/intoStoreShowByDates',
             success: function(html) {
                 let datas = html;
-                console.log({html});
+                console.log({
+                    html
+                });
                 let tcost_in = 0;
                 // let tcost_out = 0;
                 datas[0].map((item) => {
@@ -410,7 +412,7 @@
                 // $('#out_total').text(tcost_out.toLocaleString("en-US"))
                 console.log(datas, tcost_in);
             },
-            error:function(){
+            error: function() {
                 alert('error fetching');
             }
         })
@@ -483,6 +485,12 @@
             },
             error: function() {
                 alert('Failed to generate the report.'); // Handle error
+                swal({
+                    title: 'Ops!',
+                    text: 'Failed to generate the report.',
+                    type: 'success',
+                    timer: '2500'
+                });
                 toggleSpinner('print_btn', false);
             },
             complete: function() {
@@ -598,8 +606,7 @@
     });
 
     $('#use_btn').on('click', function() {
-        
-        alert("use button clicked")
+
         save_method = "use";
         $('input[name=_method]').val('POST');
         $('#modal-form').modal('show');
@@ -614,7 +621,6 @@
     });
 
     function add_expensive_row() {
-        alert('am here bost add expensive rows')
         var prev = parseInt($("#indexer").val()) + 1;
         var tr = $(this).parent().parent();
         var html = '';
@@ -766,7 +772,9 @@
             url: "{{ url('intoStoreShow') }}",
             success: function(response) {
                 var datas = JSON.parse(response);
-                console.log({datas});
+                console.log({
+                    datas
+                });
                 datas.forEach(function(item) {
                     if (item.material_id == id) {
                         // Total quantities are now already calculated by the backend
@@ -783,6 +791,7 @@
 
         });
     }
+
     function getAvailableQuantity(prev) {
         var id = $(`.selectMaterial_id${prev}`).val();
 

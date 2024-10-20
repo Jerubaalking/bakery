@@ -72,6 +72,7 @@ class TaskController extends Controller
      */
     public function store(Request $request)
     {
+        $session_id = Auth::User()->session_id;
         // Validation
         $this->validate($request, [
             "price.*" => 'required|integer|min:1',
@@ -107,6 +108,7 @@ class TaskController extends Controller
             ->where('empoyee_id', '=', $supplier->employee_id)
             ->where('account_id', '=', $account_id)
             ->where('created_at', '=', $date_in)
+            ->where('session_id', '=', $session_id)
             ->orderBy('id', 'DESC')
             ->first();
 
@@ -138,7 +140,8 @@ class TaskController extends Controller
                     'amount_paid' => 0,
                     'amount_due' => $subtotal,
                     'task_number' => $nextTask,
-                    'returned' => $return_amt
+                    'returned' => $return_amt,
+                    'session_id'=>$session_id,
                 ];
 
                 // Insert the task and get its ID
@@ -178,6 +181,7 @@ class TaskController extends Controller
                         'return_price'  => 0,
                         'return_amt'  => 0,
                         'created_at'  => $date_in,
+                        'session_id'=>$session_id,
                     ];
 
                     // Optional: Update product stock after each sale
@@ -462,7 +466,7 @@ class TaskController extends Controller
     }
     public function apiTask($start, $end, $empId)
     {
-
+        $session_id = Auth::User()->session_id;
 
         if (request()->ajax()) {
 
@@ -477,6 +481,7 @@ class TaskController extends Controller
                     ->join('employee', 'employee.id', '=', 'task.empoyee_id')
                     ->join('sales', 'task.id', '=', 'sales.task_id')
                     ->where('task.amount_due', '>', 0)
+                    ->where('task.session_id', '=', $session_id)
                     ->select(
                         'task.id',
                         'task.empoyee_id',
@@ -518,6 +523,7 @@ class TaskController extends Controller
                     ->join('employee', 'employee.id', '=', $empId)
                     ->join('sales', 'task.id', '=', 'sales.task_id')
                     ->where('task.amount_due', '>', 0)
+                    ->where('task.session_id', '=', $session_id)
                     ->select(
                         'task.id',
                         'task.empoyee_id',
@@ -656,11 +662,13 @@ class TaskController extends Controller
     public function account(Request $request, $id, $start, $end)
     {
         info($id);
+        $session_id = Auth::User()->session_id;
         $tasks = DB::table('employee')
             ->where('empoyee_id', '=', $id)
             ->join('task', 'employee.id', '=', 'task.empoyee_id')
             ->whereDate('task.created_at', '>=', $start)
             ->whereDate('task.created_at', '<=', $end)
+            ->where('task.session_id', '=', $session_id)
             ->get();
         return json_encode($tasks);
         // return view('task.details',compact('tasks'));

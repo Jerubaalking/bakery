@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Session;
 use App\User;
 use Excel;
 use Illuminate\Http\Request;
@@ -47,6 +48,7 @@ class UserController extends Controller
 	 */
 	public function store(Request $request)
 	{
+		$activeSession = Session::where('active', true)->first();
 		$this->validate($request, [
 			'name' => 'required',
 			'email' => 'required',
@@ -60,7 +62,8 @@ class UserController extends Controller
 			'email' => $request->email,
 			'phone' => $request->phone,
 			'role' => $request->role,
-			'password' => Hash::make($request->password)
+			'password' => Hash::make($request->password),
+			'session_id' => $activeSession->id, // Associate the session
 		);
 		DB::table('users')->insert($form_data);
 
@@ -68,6 +71,18 @@ class UserController extends Controller
 			'success' => true,
 			'message' => 'User Created',
 		]);
+	}
+
+	public function changeSession(Request $request) {
+		$request->validate([
+			'session_id' => 'required|exists:sessions,id',
+		]);
+	
+		$user = Auth::User();
+		$user->session_id = $request->session_id;
+		DB::table('users')->where('id', '=', $user->id)->update(['session_id'=>$request->session_id]);
+	
+		return back()->with('success', 'Session changed successfully!');
 	}
 
 	/**

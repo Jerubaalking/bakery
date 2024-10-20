@@ -33,6 +33,7 @@ class SalesModel extends Model implements Auditable
         'retail_price',
         'amt',
         'retail_amt',
+        'session_id'
     ];
 
 }

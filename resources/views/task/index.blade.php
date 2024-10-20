@@ -1682,14 +1682,10 @@
                     $.ajax({
                         url: url,
                         type: "POST",
-                        //hanya untuk input data tanpa dokumen
-                        // data : $('#modal-form form').serialize(),
                         data: new FormData($("#form-item")[0]),
                         contentType: false,
                         processData: false,
                         success: function(data) {
-                            console.log(data);
-                            if (data.success) {
                                 $('#modal-form').modal('hide');
                                 populateTable('apiTask');
                                 $(".subBtn").attr("disabled", false);
@@ -1700,16 +1696,7 @@
                                     type: 'success',
                                     timer: '1500'
                                 });
-                            } else {
-                                $(".subBtn").attr("disabled", false);
-                                $(".subBtn").html("Save");
-                                swal({
-                                    title: 'Oops...',
-                                    text: data.message,
-                                    type: 'error',
-                                    timer: '1500'
-                                })
-                            }
+                            
                         },
                         error: function(data) {
                             $(".subBtn").attr("disabled", false);

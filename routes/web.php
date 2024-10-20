@@ -198,6 +198,7 @@ Route::get('/apiPay', [ReceivePayment::class,'apiTask']);
 Route::post('/exportexpenses',[ExpensiveController::class,'exportexpenses']);
 Route::post('/exportdeposite',[DepositeController::class,'exportdeposite']);
 
+Route::post('/change-session', [UserController::class, 'changeSession'])->name('change.session');
 
 // Route::resource('/demage_products',ProductDemage::class);
 Route::post('/demage_products/{id}',[ProductDemage::class, 'store1']);

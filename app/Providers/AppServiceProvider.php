@@ -120,6 +120,11 @@ class AppServiceProvider extends ServiceProvider
                         'icon' => 'fa fa-sitemap',
                         'roles' => ['Superadministrator', 'Manager'],
                     ],
+                    'Employees' => [
+                        'url' => '/employee',
+                        'icon' => 'fa fa-users',
+                        'roles' => ['Superadministrator', 'Manager'],
+                    ],
                 ],
                 'roles' => ['Superadministrator', 'Manager'],
             ],

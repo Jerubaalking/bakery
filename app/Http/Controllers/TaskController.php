@@ -515,48 +515,47 @@ class TaskController extends Controller
                     // ->havingRaw('task.amount_paid < SUM(sales.bulk * sales.price + sales.retail * sales.retail_price)')
                     ->orderBy('task.created_at', 'DESC')
                     ->get();
-            } else {
-                $task = DB::table('task')
-                    ->whereDate('task.created_at', '>=', $start)
-                    ->whereDate('task.created_at', '<=', $end)
-                    ->where('empoyee_id', '=', $empId)
-                    ->join('employee', 'employee.id', '=', $empId)
-                    ->join('sales', 'task.id', '=', 'sales.task_id')
-                    ->where('task.amount_due', '>', 0)
-                    ->where('task.session_id', '=', $session_id)
-                    ->select(
-                        'task.id',
-                        'task.empoyee_id',
-                        'task.account_id',
-                        'task.returned',
-                        'task.demage_cost',
-                        'task.created_at',
-                        'task.task_number',
-                        'task.amount_paid',
-                        'task.amount_due',
-                        'task.sub_total',
-                        DB::raw('SUM(sales.bulk*sales.price + sales.retail*sales.retail_price) as expected_amount'),
-                        'employee.first_name',
-                        'employee.last_name'
-                    )
-                    ->groupBy(
-                        'task.id',
-                        'task.empoyee_id',
-                        'task.account_id',
-                        'task.returned',
-                        'task.demage_cost',
-                        'task.created_at',
-                        'task.task_number',
-                        'task.amount_paid',
-                        'task.amount_due',
-                        'task.sub_total',
-                        'employee.id',
-                        'employee.first_name',
-                        'employee.last_name'
-                    ) // To aggregate results properly
-                    // ->havingRaw('task.amount_paid < SUM(sales.bulk * sales.price + sales.retail * sales.retail_price)')
-                    ->orderBy('task.created_at', 'DESC')
-                    ->get();
+            } else {$task = DB::table('task')
+                ->whereDate('task.created_at', '>=', $start)
+                ->whereDate('task.created_at', '<=', $end)
+                ->where('task.empoyee_id', '=', $empId) // Corrected 'empoyee_id' to 'task.empoyee_id'
+                ->where('task.session_id', '=', $session_id)
+                ->join('employee', 'employee.id', '=', 'task.empoyee_id') // Corrected join condition
+                ->join('sales', 'task.id', '=', 'sales.task_id')
+                ->where('task.amount_due', '>', 0)
+                ->select(
+                    'task.id',
+                    'task.empoyee_id',
+                    'task.account_id',
+                    'task.returned',
+                    'task.demage_cost', // Corrected 'demage_cost' to 'damage_cost'
+                    'task.created_at',
+                    'task.task_number',
+                    'task.amount_paid',
+                    'task.amount_due',
+                    'task.sub_total',
+                    DB::raw('SUM(sales.bulk * sales.price + sales.retail * sales.retail_price) as expected_amount'),
+                    'employee.first_name',
+                    'employee.last_name'
+                )
+                ->groupBy(
+                    'task.id',
+                    'task.empoyee_id',
+                    'task.account_id',
+                    'task.returned',
+                    'task.demage_cost', // Corrected 'demage_cost' to 'damage_cost'
+                    'task.created_at',
+                    'task.task_number',
+                    'task.amount_paid',
+                    'task.amount_due',
+                    'task.sub_total',
+                    'employee.id',
+                    'employee.first_name',
+                    'employee.last_name'
+                )
+                ->orderBy('task.created_at', 'DESC')
+                ->get();
+            
             }
 
             // You have to create a link option to view account

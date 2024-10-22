@@ -122,7 +122,8 @@ class ReceivePayment extends Controller
 
     public function save_public(Request $request)
     {
-        $session_id = DB::table('sessions')->where('active','=', true)->first();
+        $session = DB::table('sessions')->where('active','=', true)->first();
+        $session_id = $session->id;
         if ($request->ajax()) {
             DB::beginTransaction(); // Start transaction
 

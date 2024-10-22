@@ -251,7 +251,7 @@
                                     <tbody>
                                         <tr>
                                             <td>Employee</td>
-                                            <td>All</td>
+                                            <td>{{$employee}}</td>
                                         </tr>
                                         <tr>
                                             <td>Total Task Records</td>

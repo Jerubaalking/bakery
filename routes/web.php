@@ -28,7 +28,9 @@ use App\Http\Controllers\UserController;
 use App\Http\Controllers\CashFlow;
 use App\Http\Controllers\Expensive_Income;
 use App\Http\Controllers\AuditController;
+use App\Http\Controllers\CustomerController;
 use App\Http\Controllers\DesignationController;
+use App\Http\Controllers\MessageController;
 use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Auth;
 
@@ -230,6 +232,19 @@ Route::resource('/get_audit', AuditController::class);
 Route::resource('/activities', ActivityController::class);
 Route::get('/api/activities', [ActivityController::class, 'apiActivity']);
 Route::get('/home', [HomeController::class, 'index'])->name('home');
+
+Route::get('/customers', [CustomerController::class, 'index'], 'customer.index');
+Route::post('/customers', [CustomerController::class, 'store'], 'customer.save');
+Route::post('/customers/{id}', [CustomerController::class, 'update'], 'customer.update');
+Route::delete('/customers/{id}', [CustomerController::class, 'destroy'], 'customer.delete');
+Route::get('/api/customers', [CustomerController::class, 'apiCustomer']);
+
+
+Route::get('/messages', [MessageController::class, 'index'], 'message.index');
+Route::post('/messages', [MessageController::class, 'store'], 'message.save');
+Route::post('/messages/{id}', [MessageController::class, 'update'], 'message.update');
+Route::delete('/messages/{id}', [MessageController::class, 'destroy'], 'message.delete');
+Route::get('/api/messages', [MessageController::class, 'apiMessages']);
 
 Route::get('/', function () {
 	return view('welcome');

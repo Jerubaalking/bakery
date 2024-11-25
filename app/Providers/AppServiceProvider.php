@@ -128,6 +128,32 @@ class AppServiceProvider extends ServiceProvider
                 ],
                 'roles' => ['Superadministrator', 'Manager'],
             ],
+            'CRM' => [
+                'icon' => 'fa fa-users',
+                'subItems' => [
+                    'Customers' => [
+                        'url' => '/customers',
+                        'icon' => 'fa fa-users',
+                        'roles' => ['Superadministrator', 'Manager'],
+                    ],
+                    'Messages' => [
+                        'url' => '/messages',
+                        'icon' => 'fa fa-envelope',
+                        'roles' => ['Superadministrator', 'Manager'],
+                    ],
+                    'Contracts' => [
+                        'url' => '/customer/contracts',
+                        'icon' => 'fa fa-file-alt',
+                        'roles' => ['Superadministrator', 'Manager'],
+                    ],
+                    'Complaints' => [
+                        'url' => '/customer/complaints',
+                        'icon' => 'fa fa-comments',
+                        'roles' => ['Superadministrator', 'Manager'],
+                    ],
+                ],
+                'roles' => ['Superadministrator', 'Manager'],
+            ],
             'Settings' => [
                 'icon' => 'fa fa-cog',
                 'subItems' => [

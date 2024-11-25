@@ -47,7 +47,7 @@ jobs:
           node-version: '20.x'
 
       - name: Select the proper .env file
-        run: mv .env.prod .env  # Make sure you're using the production environment file
+        run: mv .env.dev .env  # Make sure you're using the production environment file
 
       - name: Install Node.js dependencies
         run: npm install

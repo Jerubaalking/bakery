@@ -1,9 +1,9 @@
-name: Deployment to Dev-misana Server
+name: Deployment to Production Server
 
 on:
   push:
     branches:
-      - dev # Only run on pushes to the dev branch
+      - main  # Only run on pushes to the main branch
 
 jobs:
   build:
@@ -47,16 +47,16 @@ jobs:
           node-version: '20.x'
 
       - name: Select the proper .env file
-        run: mv .env.dev .env
+        run: mv .env.prod .env  # Make sure you're using the production environment file
 
       - name: Install Node.js dependencies
         run: npm install
 
       - name: Update Composer dependencies
-        run: composer update
-      
+        run: composer update --no-dev --prefer-dist --optimize-autoloader  # Only install production dependencies
+
       - name: Install Composer dependencies
-        run: composer install --no-dev --prefer-dist --optimize-autoloader
+        run: composer install --no-dev --prefer-dist --optimize-autoloader  # Ensure production dependencies
 
       - name: Set up Laravel environment
         run: |
@@ -73,8 +73,8 @@ jobs:
           SOURCE: "./"
           REMOTE_HOST: ${{ vars.REMOTE_HOST }}
           REMOTE_USER: "gitactions"
-          TARGET: "/var/www/misana/dev/stage"
-          EXCLUDE: "--exclude=node_modules --exclude=vendor"
+          TARGET: "/var/www/misana/dev/stage"  # Ensure you're deploying to the correct production folder
+          EXCLUDE: "--exclude=node_modules --exclude=vendor"  # Exclude non-essential folders
 
       - name: Configure SSH on server for remote commands
         run: |
@@ -82,7 +82,7 @@ jobs:
           echo "${{ secrets.DEV_SERVER_SSH_PRIVATE_KEY }}" > ~/.ssh/authorized_keys
           chmod 600 ~/.ssh/authorized_keys
           cat >>~/.ssh/config <<END
-          Host staging
+          Host production
             HostName ${{ vars.REMOTE_HOST }}
             User "gitactions"
             IdentityFile ~/.ssh/authorized_keys
@@ -90,36 +90,36 @@ jobs:
           END
 
       - name: Check PHP Extensions on Server
-        run: ssh staging 'php -m | grep -E "gd|mbstring|pdo_mysql|bcmath|xml|curl|json|openssl|zip|tokenizer|ctype|dom|simplexml|xmlreader|xmlwriter|zlib"'
+        run: ssh production 'php -m | grep -E "gd|mbstring|pdo_mysql|bcmath|xml|curl|json|openssl|zip|tokenizer|ctype|dom|simplexml|xmlreader|xmlwriter|zlib"'
 
       - name: Update Composer on the server
-        run: ssh staging 'cd /var/www/misana/dev/stage && composer update'
+        run: ssh production 'cd /var/www/misana/dev/stage && composer update --no-dev --prefer-dist --optimize-autoloader'
         continue-on-error: true
 
       - name: Clear old files and caches
         run: |
-          ssh staging 'rm -rf /var/www/misana/dev/stage/node_modules'
+          ssh production 'rm -rf /var/www/misana/dev/stage/node_modules'
         continue-on-error: true
 
       - name: Install Composer on the server
-        run: ssh staging 'cd /var/www/misana/dev/stage && composer install'
+        run: ssh production 'cd /var/www/misana/dev/stage && composer install --no-dev --prefer-dist --optimize-autoloader'
         continue-on-error: true
 
       - name: Run npm install and build assets
-        run: ssh staging 'cd /var/www/misana/dev/stage && npm install'
+        run: ssh production 'cd /var/www/misana/dev/stage && npm install && npm run prod'
         continue-on-error: true
 
       - name: Clear Laravel caches
-        run: ssh staging 'cd /var/www/misana/dev/stage && php artisan config:cache && php artisan route:cache && php artisan view:cache'
+        run: ssh production 'cd /var/www/misana/dev/stage && php artisan config:cache && php artisan route:cache && php artisan view:cache'
 
       - name: Stop PM2 (if necessary)
-        run: ssh staging 'pm2 stop misana'
+        run: ssh production 'pm2 stop misana'
         continue-on-error: true
 
       - name: Delete old PM2 instance (if necessary)
-        run: ssh staging 'pm2 delete misana'
+        run: ssh production 'pm2 delete misana'
         continue-on-error: true
 
-      - name: Start Laravel application with PM2 on port 3018
-        run: ssh staging 'cd /var/www/misana/dev/stage && pm2 start "php artisan serve --host=127.0.0.1 --port=3018" --name "misana" --log "/home/gitactions/.pm2/logs/misana-error.log"'
+      - name: Start Laravel application with PM2 in production mode
+        run: ssh production 'cd /var/www/misana/dev/stage && pm2 start "php artisan serve --host=127.0.0.1 --port=3018" --name "misana" --log "/home/gitactions/.pm2/logs/misana-error.log" --env=production'
         continue-on-error: true

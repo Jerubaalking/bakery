@@ -1,9 +1,9 @@
-name: Deployment to Dev Server
+name: Deployment to Production Server
 
 on:
   push:
     branches:
-      - main  # Only run on pushes to the main branch
+      - dev  # Only run on pushes to the main branch
 
 jobs:
   build:

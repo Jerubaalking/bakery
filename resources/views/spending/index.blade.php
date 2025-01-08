@@ -11,8 +11,7 @@
     <h3 class="title-5 m-b-35">Spending Details</h3>
 
     <!-- Export Report Form -->
-    <form action="exportexpenses" method="POST" enctype="multipart/form-data">
-        @csrf
+    <div>
         <div class="row">
             <!-- Date Range Inputs -->
             <div class="col-md-3">
@@ -25,27 +24,31 @@
             </div>
 
             <!-- Category Selection -->
-            <div class="col-md-3">
+            <div class="col-md-2">
                 <div class="form-group">
                     <label>Category</label>
-                    <select id="expenses_id" name="expenses_id" class="form-control">
+                    <select id="category" name="category" class="form-control">
                         <option value="all">All</option>
-                        @foreach($expenses as $expense)
-                        <option value="{{ $expense->id }}">{{ $expense->category }}</option>
+                        @foreach($categories as $category)
+                        <option value="{{ $category }}">{{ $category }}</option>
                         @endforeach
                     </select>
                 </div>
             </div>
 
             <!-- Submit Button -->
-            <div class="col-md-3" style="margin-top:28px;">
-                <button type="submit" class="btn btn-primary btn-md">Export Report</button>
+            <div class="col-md-1" style="margin-top:30px;">
+                <button onclick="generateTable()" class="btn btn-success btn-md">Find</button>
+            </div>
+            <!-- Submit Button -->
+            <div class="col-md-1" style="margin-top:30px;">
+                <a id="add_btn" class="btn btn-success btn-md">Add</a>
+            </div>
+            <!-- Submit Button -->
+            <div class="col-md-2" style="margin-top:30px;">
+                <button type="submit" class="btn btn-primary btn-md">PDF</button>
             </div>
         </div>
-    </form>
-    <div class="col-md-12 mb-4">
-        <a id="add_btn" style="float:left" ; class="au-btn au-btn-icon au-btn--green au-btn--small">
-            <i class="zmdi zmdi-plus"></i>Add</a>
     </div>
     <br> <br>
 
@@ -95,38 +98,41 @@
 
     const fromDate = formatDate(oneMonthBack);
     const toDate = formatDate(today);
-
+    $('#from').val(fromDate);
+    $('#to').val(toDate);
+    console.log({
+        fromDate,
+        toDate
+    });
     // Initialize DataTables with the date range as additional AJAX parameters
-    var table = $('#spending-table').DataTable({
+    const generateTable = function() {
+    const tableElement = $('#spending-table');
+
+    // Destroy existing DataTable instance if it exists
+    if ($.fn.DataTable.isDataTable(tableElement)) {
+        tableElement.DataTable().destroy();
+    }
+
+    // Initialize DataTable
+    return tableElement.DataTable({
         processing: true,
         serverSide: true,
         ajax: {
             url: "{{ url('/spendings') }}",
             data: function(d) {
-                d.from = fromDate;
-                d.to = toDate;
+                d.from = $('#from').val(); // Pass string date
+                d.to = $('#to').val();
+                d.category = $('#category').val();
+
+                console.log(d); // Log data being sent
             }
         },
-        columns: [{
-                data: 'date',
-                name: 'date'
-            },
-            {
-                data: 'category',
-                name: 'category'
-            },
-            {
-                data: 'amount',
-                name: 'amount'
-            },
-            {
-                data: 'description',
-                name: 'description'
-            },
-            {
-                data: 'receipt',
-                name: 'receipt'
-            },
+        columns: [
+            { data: 'date', name: 'date' },
+            { data: 'category', name: 'category' },
+            { data: 'amount', name: 'amount' },
+            { data: 'description', name: 'description' },
+            { data: 'receipt', name: 'receipt' },
             {
                 data: 'actions',
                 name: 'actions',
@@ -135,6 +141,11 @@
             }
         ]
     });
+};
+
+// Call the function to initialize the table
+generateTable();
+
 
     // Add New Spending
     $('#add_btn').on('click', function(e) {
@@ -160,7 +171,7 @@
             success: function(response) {
                 $('#form-spending').trigger('reset');
                 $('#modal-spending-form').modal('hide');
-                table.ajax.reload(); // Reload the table data 
+                generateTable().ajax.reload(); // Reload the table data 
                 swal({
                     title: 'Success!',
                     text: data.message,
@@ -188,7 +199,9 @@
             type: "GET",
             dataType: "JSON",
             success: function(html) {
-                console.log({html});
+                console.log({
+                    html
+                });
                 $('#modal-spending-form').modal('show');
                 $('.modal-title').text('Edit Spending');
                 $('#id').val(html.data.id);
@@ -216,7 +229,7 @@
                     '_token': csrf_token
                 },
                 success: function(data) {
-                    table.ajax.reload();
+                    generateTable().ajax.reload();
                     alert('Data deleted successfully');
                 },
                 error: function() {

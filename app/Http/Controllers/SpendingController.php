@@ -23,13 +23,21 @@ class SpendingController extends Controller
         // Check if the request is an AJAX call (for DataTables or API)
         if ($request->ajax()) {
             $spending = Spending::query();
-
+            info($request->from . ' ' . $request->to);
             // Apply filters, e.g., by date or user
             if ($request->has('from') && $request->has('to')) {
-                $spending->whereBetween('created_at', [
-                    Carbon::parse($request->date_from)->startOfDay(),
-                    Carbon::parse($request->date_to)->endOfDay()
-                ]);
+
+                $from = Carbon::parse($request->from)->startOfDay();
+                $to = Carbon::parse($request->to)->endOfDay();
+
+                // Debugging parsed dates
+                info("Parsed Dates - From: $from, To: $to");
+
+                // Apply date range filter
+                $spending->whereBetween('created_at', [$from, $to]);
+            }
+            if ($request->category != 'all') {
+                $spending->where('category', '=', $request->category);
             }
 
             // Return data formatted for DataTables
@@ -54,9 +62,11 @@ class SpendingController extends Controller
                 ->rawColumns(['actions'])
                 ->make(true);
         }
-        $expenses = [];
+        // Fetch unique categories
+        $categories = Spending::distinct()->pluck('category');
+
         // Default view for non-AJAX requests
-        return view('spending.index', compact('expenses'));
+        return view('spending.index', compact('categories'));
     }
 
     /**

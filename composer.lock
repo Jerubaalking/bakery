@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "256d152443777cf0554269df7d84335b",
+    "content-hash": "957b8067993f6d10c5b1b810424e5a63",
     "packages": [
         {
             "name": "asm89/stack-cors",
@@ -2919,43 +2919,43 @@
         },
         {
             "name": "owen-it/laravel-auditing",
-            "version": "v12.2.1",
+            "version": "v13.6.9",
             "source": {
                 "type": "git",
                 "url": "https://github.com/owen-it/laravel-auditing.git",
-                "reference": "98f1cfddbc4ed257e5644fe02e97db5674c7571a"
+                "reference": "559b391e2ebf46a734b3f82d4f18faf425107054"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/owen-it/laravel-auditing/zipball/98f1cfddbc4ed257e5644fe02e97db5674c7571a",
-                "reference": "98f1cfddbc4ed257e5644fe02e97db5674c7571a",
+                "url": "https://api.github.com/repos/owen-it/laravel-auditing/zipball/559b391e2ebf46a734b3f82d4f18faf425107054",
+                "reference": "559b391e2ebf46a734b3f82d4f18faf425107054",
                 "shasum": ""
             },
             "require": {
                 "ext-json": "*",
-                "illuminate/console": "^6.0|^7.0|^8.0|^9.0",
-                "illuminate/database": "^6.0|^7.0|^8.0|^9.0",
-                "illuminate/filesystem": "^6.0|^7.0|^8.0|^9.0",
+                "illuminate/console": "^7.0|^8.0|^9.0|^10.0|^11.0",
+                "illuminate/database": "^7.0|^8.0|^9.0|^10.0|^11.0",
+                "illuminate/filesystem": "^7.0|^8.0|^9.0|^10.0|^11.0",
                 "php": "^7.3|^8.0"
             },
             "require-dev": {
                 "laravel/legacy-factories": "*",
                 "mockery/mockery": "^1.0",
-                "orchestra/testbench": "^4.0|^5.0|^6.0|^7.0",
-                "phpunit/phpunit": "^9.0"
+                "orchestra/testbench": "^5.0|^6.0|^7.0|^8.0|^9.0",
+                "phpunit/phpunit": "^9.6|^10.5|^11.0"
             },
             "suggest": {
-                "laravelista/lumen-vendor-publish": "Needed to publish the package configuration in Lumen"
+                "irazasyed/larasupport": "Needed to publish the package configuration in Lumen"
             },
             "type": "package",
             "extra": {
-                "branch-alias": {
-                    "dev-master": "v13-dev"
-                },
                 "laravel": {
                     "providers": [
                         "OwenIt\\Auditing\\AuditingServiceProvider"
                     ]
+                },
+                "branch-alias": {
+                    "dev-master": "v13-dev"
                 }
             },
             "autoload": {
@@ -2975,10 +2975,14 @@
                 {
                     "name": "Raphael França",
                     "email": "raphaelfrancabsb@gmail.com"
+                },
+                {
+                    "name": "Morten D. Hansen",
+                    "email": "morten@visia.dk"
                 }
             ],
             "description": "Audit changes of your Eloquent models in Laravel/Lumen",
-            "homepage": "http://laravel-auditing.com",
+            "homepage": "https://laravel-auditing.com",
             "keywords": [
                 "Accountability",
                 "Audit",
@@ -2999,7 +3003,7 @@
                 "issues": "https://github.com/owen-it/laravel-auditing/issues",
                 "source": "https://github.com/owen-it/laravel-auditing"
             },
-            "time": "2022-02-22T13:39:06+00:00"
+            "time": "2024-12-27T15:04:04+00:00"
         },
         {
             "name": "phenx/php-font-lib",
@@ -8943,12 +8947,12 @@
     ],
     "aliases": [],
     "minimum-stability": "dev",
-    "stability-flags": {},
+    "stability-flags": [],
     "prefer-stable": true,
     "prefer-lowest": false,
     "platform": {
         "php": "^7.3|^8.0"
     },
-    "platform-dev": {},
+    "platform-dev": [],
     "plugin-api-version": "2.6.0"
 }

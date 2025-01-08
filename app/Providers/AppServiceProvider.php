@@ -128,6 +128,22 @@ class AppServiceProvider extends ServiceProvider
                 ],
                 'roles' => ['Superadministrator', 'Manager'],
             ],
+            'Expenses' => [
+                'icon' => 'fas fa-chart-bar',
+                'subItems' => [
+                    'Spendings' => [
+                        'url' => '/spendings',
+                        'icon' => 'fas fa-usd',
+                        'roles' => ['Superadministrator', 'Manager', 'accountant'],
+                    ],
+                    // 'Salaries' => [
+                    //     'url' => '/payroll',
+                    //     'icon' => 'fa fa-user',
+                    //     'roles' => ['Superadministrator', 'Manager'],
+                    // ],
+                ],
+                'roles' => ['Superadministrator', 'Manager'],
+            ],
             'CRM' => [
                 'icon' => 'fa fa-users',
                 'subItems' => [

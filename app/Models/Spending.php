@@ -4,19 +4,21 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use OwenIt\Auditing\Contracts\Auditable;
+use OwenIt\Auditing\Contracts\Auditable as AuditableContract;
+use OwenIt\Auditing\Auditable;
 
-class ExpensesModel extends Model implements Auditable
+// use OwenIt\Auditing\Auditable;
+
+class Spending extends Model implements AuditableContract
 {
-    use HasFactory;
-    use \OwenIt\Auditing\Auditable;
-
+    use HasFactory, Auditable;
+    
      // primary key
-     protected $table = 'expensive';
+     protected $table = 'spendings';
 
      public $primaryKey = 'id';
     
-     public $timestamps = false;
+     public $timestamps = true;
 
      
     /**
@@ -26,11 +28,9 @@ class ExpensesModel extends Model implements Auditable
      */
     protected $fillable = [
         'description',
+        'receipt',
         'category',
         'amount',
         'date'
-       
     ];
- 
-
 }

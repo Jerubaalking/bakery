@@ -1378,29 +1378,42 @@ class TaskController extends Controller
         if (!$request->has('date_range') || empty($request->date_range)) {
             return response()->json(['error' => 'Date range is required.'], 400);
         }
-
         // Parse date range
         $datesArray = explode('-', $request->date_range);
 
-        // Validate the date range
-        if (count($datesArray) !== 2 || !Carbon::hasFormat(trim($datesArray[0]), 'm/d/Y') || !Carbon::hasFormat(trim($datesArray[1]), 'm/d/Y')) {
-            return response()->json(['error' => 'Invalid date range format.'], 400);
+        // Validate the date range format
+        if (
+            count($datesArray) !== 2 ||
+            !Carbon::hasFormat(trim($datesArray[0]), 'm/d/Y') ||
+            !Carbon::hasFormat(trim($datesArray[1]), 'm/d/Y')
+        ) {
+            return response()->json(['error' => 'Invalid date range format. Please use mm/dd/yyyy.'], 400);
         }
 
-        $from = Carbon::createFromFormat('m/d/Y', trim($datesArray[0]))->startOfDay();
-        $to = Carbon::createFromFormat('m/d/Y', trim($datesArray[1]))->endOfDay();
-
+        try {
+            $from = Carbon::createFromFormat('m/d/Y', trim($datesArray[0]))->startOfDay();
+            $to = Carbon::createFromFormat('m/d/Y', trim($datesArray[1]))->endOfDay();
+        } catch (\Exception $e) {
+            return response()->json(['error' => 'Error processing the date range.'], 500);
+        }
+        
+        info('date range array -->'.json_encode($request->all()));
         // Initialize employee ID and status
         $empId = $request->employeeId;
+
         // If all employees are selected
         if ($empId == 'all') {
             $employee = 'All';
-            $product_outs = $this->getProductOuts(null, $from, $to);
-            $payments = $this->getPayments(null, $from, $to);
-            $product_out = $this->processProductOuts($product_outs, $payments);
-            $sums = $this->getSums(null, $from, $to);
-            $demage = $this->getDemageRecords(null, $from, $to);
-            $x = $this->getReceiveSales(null, $from, $to);
+            try {
+                $product_outs = $this->getProductOuts(null, $from, $to);
+                $payments = $this->getPayments(null, $from, $to);
+                $product_out = $this->processProductOuts($product_outs, $payments);
+                $sums = $this->getSums(null, $from, $to);
+                $demage = $this->getDemageRecords(null, $from, $to);
+                $x = $this->getReceiveSales(null, $from, $to);
+            } catch (\Exception $e) {
+                return response()->json(['error' => 'Error fetching data.'], 500);
+            }
 
             // Ensure data is available
             if (empty($product_out) || empty($sums) || empty($x) || empty($demage) || empty($payments)) {
@@ -1411,20 +1424,24 @@ class TaskController extends Controller
             return $this->generatePdf($product_out, $sums, $x, $demage, $payments, $from, $to, $employee);
         } else {
             // Fetch data for a specific employee
-            $employeee = DB::table('employee')->where('id', '=', $empId)->first();
+            try {
+                $employeee = DB::table('employee')->where('id', '=', $empId)->first();
 
-            // Check if employee exists
-            if (!$employeee) {
-                return response()->json(['error' => 'Employee not found.'], 404);
+                // Check if employee exists
+                if (!$employeee) {
+                    return response()->json(['error' => 'Employee not found.'], 404);
+                }
+
+                $employee = $employeee->first_name . ' ' . $employeee->last_name;
+                $product_outs = $this->getProductOuts($empId, $from, $to);
+                $payments = $this->getPayments($empId, $from, $to);
+                $product_out = $this->processProductOuts($product_outs, $payments);
+                $sums = $this->getSums($empId, $from, $to);
+                $demage = $this->getDemageRecords($empId, $from, $to);
+                $x = $this->getReceiveSales($empId, $from, $to);
+            } catch (\Exception $e) {
+                return response()->json(['error' => 'Error fetching employee data or related records.'], 500);
             }
-
-            $employee = $employeee->first_name . ' ' . $employeee->last_name;
-            $product_outs = $this->getProductOuts($empId, $from, $to);
-            $payments = $this->getPayments($empId, $from, $to);
-            $product_out = $this->processProductOuts($product_outs, $payments);
-            $sums = $this->getSums($empId, $from, $to);
-            $demage = $this->getDemageRecords($empId, $from, $to);
-            $x = $this->getReceiveSales($empId, $from, $to);
 
             // Ensure data is available for employee
             if (empty($product_out) || empty($sums) || empty($x) || empty($demage) || empty($payments)) {
@@ -1435,6 +1452,7 @@ class TaskController extends Controller
             return $this->generatePdf($product_out, $sums, $x, $demage, $payments, $from, $to, $employee);
         }
     }
+
 
 
     // Helper functions can be defined here for better structure, like:

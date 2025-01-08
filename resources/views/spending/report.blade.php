@@ -169,7 +169,7 @@
                   @foreach($exp as $exp)
                 <tr>
                 <td class="pl-0">
-                     {{$exp->expensive_date}}
+                     {{$exp->spending_date}}
                      </td>
                      <td class="pl-0">
                         {{$exp->account_name}}

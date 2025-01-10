@@ -15,10 +15,10 @@ class BeeMService
 
     public function __construct()
     {
-        $this->apiUrl = env('BEEM_API_URL'); // Add to .env
-        $this->apiKey = env('BEEM_API_KEY'); // Add to .env
-        $this->senderId = env('BEEM_SENDER_ID'); // Add to .env
-        $this->secretKey = env('BEEM_SECRET'); // Add to .env
+        $this->apiUrl = env('BEEM_API_URL', "https://apisms.beem.africa/v1/send"); // Add to .env
+        $this->apiKey = env('BEEM_API_KEY', '5472fb3edef1e55b'); // Add to .env
+        $this->senderId = env('BEEM_SENDER_ID', 'MISANA'); // Add to .env
+        $this->secretKey = env('BEEM_SECRET', 'YzUyZjY0NjQ5YWZmNTNlNmY4ODhlZGY3NjA2NGUwYzZjMjA5OTAwZmIzZmQ5ZjUyOWYwMDliMmJjZDcyYTc5ZA=='); // Add to .env
     }
 
     /**
@@ -62,7 +62,7 @@ class BeeMService
             ];
         }
     }
-    public function sendBulkMessage(string $message, array $recipients, string $scheduleTime = null): array
+    public function sendBulkMessage(string $message, array $recipients, string $scheduleTime = null)
     {
         $client = new Client();
 

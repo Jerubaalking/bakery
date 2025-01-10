@@ -252,7 +252,7 @@
         if (!e.isDefaultPrevented()) {
             const id = $('#message_id').val();
             console.log({id});
-            if (save_method == 'send') url = "{{ url('messages') }}/"+id+'/send';
+            if (save_method == 'send') url = "{{ url('messages') }}/"+id+"/send";
 
             $.ajax({
                 url: url,

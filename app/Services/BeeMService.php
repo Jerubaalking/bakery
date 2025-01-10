@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use GuzzleHttp\Client;
 use GuzzleHttp\Exception\RequestException;
 use Illuminate\Support\Facades\Http;
 
@@ -29,7 +30,7 @@ class BeeMService
      * @param string|null $scheduleTime
      * @return mixed
      */
-    public function sendBulkMessage(string $message, array $recipients, string $scheduleTime = null)
+    public function rawSendBulkMessage(string $message, array $recipients, string $scheduleTime = null)
     {
         $postData = [
             'source_addr' => $this->senderId,
@@ -53,6 +54,47 @@ class BeeMService
             return [
                 'status' => 'error',
                 'message' => $response->body(),
+            ];
+        } catch (\Exception $e) {
+            return [
+                'status' => 'error',
+                'message' => $e->getMessage(),
+            ];
+        }
+    }
+    public function sendBulkMessage(string $message, array $recipients, string $scheduleTime = null): array
+    {
+        $client = new Client();
+
+        $postData = [
+            'source_addr' => $this->senderId,
+            'encoding' => "0",
+            'message' => $message,
+            'recipients' => $recipients,
+        ];
+
+        try {
+            $response = $client->post($this->apiUrl, [
+                'headers' => [
+                    'Authorization' => 'Basic ' . base64_encode("{$this->apiKey}:{$this->secretKey}"),
+                    'Content-Type' => 'application/json',
+                ],
+                'json' => $postData, // Automatically encodes as JSON
+                'verify' => false, // Disable SSL certificate verification
+            ]);
+
+            return [
+                'status' => 'success',
+                'data' => json_decode($response->getBody(), true),
+            ];
+        } catch (RequestException $e) {
+            $errorResponse = $e->hasResponse()
+                ? $e->getResponse()->getBody()->getContents()
+                : $e->getMessage();
+
+            return [
+                'status' => 'error',
+                'message' => $errorResponse,
             ];
         } catch (\Exception $e) {
             return [

@@ -94,15 +94,18 @@
         $('input[name=_method]').val('PATCH');
         $('#form-customer')[0].reset();
         $.ajax({
-            url: "{{ url('Customer') }}" + '/' + id + "/edit",
+            url: "{{ url('customers') }}" + '/' + id,
             type: "GET",
             dataType: "JSON",
             success: function(html) {
+                console.log({html});
                 $('#modal-customer-form').modal('show');
                 $('.modal-title').text('Edit Customer');
                 $('#id').val(html.data.id);
-                $('#customer_name').val(html.data.customer_name);
-                $('#customer_group').val(html.data.customer_group);
+                $('#name').val(html.data.name);
+                $('#phone').val(html.data.phone);
+                $('#location').val(html.data.location);
+                $('#group').val(html.data.group);
             },
             error: function() {
                 alert("Nothing Data");
@@ -187,6 +190,7 @@
             });
         });
     }
+    
     $('#form-customer').validator().on('submit', function(e) {
             
             if (!e.isDefaultPrevented()) {

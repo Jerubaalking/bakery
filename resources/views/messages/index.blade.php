@@ -21,7 +21,7 @@
     </div>
     <br>
     <div class="table-responsive table-striped  table-responsive">
-        <table id="message-table" class="table  table-striped table-data2">
+        <table id="message-table" class="table  table-striped table-data2 text-sm">
             <thead>
                 <tr>
                     <th>ID</th>
@@ -84,27 +84,84 @@
         $('#form-message')[0].reset();
         $('.modal-title').text('Add Message');
     }
-    function sendForm() {
+
+    function sendForm(id) {
         save_method = "send";
         $('input[name=_method]').val('POST');
         $('#modal-send').modal('show');
         $('#form-send')[0].reset();
+        $('#message_id').val(id); // Set the message ID
         $('.modal-title').text('Send Message');
+
+        // Fetch customers and groups data
+        $.ajax({
+            url: '/api/presend', // Replace with your actual endpoint
+            type: 'GET',
+            dataType: 'json',
+            success: function(response) {
+                if (response.status === 'success') {
+                    // Populate the groups dropdown
+                    console.log({
+                        response
+                    });
+                    const groupSelect = $('#group');
+                    groupSelect.empty(); // Clear any existing options
+                    groupSelect.append('<option disabled>--select group--</option>');
+                    response.groups.forEach(function(group) {
+                        groupSelect.append(`<option value="${group.value}">${group.name}</option>`);
+                    });
+
+                    // Populate the customers checkbox list
+                    const customerSelect = $('.customer-checkboxes');
+                    customerSelect.empty(); // Clear existing checkboxes
+                    response.customers.forEach(function(customer) {
+                        customerSelect.append(`
+                        <label>
+                            <input type="checkbox" id="customers[]" name="customers[]" value="${customer.id}"> ${customer.name}
+                        </label><br>
+                    `);
+                    });
+
+                    // Optionally, you can pre-select customers or groups based on certain conditions.
+                    // For example:
+                    $('#group').val(response.selectedGroup); // Pre-select a group
+                    // $('input[name="customers[]"][value="' + response.selectedCustomers + '"]').prop('checked', true);
+                } else {
+                    // Handle error if no data or issue with fetching
+                    alert('Error fetching data.');
+                }
+            },
+            error: function(xhr, status, error) {
+                console.error('Error fetching data:', error);
+                alert('There was an issue retrieving the data.');
+            }
+        });
     }
+
+    function toggleOption(option) {
+        if (option === 'group') {
+            document.getElementById('group-select').style.display = 'block';
+            document.getElementById('customer-select').style.display = 'none';
+        } else if (option === 'customers') {
+            document.getElementById('group-select').style.display = 'none';
+            document.getElementById('customer-select').style.display = 'block';
+        }
+    }
+
     function editForm(id) {
         save_method = 'edit';
         $('input[name=_method]').val('PATCH');
         $('#form-message')[0].reset();
         $.ajax({
-            url: "{{ url('messages') }}" + '/' + id + "/edit",
+            url: "{{ url('messages') }}" + '/' + id,
             type: "GET",
             dataType: "JSON",
             success: function(html) {
                 $('#modal-message-form').modal('show');
                 $('.modal-title').text('Edit Message');
                 $('#id').val(html.data.id);
-                $('#message_name').val(html.data.message_name);
-                $('#message_group').val(html.data.message_group);
+                $('#title').val(html.data.title);
+                $('#message').val(html.data.message);
             },
             error: function() {
                 alert("Nothing Data");
@@ -189,43 +246,81 @@
             });
         });
     }
-    $('#form-message').validator().on('submit', function(e) {
-            
-            if (!e.isDefaultPrevented()) {
-                var id = $('#id').val();
-                if (save_method == 'add') url = "{{ url('messages') }}";
-                else url = "{{url('messages') . '/' }}" + id;
 
-                $.ajax({
-                    url: url,
-                    type: "POST",
-                    //hanya untuk input data tanpa dokumen
-                    //                      data : $('#modal-message').serialize(),
-                    data: new FormData($("#form-message")[0]),
-                    contentType: false,
-                    processData: false,
-                    success: function(data) {
-                        $('#modal-message-form').modal('hide');
-                        table.ajax.reload();
-                        swal({
-                            title: 'Success!',
-                            text: data.message,
-                            type: 'success',
-                            timer: '1500'
-                        })
-                    },
-                    error: function(data) {
-                        swal({
-                            title: 'Oops...',
-                            text: data.message,
-                            type: 'error',
-                            timer: '1500'
-                        })
-                    }
-                });
-                return false;
-            }
-        });
+    $('#form-send').validator().on('submit', function(e) {
+
+        if (!e.isDefaultPrevented()) {
+            const id = $('#message_id').val();
+            console.log({id});
+            if (save_method == 'send') url = "{{ url('messages') }}/"+id+'/send';
+
+            $.ajax({
+                url: url,
+                type: "POST",
+                //hanya untuk input data tanpa dokumen
+                //                      data : $('#modal-message').serialize(),
+                data: new FormData($("#form-send")[0]),
+                contentType: false,
+                processData: false,
+                success: function(data) {
+                    $('#modal-message-form').modal('hide');
+                    table.ajax.reload();
+                    swal({
+                        title: 'Success!',
+                        text: data.message,
+                        type: 'success',
+                        timer: '10500'
+                    })
+                },
+                error: function(data) {
+                    swal({
+                        title: 'Oops...',
+                        text: data.message,
+                        type: 'error',
+                        timer: '1500'
+                    })
+                }
+            });
+            return false;
+        }
+    });
+    $('#form-message').validator().on('submit', function(e) {
+
+        if (!e.isDefaultPrevented()) {
+            var id = $('#id').val();
+            if (save_method == 'add') url = "{{ url('messages') }}";
+            else url = "{{url('messages') . '/' }}" + id;
+
+            $.ajax({
+                url: url,
+                type: "POST",
+                //hanya untuk input data tanpa dokumen
+                //                      data : $('#modal-message').serialize(),
+                data: new FormData($("#form-message")[0]),
+                contentType: false,
+                processData: false,
+                success: function(data) {
+                    $('#modal-message-form').modal('hide');
+                    table.ajax.reload();
+                    swal({
+                        title: 'Success!',
+                        text: data.message,
+                        type: 'success',
+                        timer: '1500'
+                    })
+                },
+                error: function(data) {
+                    swal({
+                        title: 'Oops...',
+                        text: data.message,
+                        type: 'error',
+                        timer: '1500'
+                    })
+                }
+            });
+            return false;
+        }
+    });
 </script>
 
 @endsection

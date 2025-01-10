@@ -10,7 +10,8 @@ use Illuminate\Notifications\Notification;
 class ExpensiveNotification extends Notification
 {
     use Queueable;
-
+    static $description;
+    static $amount;
     /**
      * Create a new notification instance.
      *

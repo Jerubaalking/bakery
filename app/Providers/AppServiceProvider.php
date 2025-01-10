@@ -99,11 +99,6 @@ class AppServiceProvider extends ServiceProvider
                         'icon' => 'fa fa-history',
                         'roles' => ['Superadministrator', 'Manager'],
                     ],
-                    'Expenses' => [
-                        'url' => '/Expensive',
-                        'icon' => 'fas fa-table',
-                        'roles' => ['Superadministrator', 'Manager'],
-                    ],
                 ],
                 'roles' => ['Superadministrator', 'Manager'],
             ],

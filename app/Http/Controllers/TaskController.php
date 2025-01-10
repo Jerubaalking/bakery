@@ -1372,158 +1372,122 @@ class TaskController extends Controller
         ));
     }
 
+    /**
+     * Store a newly created resource in storage.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\Http\Response
+     */
     public function exportTask(Request $request)
     {
-        // Check if date range is provided
-        if (!$request->has('date_range') || empty($request->date_range)) {
-            return response()->json(['error' => 'Date range is required.'], 400);
-        }
         // Parse date range
         $datesArray = explode('-', $request->date_range);
+        $from = Carbon::createFromFormat('m/d/Y', trim($datesArray[0]))->startOfDay();
+        $to = Carbon::createFromFormat('m/d/Y', trim($datesArray[1]))->endOfDay();
 
-        // Validate the date range format
-        if (
-            count($datesArray) !== 2 ||
-            !Carbon::hasFormat(trim($datesArray[0]), 'm/d/Y') ||
-            !Carbon::hasFormat(trim($datesArray[1]), 'm/d/Y')
-        ) {
-            return response()->json(['error' => 'Invalid date range format. Please use mm/dd/yyyy.'], 400);
-        }
-
-        try {
-            $from = Carbon::createFromFormat('m/d/Y', trim($datesArray[0]))->startOfDay();
-            $to = Carbon::createFromFormat('m/d/Y', trim($datesArray[1]))->endOfDay();
-        } catch (\Exception $e) {
-            return response()->json(['error' => 'Error processing the date range.'], 500);
-        }
-        
-        info('date range array -->'.json_encode($request->all()));
         // Initialize employee ID and status
         $empId = $request->employeeId;
-
         // If all employees are selected
         if ($empId == 'all') {
             $employee = 'All';
-            try {
-                $product_outs = $this->getProductOuts(null, $from, $to);
-                $payments = $this->getPayments(null, $from, $to);
-                $product_out = $this->processProductOuts($product_outs, $payments);
-                $sums = $this->getSums(null, $from, $to);
-                $demage = $this->getDemageRecords(null, $from, $to);
-                $x = $this->getReceiveSales(null, $from, $to);
-            } catch (\Exception $e) {
-                return response()->json(['error' => 'Error fetching data.'], 500);
-            }
-
-            // Ensure data is available
-            if (empty($product_out) || empty($sums) || empty($x) || empty($demage) || empty($payments)) {
-                return response()->json(['error' => 'No data found for the selected date range.'], 404);
-            }
+            $product_outs = $this->getProductOuts(null, $from, $to);
+            $payments = $this->getPayments(null, $from, $to);
+            $product_out = $this->processProductOuts($product_outs, $payments);
+            $sums = $this->getSums(null, $from, $to);
+            $demage = $this->getDemageRecords(null, $from, $to);
+            $x = $this->getReceiveSales(null, $from, $to);
 
             // Generate PDF
             return $this->generatePdf($product_out, $sums, $x, $demage, $payments, $from, $to, $employee);
         } else {
+
+
             // Fetch data for a specific employee
-            try {
-                $employeee = DB::table('employee')->where('id', '=', $empId)->first();
+            $employeee = DB::table('employee')->where('id', '=', $empId)->first();
+            $employee = $employeee->first_name . ' ' . $employeee->last_name;
+            $product_outs = $this->getProductOuts($empId, $from, $to);
+            $payments = $this->getPayments($empId, $from, $to);
+            $product_out = $this->processProductOuts($product_outs, $payments);
+            $sums = $this->getSums($empId, $from, $to);
+            $demage = $this->getDemageRecords($empId, $from, $to);
+            $x = $this->getReceiveSales($empId, $from, $to);
 
-                // Check if employee exists
-                if (!$employeee) {
-                    return response()->json(['error' => 'Employee not found.'], 404);
-                }
-
-                $employee = $employeee->first_name . ' ' . $employeee->last_name;
-                $product_outs = $this->getProductOuts($empId, $from, $to);
-                $payments = $this->getPayments($empId, $from, $to);
-                $product_out = $this->processProductOuts($product_outs, $payments);
-                $sums = $this->getSums($empId, $from, $to);
-                $demage = $this->getDemageRecords($empId, $from, $to);
-                $x = $this->getReceiveSales($empId, $from, $to);
-            } catch (\Exception $e) {
-                return response()->json(['error' => 'Error fetching employee data or related records.'], 500);
-            }
-
-            // Ensure data is available for employee
-            if (empty($product_out) || empty($sums) || empty($x) || empty($demage) || empty($payments)) {
-                return response()->json(['error' => 'No data found for the selected employee and date range.'], 404);
-            }
+            // Additional logic for employee-specific processing
 
             // Generate PDF
             return $this->generatePdf($product_out, $sums, $x, $demage, $payments, $from, $to, $employee);
         }
     }
 
-
-
     // Helper functions can be defined here for better structure, like:
-    protected function getProductOuts($empId, $from, $to)
-    {
-        $query = DB::table('sales')
-            ->join('task', 'task.id', '=', 'sales.task_id')
-            ->leftJoin('receive_sales', 'task.id', '=', 'receive_sales.task_id')
-            ->join('employee', 'employee.id', '=', 'task.empoyee_id')
-            ->join('products', 'sales.product_id', '=', 'products.id')
-            ->whereBetween('task.created_at', [$from, $to])
-            ->select(
-                'sales.id as sales_id',       // Sales ID for reference (if needed)
-                'sales.qty',                  // Quantity sold
-                'sales.amt as amount',        // Amount for this sale
-                'task.amount_paid',           // Amount paid for the task
-                'task.task_number',           // Task number
-                'task.sub_total',             // Subtotal for the task
-                DB::raw('CONCAT(employee.first_name, " ", employee.last_name) as employee_name'), // Full employee name
-                'products.product_name',      // Product name
-                'task.created_at',            // Date of the task
-                'employee.employee_number',    // Employee number for reference
-                'employee.first_name',        // Employee's first name
-                'employee.last_name',         // Employee's last name
-                'employee.phone',             // Employee's phone number
-                'sales.retail',               // Retail quantity (ensure this exists in your sales table)
-                'sales.bulk',                 // Bulk quantity (ensure this exists in your sales table)
-                'sales.price',                // Price per unit
-                'sales.retail_price'          // Retail price per unit
-            )
-            ->groupBy(
-                'sales.id',                   // Group by sales ID to avoid duplicates
-                'sales.qty',
-                'sales.amt',
-                'task.amount_paid',
-                'task.task_number',
-                'task.sub_total',
-                'employee.first_name',
-                'employee.last_name',
-                'products.product_name',
-                'task.created_at',
-                'employee.employee_number',
-                'employee.phone',
-                'sales.retail',
-                'sales.bulk',
-                'sales.price',
-                'sales.retail_price'
-            )
-            ->orderBy('sales.created_at', 'ASC');
-
-        // Apply employee filter if ID is present
-        if ($empId) {
-            $query->where('task.empoyee_id', '=', $empId);
+        protected function getProductOuts($empId, $from, $to)
+        {
+            $query = DB::table('sales')
+                ->join('task', 'task.id', '=', 'sales.task_id')
+                ->leftJoin('receive_sales', 'task.id', '=', 'receive_sales.task_id')
+                ->join('employee', 'employee.id', '=', 'task.empoyee_id')
+                ->join('products', 'sales.product_id', '=', 'products.id')
+                ->whereBetween('task.created_at', [$from, $to])
+                ->select(
+                    'sales.id as sales_id',       // Sales ID for reference (if needed)
+                    'sales.qty',                  // Quantity sold
+                    'sales.amt as amount',        // Amount for this sale
+                    'task.amount_paid',           // Amount paid for the task
+                    'task.task_number',           // Task number
+                    'task.sub_total',             // Subtotal for the task
+                    DB::raw('CONCAT(employee.first_name, " ", employee.last_name) as employee_name'), // Full employee name
+                    'products.product_name',      // Product name
+                    'task.created_at',            // Date of the task
+                    'employee.employee_number',    // Employee number for reference
+                    'employee.first_name',        // Employee's first name
+                    'employee.last_name',         // Employee's last name
+                    'employee.phone',             // Employee's phone number
+                    'sales.retail',               // Retail quantity (ensure this exists in your sales table)
+                    'sales.bulk',                 // Bulk quantity (ensure this exists in your sales table)
+                    'sales.price',                // Price per unit
+                    'sales.retail_price'          // Retail price per unit
+                )
+                ->groupBy(
+                    'sales.id',                   // Group by sales ID to avoid duplicates
+                    'sales.qty',
+                    'sales.amt',
+                    'task.amount_paid',
+                    'task.task_number',
+                    'task.sub_total',
+                    'employee.first_name',
+                    'employee.last_name',
+                    'products.product_name',
+                    'task.created_at',
+                    'employee.employee_number',
+                    'employee.phone',
+                    'sales.retail',
+                    'sales.bulk',
+                    'sales.price',
+                    'sales.retail_price'
+                )
+                ->orderBy('sales.created_at', 'ASC');
+        
+            // Apply employee filter if ID is present
+            if ($empId) {
+                $query->where('task.empoyee_id', '=', $empId);
+            }
+        
+            // Execute and return the results
+            return $query->get();
         }
-
-        // Execute and return the results
-        return $query->get();
-    }
-
+        
 
     protected function getPayments($empId, $from, $to)
     {
         $query = DB::table('receive_sales')
             ->join('task', 'receive_sales.task_id', '=', 'task.id')
             ->whereBetween('task.created_at', [$from, $to]);
-        if ($empId) {
-            $query->where('task.empoyee_id', '=', $empId); // Apply employee filter if ID is present
-        }
-
-        // Execute and return the results
-        return $query->sum('receive_sales.amount');
+            if ($empId) {
+                $query->where('task.empoyee_id', '=', $empId); // Apply employee filter if ID is present
+            }
+        
+            // Execute and return the results
+            return $query->sum('receive_sales.amount');
     }
 
     protected function processProductOuts($product_outs, $payments)
@@ -1536,13 +1500,13 @@ class TaskController extends Controller
     {
         // Start building the query
         $query = DB::table('task')
-            ->leftJoin(DB::raw('(SELECT task_id, SUM(qty) as sum_qty, SUM(amt) as sum_amt, SUM(retail_amt) as sum_retail_amt FROM sales GROUP BY task_id) as sales_summary'), 'sales_summary.task_id', '=', 'task.id')
-            ->leftJoin(DB::raw('(SELECT task_id, SUM(qty) as sum_return_qty, SUM(amt) as sum_return_amt FROM stock_return GROUP BY task_id) as stock_return_summary'), 'stock_return_summary.task_id', '=', 'task.id')
-            ->leftJoin(DB::raw('(SELECT task_id, SUM(qty) as sum_demage_qty, SUM(amt) as sum_demage_amt FROM product_demage GROUP BY task_id) as demage_summary'), 'demage_summary.task_id', '=', 'task.id')
-            ->leftJoin(DB::raw('(SELECT task_id, SUM(amount) as sum_receive FROM receive_sales GROUP BY task_id) as receive_sales_summary'), 'receive_sales_summary.task_id', '=', 'task.id')
-            ->leftJoin('employee', 'employee.id', '=', 'task.empoyee_id')
-            ->whereBetween('task.created_at', [$from, $to]) // Apply date range filter
-            ->selectRaw('
+        ->leftJoin(DB::raw('(SELECT task_id, SUM(qty) as sum_qty, SUM(amt) as sum_amt, SUM(retail_amt) as sum_retail_amt FROM sales GROUP BY task_id) as sales_summary'), 'sales_summary.task_id', '=', 'task.id')
+        ->leftJoin(DB::raw('(SELECT task_id, SUM(qty) as sum_return_qty, SUM(amt) as sum_return_amt FROM stock_return GROUP BY task_id) as stock_return_summary'), 'stock_return_summary.task_id', '=', 'task.id')
+        ->leftJoin(DB::raw('(SELECT task_id, SUM(qty) as sum_demage_qty, SUM(amt) as sum_demage_amt FROM product_demage GROUP BY task_id) as demage_summary'), 'demage_summary.task_id', '=', 'task.id')
+        ->leftJoin(DB::raw('(SELECT task_id, SUM(amount) as sum_receive FROM receive_sales GROUP BY task_id) as receive_sales_summary'), 'receive_sales_summary.task_id', '=', 'task.id')
+        ->leftJoin('employee', 'employee.id', '=', 'task.empoyee_id')
+        ->whereBetween('task.created_at', [$from, $to]) // Apply date range filter
+        ->selectRaw('
             CONCAT(employee.first_name, " ", employee.last_name) as employee_name,
             task.task_number as dispatch,
             task.created_at as date,
@@ -1556,35 +1520,35 @@ class TaskController extends Controller
             demage_summary.sum_demage_amt,
             receive_sales_summary.sum_receive
         ')
-            ->groupBy(
-                'employee.first_name',
-                'employee.last_name',
-                'task.task_number',
-                'task.created_at',
-                'sales_summary.sum_qty',
-                'sales_summary.sum_amt',
-                'sales_summary.sum_retail_amt',
-                'stock_return_summary.sum_return_qty',
-                'stock_return_summary.sum_return_amt',
-                'task.amount_due',
-                'demage_summary.sum_demage_qty',
-                'demage_summary.sum_demage_amt',
-                'receive_sales_summary.sum_receive'
-            );
+        ->groupBy(
+            'employee.first_name',
+            'employee.last_name',
+            'task.task_number',
+            'task.created_at',
+            'sales_summary.sum_qty',
+            'sales_summary.sum_amt',
+            'sales_summary.sum_retail_amt',
+            'stock_return_summary.sum_return_qty',
+            'stock_return_summary.sum_return_amt',
+            'task.amount_due',
+            'demage_summary.sum_demage_qty',
+            'demage_summary.sum_demage_amt',
+            'receive_sales_summary.sum_receive'
+        );
         // If employee ID is provided, add it to the query
         if ($empId) {
             $query->where('task.empoyee_id', '=', $empId); // Filter by employee ID
         }
-
+    
         // Execute and return the results
         return $query->get();
     }
-
-
+    
+    
 
     protected function getDemageRecords($empId, $from, $to)
     {
-        $query = DB::table('product_demage')
+        $query= DB::table('product_demage')
             ->join('task', 'task.id', '=', 'product_demage.task_id')
             ->join('employee', 'employee.id', '=', 'task.empoyee_id')
             ->join('products', 'product_demage.product_id', '=', 'products.id')
@@ -1598,12 +1562,12 @@ class TaskController extends Controller
                 'employee.last_name',
                 'employee.phone'
             );
-        if ($empId) {
-            $query->where('task.empoyee_id', '=', $empId); // Apply employee filter if ID is present
-        }
-
-        // Execute and return the results
-        return $query->get();
+            if ($empId) {
+                $query->where('task.empoyee_id', '=', $empId); // Apply employee filter if ID is present
+            }
+        
+            // Execute and return the results
+            return $query->get();
     }
 
     protected function getReceiveSales($empId, $from, $to)
@@ -1621,12 +1585,12 @@ class TaskController extends Controller
                 'employee.phone'
             );
 
-        if ($empId) {
-            $query->where('task.empoyee_id', '=', $empId); // Apply employee filter if ID is present
-        }
-
-        // Execute and return the results
-        return $query->get();
+            if ($empId) {
+                $query->where('task.empoyee_id', '=', $empId); // Apply employee filter if ID is present
+            }
+        
+            // Execute and return the results
+            return $query->get();
     }
 
     protected function generatePdf($product_out, $sums, $x, $demage, $payments, $from, $to, $employee)
@@ -1639,7 +1603,7 @@ class TaskController extends Controller
             $total_retail_amt += $sum->sum_retail_amt;
             $total_return_qty += $sum->sum_return_qty;
             $total_return_amt += $sum->sum_return_amt;
-            $total_due += (($total_retail_amt + $total_amt) - $payments);
+            $total_due += (($total_retail_amt + $total_amt)-$payments);
         }
 
         // Pass the grand totals to the PDF view
@@ -1653,7 +1617,7 @@ class TaskController extends Controller
             'count' => count($product_out),
             'product_out' => $product_out,
             'sum_qty' => $total_qty, // Total sum of qty
-            'sum_amt' => $total_amt + $total_retail_amt, // Total sum of amt
+            'sum_amt' => $total_amt+$total_retail_amt, // Total sum of amt
             'sum_return_qty' => $total_return_qty, // Total sum of returned qty
             'sum_return_amt' => $total_return_amt, // Total sum of returned amt
             'sum_due' => $total_due,

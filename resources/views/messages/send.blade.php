@@ -12,22 +12,44 @@
                 <div class="modal-body">
                     <div class="box-body">
                         <input type="hidden" id="message_id" name="message_id">
-                        <div class="row">
-                            <div class="col-md-12">
-                                <div class="form-group">
-                                    <label>Group</label>
-                                    <select id="group" name="group" class="form-control">
-                                        <option disabled>--select group--</option>
-                                        <option value="platnum">Platnum</option>
-                                        <option value="gold">Gold</option>
-                                        <option value="silver">Silver</option>
-                                        <option value="bronze">Bronze</option>
-                                    </select>
 
-                                    <span class="help-block with-errors"></span>
-                                </div>
+                        <!-- Radio Buttons for Selection -->
+                        <div class="form-group">
+                            <label>Select Option</label>
+                            <div>
+                                <label class="radio-inline">
+                                    <input type="radio" name="sendOption" value="group" checked onclick="toggleOption('group')">
+                                    By Group
+                                </label>
+                                <label class="radio-inline">
+                                    <input type="radio" name="sendOption" value="customers" onclick="toggleOption('customers')">
+                                    Select Customers
+                                </label>
                             </div>
+                        </div>
 
+                        <!-- Group Selection -->
+                        <div class="form-group" id="group-select">
+                            <label>Group</label>
+                            <select id="group" name="group" class="form-control">
+                                <option disabled>--select group--</option>
+                                <option value="platnum">Platnum</option>
+                                <option value="gold">Gold</option>
+                                <option value="silver">Silver</option>
+                                <option value="bronze">Bronze</option>
+                            </select>
+                            <span class="help-block with-errors"></span>
+                        </div>
+
+                        <!-- Customer Selection -->
+                        <div class="form-group" id="customer-select" style="display: none;">
+                            <label>Customers</label>
+                            <div class="customer-checkboxes">
+                                <label>
+                                    <input type="checkbox" id="customers[]" name="customers[]" value="" disabled> Customer 1
+                                </label>
+                            </div>
+                            <span class="help-block with-errors"></span>
                         </div>
                     </div>
                     <!-- /.box-body -->
@@ -44,4 +66,3 @@
     </div>
     <!-- /.modal-dialog -->
 </div>
-<!-- /.modal -->

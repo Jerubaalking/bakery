@@ -24,7 +24,17 @@ class CustomerController  extends Controller
     {
         return view('customer.index');
     }
-
+    /**
+     * Show the form for editing the specified resource.
+     *
+     * @param Customer $customer
+     * @return \Illuminate\Contracts\View\View
+     */
+    public function edit($id)
+    {
+        $customer = DB::table('customers')->find($id);
+        return response()->json(['data' => $customer]);
+    }
     /**
      * Store a newly created customer in the database.
      *
@@ -87,11 +97,17 @@ class CustomerController  extends Controller
             $customers = DB::table('customers')->select(['id', 'name', 'phone', 'group', 'location', 'created_at', 'updated_at'])->get();
 
             return DataTables::of($customers)
-                ->addColumn('action', function ($data) {
-                    return '
-                        <a href="#" class="btn btn-info btn-xs"><i class="glyphicon glyphicon-eye-open"></i> View</a>
-                        <a onclick="editForm(' . $data->id . ')" class="btn btn-primary btn-xs"><i class="glyphicon glyphicon-edit"></i> Edit</a>
-                        <a onclick="deleteData(' . $data->id . ')" class="btn btn-danger btn-xs"><i class="glyphicon glyphicon-trash"></i> Delete</a>
+                ->addColumn('action', function ($customer) {
+                    return '<div class="dropdown" style="width:100%;">
+                                <a href="#" class="dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                    <button class="m-5 btn btn-outline btn-default btn-sm"><i class="fa fa-ellipsis-v"></i></button>
+                                </a>
+                                <ul class="dropdown-menu">
+                                <li>
+                                <li><a onclick="editForm(' . $customer->id . ')" class="btn btn-info btn-xs" style="color:white"><i class="glyphicon glyphicon-edit" style="color:white"></i> edit</a></li>
+                                    <li><a onclick="deleteData(' . $customer->id . ')" class="btn btn-danger btn-xs" style="color:white"><i class="glyphicon glyphicon-trash" style="color:white"></i> Delete</a></li>
+                                </ul>
+                            </div> 
                     ';
                 })
                 ->rawColumns(['action'])
@@ -104,7 +120,8 @@ class CustomerController  extends Controller
         ], 400);
     }
 
-    public function update(){
+    public function update()
+    {
         $id = request()->input('id');
     }
     /**
@@ -114,7 +131,7 @@ class CustomerController  extends Controller
      */
     public function destroy(Request $request, $id)
     {
-        
+
 
         DB::beginTransaction();
 

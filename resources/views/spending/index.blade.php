@@ -106,45 +106,69 @@
     });
     // Initialize DataTables with the date range as additional AJAX parameters
     const generateTable = function() {
-    const tableElement = $('#spending-table');
+        const tableElement = $('#spending-table');
 
-    // Destroy existing DataTable instance if it exists
-    if ($.fn.DataTable.isDataTable(tableElement)) {
-        tableElement.DataTable().destroy();
-    }
+        // Destroy existing DataTable instance if it exists
+        if ($.fn.DataTable.isDataTable(tableElement)) {
+            tableElement.DataTable().destroy();
+        }
 
-    // Initialize DataTable
-    return tableElement.DataTable({
-        processing: true,
-        serverSide: true,
-        ajax: {
-            url: "{{ url('/spendings') }}",
-            data: function(d) {
-                d.from = $('#from').val(); // Pass string date
-                d.to = $('#to').val();
-                d.category = $('#category').val();
+        // Initialize DataTable
+        return tableElement.DataTable({
+            processing: true,
+            serverSide: true,
+            rowReorder: {
+                selector: 'td:nth-child(3)'
+            },
+            "autoWidth": false,
+            // serverSide: true,
+            dom: 'lBfrtip',
+            "scrollCollapse": true,
+            buttons: [],
+            "lengthMenu": [5, 10, 25, 50, 100],
+            responsive: true,
+            ajax: {
+                url: "{{ url('/spendings') }}",
+                data: function(d) {
+                    d.from = $('#from').val(); // Pass string date
+                    d.to = $('#to').val();
+                    d.category = $('#category').val();
 
-                console.log(d); // Log data being sent
-            }
-        },
-        columns: [
-            { data: 'date', name: 'date' },
-            { data: 'category', name: 'category' },
-            { data: 'amount', name: 'amount' },
-            { data: 'description', name: 'description' },
-            { data: 'receipt', name: 'receipt' },
-            {
-                data: 'actions',
-                name: 'actions',
-                orderable: false,
-                searchable: false
-            }
-        ]
-    });
-};
+                    console.log(d); // Log data being sent
+                }
+            },
+            columns: [{
+                    data: 'date',
+                    name: 'date'
+                },
+                {
+                    data: 'category',
+                    name: 'category'
+                },
+                {
+                    data: 'amount',
+                    name: 'amount'
+                },
+                {
+                    data: 'description',
+                    name: 'description'
+                },
+                {
+                    data: 'receipt',
+                    name: 'receipt'
+                },
+                {
+                    data: 'actions',
+                    name: 'actions',
+                    orderable: false,
+                    searchable: false
+                }
+            ]
+        });
+    };
 
-// Call the function to initialize the table
-generateTable();
+    // Call the function to initialize the table
+    generateTable();
 
 
     // Add New Spending

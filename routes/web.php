@@ -32,6 +32,7 @@ use App\Http\Controllers\CustomerController;
 use App\Http\Controllers\DesignationController;
 use App\Http\Controllers\MessageController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\SpendingController;
 use Illuminate\Support\Facades\Auth;
 
 /*
@@ -237,6 +238,12 @@ Route::get('/customers', [CustomerController::class, 'index'], 'customer.index')
 Route::post('/customers', [CustomerController::class, 'store'], 'customer.save');
 Route::post('/customers/{id}', [CustomerController::class, 'update'], 'customer.update');
 Route::delete('/customers/{id}', [CustomerController::class, 'destroy'], 'customer.delete');
+
+
+Route::get('/spendings', [SpendingController::class, 'index'], 'spending.index');
+Route::post('/spendings', [SpendingController::class, 'store'], 'spending.save');
+Route::post('/spendings/{id}', [SpendingController::class, 'update'], 'spending.update');
+Route::delete('/spendings/{id}', [SpendingController::class, 'destroy'], 'spending.delete');
 
 
 Route::get('/messages', [MessageController::class, 'index'], 'message.index');

@@ -242,6 +242,7 @@ Route::get('/api/customers', [CustomerController::class, 'apiCustomer']);
 
 Route::get('/messages', [MessageController::class, 'index'], 'message.index');
 Route::post('/messages', [MessageController::class, 'store'], 'message.save');
+Route::post('/messages/{id}/send', [MessageController::class, 'sendMessage'], 'message.send');
 Route::post('/messages/{id}', [MessageController::class, 'update'], 'message.update');
 Route::delete('/messages/{id}', [MessageController::class, 'destroy'], 'message.delete');
 Route::get('/api/messages', [MessageController::class, 'apiMessages']);

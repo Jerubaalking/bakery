@@ -246,6 +246,12 @@ Route::post('/messages/{id}', [MessageController::class, 'update'], 'message.upd
 Route::delete('/messages/{id}', [MessageController::class, 'destroy'], 'message.delete');
 Route::get('/api/messages', [MessageController::class, 'apiMessages']);
 
+Route::prefix('api')->group(function () {
+    Route::get('customers', [CustomerController::class, 'apiCustomer']);
+    Route::get('messages', [MessageController::class, 'apiMessages']);
+    Route::get('presend', [MessageController::class, 'preSend']);
+});
+
 Route::get('/', function () {
 	return view('welcome');
 });

@@ -148,4 +148,49 @@ class SpendingController extends Controller
 
         return redirect()->route('spending.index')->with('success', 'Expense deleted successfully!');
     }
+
+    public function pdf(Request $request)
+    {
+        info($request->all());
+        // Validate input parameters
+        $request->validate([
+            'from' => 'nullable|date',
+            'to' => 'nullable|date',
+            'category' => 'nullable|string'
+        ]);
+    
+        // Initialize query
+        $spending = Spending::query();
+    
+        // Apply date range filter if provided
+        if ($request->filled('from') && $request->filled('to')) {
+            $from = Carbon::parse($request->from)->startOfDay();
+            $to = Carbon::parse($request->to)->endOfDay();
+            $spending->whereBetween('created_at', [$from, $to]);
+        }
+    
+        // Apply category filter if provided
+        if ($request->filled('category') && $request->category !== 'all') {
+            $spending->where('category', $request->category);
+        }
+    
+        // Retrieve filtered data
+        $spendings = $spending->get();
+    
+        // Calculate totals
+        $total = $spendings->sum('amount');
+        info($request->from.' & '.$request->to);
+        // Generate PDF with the filtered data and totals
+        $pdf = PDF::loadView('spending.export', [
+            'spendings' => $spendings,
+            'total' => $total,
+            'from' => $request->from,
+            'to' => $request->to,
+            'category' => $request->category
+        ]);
+    
+        // Return the PDF stream
+        return $pdf->stream('spendings_report.pdf');
+    }
+    
 }

@@ -244,6 +244,7 @@ Route::get('/spendings', [SpendingController::class, 'index'], 'spending.index')
 Route::post('/spendings', [SpendingController::class, 'store'], 'spending.save');
 Route::post('/spendings/{id}', [SpendingController::class, 'update'], 'spending.update');
 Route::delete('/spendings/{id}', [SpendingController::class, 'destroy'], 'spending.delete');
+Route::get('/spendings-report', [SpendingController::class, 'pdf'], 'spending.report');
 
 
 Route::get('/messages', [MessageController::class, 'index'], 'message.index');

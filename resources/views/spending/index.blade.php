@@ -46,7 +46,13 @@
             </div>
             <!-- Submit Button -->
             <div class="col-md-2" style="margin-top:30px;">
-                <button type="submit" class="btn btn-primary btn-md">PDF</button>
+                <button id="generatePdf" class="btn btn-primary btn-md">
+                    <i class="zmdi zmdi-download"></i> <i class="fa fa-pdf"></i>
+                    <span id="pdf_report_text">PDF</span>
+                    <span id="pdf_report_loader" class="loader" style="display: none;">
+                        <i class="fas fa-spinner fa-spin" style="font-size: 15px;"></i>
+                    </span>
+                </button>
             </div>
         </div>
     </div>
@@ -179,6 +185,73 @@
         $('#form-spending')[0].reset();
         $('.modal-title').text('Add Spending');
     });
+
+    function toggleSpinner(buttonId, isLoading) {
+        const button = document.getElementById(buttonId);
+        const loader = button.querySelector('.loader');
+        const buttonText = button.querySelector('span');
+
+        if (isLoading) {
+            // Disable the button and show the loader
+            button.classList.add('disabled'); // Optional: to visually indicate the button is disabled
+            loader.style.display = 'inline'; // Show the loader
+            buttonText.style.display = 'none'; // Hide the button text
+        } else {
+            // Enable the button and hide the loader
+            button.classList.remove('disabled'); // Remove disabled class
+            loader.style.display = 'none'; // Hide the loader
+            buttonText.style.display = 'inline'; // Show the button text
+        }
+    }
+
+    function fetchAndOpenPdf(filters) {
+
+        toggleSpinner('generatePdf', true);
+        $.ajax({
+            url: '/spendings-report',
+            method: 'GET',
+            data: filters,
+            xhrFields: {
+                responseType: 'blob' // To handle binary data (PDF)
+            },
+            success: function(response) {
+                // Create a Blob object for the PDF
+                const pdfBlob = new Blob([response], {
+                    type: 'application/pdf'
+                });
+
+                // Create a URL for the Blob and open it in a new window
+                const pdfUrl = URL.createObjectURL(pdfBlob);
+                window.open(pdfUrl, '_blank');
+            },
+            error: function() {
+                alert('Failed to generate the report.'); // Handle error
+                swal({
+                    title: 'Ops!',
+                    text: 'Failed to generate the report.',
+                    type: 'success',
+                    timer: '2500'
+                });
+                toggleSpinner('generatePdf', false);
+            },
+            complete: function() {
+                // Hide spinner and enable button
+                toggleSpinner('generatePdf', false);
+            }
+        });
+    }
+
+    // Example usage
+    $(document).on('click', '#generatePdf', function() {
+        let filters = {
+            from: $('#from').val(),
+            to: $('#to').val(),
+            category: $('#category').val(),
+        };
+
+        fetchAndOpenPdf(filters);
+    });
+
 
     // Handle Form Submit
     $('#form-spending').on('submit', function(e) {

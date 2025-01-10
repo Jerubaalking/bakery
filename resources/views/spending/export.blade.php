@@ -1,21 +1,4 @@
-{{--<!doctype html>--}}
-{{--<html lang="en">--}}
-{{--<head>--}}
-    {{--<meta charset="UTF-8">--}}
-    {{--<meta name="viewport"--}}
-          {{--content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">--}}
-    {{--<meta http-equiv="X-UA-Compatible" content="ie=edge">--}}
-    {{--<link rel="stylesheet" href="asset('css1.css')}}">--}}
-    {{--<!-- Font Awesome -->--}}
-   
-     <!-- Vendor CSS-->
-    {{--<link rel="stylesheet" href="{{ asset('assets/bower_components/font-awesome/css/font-awesome.min.css')}} ">--}}
-    {{--<!-- Ionicons -->--}}
-    {{--<link rel="stylesheet" href="{{ asset('assets/bower_components/Ionicons/css/ionicons.min.css')}} ">--}}
 
-    {{--<title>rizone||application form</title>--}}
-{{--</head>--}}
-{{--<body>--}}
 <style type="text/css" media="screen">
             html {
                 font-family: sans-serif;
@@ -144,21 +127,19 @@
        
     <div id="watermark">
                      <img src="assets/img/misana.png" alt="logo" height="100" width="150" style="float:right;padding-right:62px;margin-top:-25px;">
-                     <img src="assets/img/misana.png" height="100%" width="100%" style="opacity: 0.05;"/>
                         </div>
         {{-- Header --}}
       <section>
       <div class="box" style="margin-top:80px;">
     
       <center><h1 style="color:red;"><strong>MISANA HOME BAKERY</strong></h1></center>
-      <center><h3 style="margin-left:30px;margin-top:-10px;"><strong style="color:green">Expenses  Report<p style="color:red">From</p>{{$from}}<p style="color:red">To</p>{{$to}}</strong></h3></center>
+      <center><h3 style="margin-left:30px;margin-top:-10px;"><strong style="color:green">Spending Report<p style="color:red">From</p>{{$from}}<p style="color:red">To</p>{{$to}}</strong></h3></center>
 
 
         <table class="table table table-striped">
         <thead>
             <tr>
                    <th scope="col" class="border-0 pl-0">Date</th>
-                   <th scope="col" class="border-0 pl-0">Account Name</th>
                    <th scope="col" class="border-0 pl-0">Description</th>
                    <th scope="col" class="border-0 pl-0">Cost</th>
                    
@@ -166,13 +147,10 @@
             </thead>
             <tbody>
                 {{-- Items --}}
-                  @foreach($exp as $exp)
+                  @foreach($spendings as $exp)
                 <tr>
                 <td class="pl-0">
-                     {{$exp->spending_date}}
-                     </td>
-                     <td class="pl-0">
-                        {{$exp->account_name}}
+                     {{$exp->date}}
                      </td>
                      <td class="pl-0">
                         {{$exp->description}}
@@ -188,7 +166,7 @@
                         </td>
                         <td></td>
                       <td >
-                       <strong style="color:#4682B4">{{number_format($sum_amount,2)}}</strong>
+                       <strong style="color:#4682B4">{{number_format($total,2)}}</strong>
                         </td>
                       
                     
@@ -197,14 +175,5 @@
                </table>
 
         </div>
-   
-    {{--<!-- jQuery 3 -->--}}
-    {{--<script src="{{  asset('assets/bower_components/jquery/dist/jquery.min.js') }} "></script>--}}
-    {{--<!-- Bootstrap 3.3.7 -->--}}
-    {{--<script src="{{  asset('assets/bower_components/bootstrap/dist/js/bootstrap.min.js') }} "></script>--}}
-    {{--<!-- AdminLTE App -->--}}
-    {{--<script src="{{  asset('assets/dist/js/adminlte.min.js') }}"></script>--}}
-{{--</body>--}}
-{{--</html>--}}
 
 
